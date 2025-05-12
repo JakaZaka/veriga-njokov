@@ -71,7 +71,7 @@ const clothingItemSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-// Create indexes for common queries
+// indexes for common queries
 clothingItemSchema.index({ user: 1, category: 1 });
 clothingItemSchema.index({ user: 1, favorite: 1 });
 

@@ -23,13 +23,12 @@ const userSchema = mongoose.Schema(
       default: 'user',
     },
     preferences: {
-      type: mongoose.Schema.Types.Mixed, // Flexible field for user preferences
+      type: mongoose.Schema.Types.Mixed,
     },
   },
   { timestamps: true }
 );
 
-// Password hashing middleware
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     next();
