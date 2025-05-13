@@ -1,0 +1,4 @@
+package scraperUtil
+
+class HMScraper {
+}

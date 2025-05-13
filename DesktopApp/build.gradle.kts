@@ -21,6 +21,9 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    implementation("org.jsoup:jsoup:1.16.1")
+    implementation("org.json:json:20231013")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
 
 compose.desktop {
