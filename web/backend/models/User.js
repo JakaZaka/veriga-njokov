@@ -22,6 +22,47 @@ const userSchema = mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    // location fields
+    location: {
+      address: {
+        type: String,
+      },
+      city: {
+        type: String,
+      },
+      country: {
+        type: String,
+        default: 'Slovenia',
+      },
+      coordinates: {
+        // GeoJSON format for MongoDB geospatial queries
+        type: {
+          type: String,
+          enum: ['Point'],
+          default: 'Point',
+        },
+        coordinates: {
+          // [longitude, latitude]
+          type: [Number],
+          default: [14.5058, 46.0569], // Default coordinates for Ljubljana
+        }
+      },
+    },
+    // privacy settings related to wardrobe sharing
+    privacySettings: {
+      showOnMap: {
+        type: Boolean,
+        default: true,
+      },
+      publicWardrobe: {
+        type: Boolean,
+        default: false,
+      },
+      publicOutfits: {
+        type: Boolean,
+        default: false,
+      },
+    },
     preferences: {
       type: mongoose.Schema.Types.Mixed,
     },
@@ -29,6 +70,10 @@ const userSchema = mongoose.Schema(
   { timestamps: true }
 );
 
+// geospatial index for efficient location-based queries
+userSchema.index({ 'location.coordinates': '2dsphere' });
+
+// Password encryption middleware
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     next();
