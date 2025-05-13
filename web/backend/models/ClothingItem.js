@@ -19,9 +19,6 @@ const clothingItemSchema = mongoose.Schema(
     subCategory: {
       type: String,
     },
-    brand: {
-      type: String,
-    },
     color: {
       type: String,
     },
@@ -31,19 +28,6 @@ const clothingItemSchema = mongoose.Schema(
     season: {
       type: [String],
       enum: ['spring', 'summer', 'fall', 'winter', 'all'],
-    },
-    material: {
-      type: String,
-    },
-    purchaseDate: {
-      type: Date,
-    },
-    purchasePrice: {
-      type: Number,
-    },
-    wearCount: {
-      type: Number,
-      default: 0,
     },
     favorite: {
       type: Boolean,
@@ -57,11 +41,6 @@ const clothingItemSchema = mongoose.Schema(
     },
     notes: {
       type: String,
-    },
-    status: {
-      type: String,
-      enum: ['active', 'donated', 'sold', 'archived'],
-      default: 'active',
     },
     // Flexible field for future extensions
     metadata: {
