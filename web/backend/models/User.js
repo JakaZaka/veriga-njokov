@@ -22,6 +22,15 @@ const userSchema = mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    // Contact information
+    contactInfo: {
+      phoneNumber: {
+        type: String,
+      },
+      emailAdress: {
+        type: String,
+      },
+    },
     // location fields
     location: {
       address: {
@@ -46,21 +55,6 @@ const userSchema = mongoose.Schema(
           type: [Number],
           default: [15.6467, 46.5547], // Default coordinates for Maribor
         }
-      },
-    },
-    // privacy settings related to wardrobe sharing
-    privacySettings: {
-      showOnMap: {
-        type: Boolean,
-        default: true,
-      },
-      publicWardrobe: {
-        type: Boolean,
-        default: false,
-      },
-      publicOutfits: {
-        type: Boolean,
-        default: false,
       },
     },
     preferences: {
