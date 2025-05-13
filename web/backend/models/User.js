@@ -44,7 +44,7 @@ const userSchema = mongoose.Schema(
         coordinates: {
           // [longitude, latitude]
           type: [Number],
-          default: [14.5058, 46.0569], // Default coordinates for Ljubljana
+          default: [15.6467, 46.5547], // Default coordinates for Maribor
         }
       },
     },
