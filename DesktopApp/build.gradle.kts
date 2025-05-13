@@ -21,9 +21,11 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
-    implementation("org.jsoup:jsoup:1.16.1")
-    implementation("org.json:json:20231013")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("it.skrape:skrapeit:1.2.2")
+    implementation("org.seleniumhq.selenium:selenium-java:4.19.1")
+    implementation("org.seleniumhq.selenium:selenium-edge-driver:4.19.1")
+    implementation("org.seleniumhq.selenium:selenium-support:4.19.1")
+
 }
 
 compose.desktop {
