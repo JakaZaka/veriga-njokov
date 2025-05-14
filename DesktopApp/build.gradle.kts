@@ -30,7 +30,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "MainScraperKt"
+        mainClass = "MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
