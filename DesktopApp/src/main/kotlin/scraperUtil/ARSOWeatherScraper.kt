@@ -9,10 +9,7 @@ import org.jsoup.select.Elements
  */
 class ARSOWeatherScraper {
     private val arsoUrl = "https://meteo.arso.gov.si/uploads/probase/www/observ/surface/text/sl/observationAms_si_latest.html"
-    
-    /**
-     * Main function to scrape ARSO weather data
-     */
+
     fun scrapeWeatherData() {
         println("Fetching weather data from ARSO...")
         
@@ -29,28 +26,36 @@ class ARSOWeatherScraper {
                 val row = rows[i]
                 val cells = row.select("td")
                 
-                if (cells.size >= 8) {
-                    // Extract data from cells
+                if (cells.size >= 9) {
+                    // Extract data from cells using correct indices (based on debugging)
                     val location = cells[0].text()
-                    val temperature = cells[1].text().replace("°C", "").trim()
-                    val relativeHumidity = cells[2].text().replace("%", "").trim()
-                    val windSpeed = cells[4].text().split(" ")[0]
-                    val precipitation = cells[7].text().replace("mm", "").trim()
+                    val temperature = cells[2].text().trim() // Temperature is in cell[2]
+                    val humidity = cells[3].text().trim() // Humidity is in cell[3]
+                    val windSpeed = if (cells[5].text().isNotBlank()) cells[5].text().trim() else ""
+                    val precipitation = if (cells[8].text().isNotBlank()) cells[8].text().trim() else "0"
                     
-                    // Convert to appropriate data types where possible
+                    // Convert to appropriate data types
                     val temperatureValue = temperature.toDoubleOrNull() ?: Double.NaN
                     val isRaining = precipitation.toDoubleOrNull()?.let { it > 0.0 } ?: false
                     
                     // Print parsed data
                     println("Location: $location")
-                    println("Temperature: $temperatureValue°C")
+                    println("Temperature: ${temperatureValue}°C")
                     println("Is raining: $isRaining")
-                    println("Humidity: $relativeHumidity%")
+                    println("Humidity: $humidity%")
                     println("Wind speed: $windSpeed km/h")
                     println("-----------------------")
                     
                     // In future: Save to MongoDB using the Weather model
-                    // Currently our model can accept location, temperature, isRaining
+                    // Example code to save (not executed now):
+                    /*
+                    val weatherData = Weather(
+                        location = location,
+                        temperature = temperatureValue,
+                        isRaining = isRaining
+                    )
+                    // Save to database
+                    */
                 }
             }
         } catch (e: Exception) {
