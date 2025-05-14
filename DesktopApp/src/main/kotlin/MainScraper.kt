@@ -1,4 +1,5 @@
 import scraperUtil.ARSOWeatherScraper
+import scraperUtil.HMScraper
 
 fun main() {
     println("Starting Closy data scraping...")
@@ -13,7 +14,7 @@ fun main() {
     // Clothing data from H&M
     println("\n===== H&M CLOTHING DATA =====")
     val hmScraper = HMScraper()
-    hmScraper.scrapeClothing()
+    hmScraper.getWomenClothes()
     
     println("\nScraping completed!")
 }
