@@ -11,6 +11,9 @@ fun main() {
     // Clothing data from Zara
     
     // Clothing data from H&M
+    println("\n===== H&M CLOTHING DATA =====")
+    val hmScraper = HMScraper()
+    hmScraper.scrapeClothing()
     
     println("\nScraping completed!")
 }
