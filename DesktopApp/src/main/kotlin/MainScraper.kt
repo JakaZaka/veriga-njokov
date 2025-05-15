@@ -3,10 +3,10 @@ import scraperUtil.ARSOWeatherScraper
 fun main() {
     println("Starting Closy data scraping...")
     
-    // Weather data from ARSO
+    /*// Weather data from ARSO
     println("\n===== ARSO WEATHER DATA =====")
     val weatherScraper = ARSOWeatherScraper()
-    weatherScraper.scrapeWeatherData()
+    weatherScraper.scrapeWeatherData()*/
     
     // Clothing data from Zara
     
