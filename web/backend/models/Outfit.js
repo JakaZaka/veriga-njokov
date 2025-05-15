@@ -31,29 +31,15 @@ const outfitSchema = mongoose.Schema(
     occasion: {
       type: String,
     },
-    favorite: {
-      type: Boolean,
-      default: false,
-    },
-    wearCount: {
-      type: Number,
-      default: 0,
-    },
-    lastWorn: {
-      type: Date,
-    },
+    liked: { type: Number, default: 0 },
+    likedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
     imageUrl: {
       type: String,
-    },
-    tags: {
-      type: [String],
-    },
-    notes: {
-      type: String,
-    },
-    // Flexible field for future extensions
-    metadata: {
-      type: mongoose.Schema.Types.Mixed,
     },
   },
   { timestamps: true }
