@@ -14,6 +14,10 @@ const weatherSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isSnowing: {
+      type: Boolean,
+      default: false,
+    },
     fetchedAt: {
       type: Date,
       default: Date.now,

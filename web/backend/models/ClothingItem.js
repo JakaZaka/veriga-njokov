@@ -2,6 +2,14 @@ const mongoose = require('mongoose');
 
 const clothingItemSchema = mongoose.Schema(
   {
+    fromShop: {
+      type: Boolean,
+      default: false,
+    },
+    clothingStoreId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ClothingStore',
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -29,15 +37,26 @@ const clothingItemSchema = mongoose.Schema(
       type: [String],
       enum: ['spring', 'summer', 'fall', 'winter', 'all'],
     },
-    favorite: {
+    wantToGet: {
+      type: Boolean,
+      default: false,
+    },
+    liked: {
+      type: Boolean,
+      default: false,
+    },
+    likedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    wantToGive: {
       type: Boolean,
       default: false,
     },
     imageUrl: {
       type: String,
-    },
-    tags: {
-      type: [String],
     },
     notes: {
       type: String,

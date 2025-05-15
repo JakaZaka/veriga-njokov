@@ -57,15 +57,9 @@ const userSchema = mongoose.Schema(
         }
       },
     },
-    preferences: {
-      type: mongoose.Schema.Types.Mixed,
-    },
   },
   { timestamps: true }
 );
-
-// geospatial index for efficient location-based queries
-userSchema.index({ 'location.coordinates': '2dsphere' });
 
 // Password encryption middleware
 userSchema.pre('save', async function (next) {
