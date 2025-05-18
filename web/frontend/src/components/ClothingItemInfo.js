@@ -11,7 +11,7 @@ function ClothingItemInfo(){
    
     useEffect(function(){
         const getClothingItemById = async function(){
-            const res = await fetch(`http://localhost:8000/clothing/${id}`);
+            const res = await fetch(`/api/clothing/${id}`);
             const data = await res.json();
             setClothingItem(data);
         }
@@ -45,7 +45,9 @@ function ClothingItemInfo(){
   <h1 className="Clothing-title">{clothingItem.name}</h1>
 
   <img
-    src={`http://localhost:8000/${clothingItem.imageUrl}`}
+      src={clothingItem.imageUrl?.startsWith('/images/')
+    ? clothingItem.imageUrl
+    : `/images/${clothingItem.imageUrl}`}
     style={{ width: '300px', height: '300px', objectFit: 'cover' }}
     alt={clothingItem.name}
     className="photo-detail-img"

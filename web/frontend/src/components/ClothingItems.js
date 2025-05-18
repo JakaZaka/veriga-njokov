@@ -9,7 +9,7 @@ function Clothes(){
     const getClothes = async function() {
        
         
-        const res = await fetch('http://localhost:8000/clothing', {
+        const res = await fetch('/api/clothing', {
             method: 'GET',
             credentials: 'include'
         });

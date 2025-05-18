@@ -1,30 +1,31 @@
 const express = require('express');
 const connectDB = require('./config/db');
 require('dotenv').config();
-var path = require('path');
+const cors = require('cors');
+const path = require('path');
 
 // Connect to MongoDB
 connectDB();
 
 const app = express();
 
-var cors = require('cors');
-var allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 app.use(cors({
   credentials: true,
   origin: function(origin, callback){
-    // Allow requests with no origin (mobile apps, curl)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin)===-1){
-      var msg = "The CORS policy does not allow access from the specified Origin.";
-      return callback(new Error(msg), false);
+    if (!origin) return callback(null, true);
+    if (
+      origin.startsWith('http://localhost:') ||
+      origin.startsWith('http://127.0.0.1:')
+    ) {
+      return callback(null, true);
     }
-    return callback(null, true);
+    var msg = "The CORS policy does not allow access from the specified Origin.";
+    return callback(new Error(msg), false);
   }
 }));
 
-// Middleware
-app.use(express.json());
+app.use(express.json({ limit: '100mb' })); // Limit request size to 100MB
 
 // Basic route for testing
 app.get('/', (req, res) => {
@@ -38,24 +39,20 @@ const userRoutes = require('./routes/userRoutes');
 const clothingItemRoutes = require('./routes/clothingItemRoutes');
 const outfitRoutes = require('./routes/outfitRoutes');
 const weatherRoutes = require('./routes/weatherRoutes');
-const clothingStoreRoutes = require('./routes/clothingStoreRoutes'); // Add this line
-const enumRoutes = require('./routes/enumRoutes'); // Add this line
-const locationRoutes = require('./routes/locationRoutes'); 
+const clothingStoreRoutes = require('./routes/clothingStoreRoutes');
+const enumRoutes = require('./routes/enumRoutes');
+const locationRoutes = require('./routes/locationRoutes');
 
 // API routes
 app.use('/api/users', userRoutes);
-app.use('/clothing', clothingItemRoutes);
+app.use('/api/clothing', clothingItemRoutes);
 app.use('/api/outfits', outfitRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/stores', clothingStoreRoutes);
+app.use('/api/enums', enumRoutes);
+app.use('/api/locations', locationRoutes);
 
-app.use('/stores', clothingStoreRoutes); 
-app.use('/enums', enumRoutes); 
-app.use('/locations', locationRoutes);
-/* Start server
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});*/
 
+// Start server
 
 module.exports = app;
