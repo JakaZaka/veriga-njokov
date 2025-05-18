@@ -1,5 +1,5 @@
-const ClothingStore = require('../models/Location');
-const ClothingItem = require('../models/ClothingStore');
+const ClothingStore = require('../models/ClothingStore');
+const Location = require('../models/Location');
 const fetch = require('node-fetch');
 
 async function geocodeAddress(address) {
@@ -24,31 +24,13 @@ async function geocodeAddress(address) {
 // @access  Public
 const getLocations = async (req, res) => {
   try {
-    /*const filter = {};
-    
-    // Handle query parameters for filtering
-    if (req.query.name) filter.name = { $regex: req.query.name, $options: 'i' };
-    if (req.query.city) filter['location.city'] = { $regex: req.query.city, $options: 'i' };*/
+    /*const locations = await Location.find();
+    res.json(locations);*/
 
-    const {address, city, state, clothingStoreId} = req.body;
-    const wholeAddress = `${address}, ${city}, ${state}`;
-    const [lng, lat] = await geocodeAddress(wholeAddress);
-
-
-    const newLocation = new Location({
-      address,
-      city,
-      country,
-      clothingStoreId,
-      coordinates: {
-        type: 'Point',
-        coordinates: [lng, lat],
-      },
-    });
-
-    await newLocation.save();
-    res.status(201).json(newLocation);
-    res.json(clothingStores);
+    const locations = await Location.find(/*filter*/).populate('clothingStoreId', 'name website');
+    var data = [];
+    data.locations = locations;
+    res.json(locations);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -76,11 +58,38 @@ const getLocationById = async (req, res) => {
 // @access  Private/Admin
 const createLocation = async (req, res) => {
   try {
-    const location = new ClothingStore(req.body);
-    const createLocation = await location.save();
-    res.status(201).json(createLocation);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+   
+    console.log("Request body:", req.body);
+
+    const { address, city, country, clothingStoreId } = req.body;
+    if (!address || !city || !country || !clothingStoreId) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const fullAddress = `${address}, ${city}, ${country}`;
+    console.log("Full address to geocode:", fullAddress);
+
+    const [lng, lat] = await geocodeAddress(fullAddress);
+    console.log("Geocoded coordinates:", lng, lat);
+
+    const newLocation = new Location({
+      address,
+      city,
+      country,
+      clothingStoreId,
+      coordinates: {
+        type: 'Point',
+        coordinates: [lng, lat],
+      },
+    });
+
+    const savedLocation = await newLocation.save();
+    console.log("Location saved:", savedLocation);
+
+    res.status(201).json(savedLocation);
+  } catch (err) {
+    console.error("Error in createLocation:", err);
+    res.status(500).json({ message: 'Failed to add location', error: err.message });
   }
 };
 

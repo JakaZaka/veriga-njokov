@@ -31,7 +31,13 @@ function AddClothingStore(props) {
         const res = await fetch('http://localhost:8000/stores', {
             method: 'POST',
             credentials: 'include',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+            name,
+            website
+        })
         });
         const data = await res.json();
 

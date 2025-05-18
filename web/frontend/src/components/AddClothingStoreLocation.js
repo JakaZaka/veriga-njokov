@@ -3,72 +3,69 @@ import { Navigate } from 'react-router';
 import { UserContext } from '../userContext';
 import { use } from 'react';
 import { useEffect } from 'react';
+import AddClothingStore from './AddClothingStore';
 
-function AddClothingItem(props) {
+
+function AddClothingStoreLocation(props) {
     const userContext = useContext(UserContext); 
-    const[adress, setAddress] = useState('');
-    const[city, setCoty] = useState('');
+    const[address, setAddress] = useState('');
+    const[city, setCity] = useState('');
     const[country, setCountry] = useState('');
+    const[store, setStore] = useState('');
+    const[uploaded, setUploaded] = useState(false);
+    const[stores, setStores] = useState([]);
     
     useEffect(() => {
-        async function fetchEnums() {
-            const res = await fetch('http://localhost:8000/enums/clothing', {
+        async function fetchStores() {
+            const res = await fetch('http://localhost:8000/stores/existing', {
                 method: 'GET',
                 credentials: 'include'
             });
             const data = await res.json();
-            setSeasons(data.season);
-            setCategories(data.category);
+            setStores(data);
         }
-        fetchEnums();
+        fetchStores();
     }, []);
 
     async function onSubmit(e){
         e.preventDefault();
 
-        if(!name){
-            alert("Add the name!");
+        if(!address){
+            alert("Add the adress!");
             return;
         }
-        if(!category){
-            alert("Choose the category!");
+        if(!city){
+            alert("Add the city!");
             return;
         }
-        if(!subCategory){
-            alert("Choose the sub-category!");
+        if(!country){
+            alert("Add the country!");
             return;
         }
-        if(!color){
-            alert("Add the color!");
+        if(!store){
+            alert("Choose the store!");
             return;
         }
-        if(!size){
-            alert("Add the size!");
-            return;
-        }
-        if(!season){
-            alert("Choose the season!");
-            return;
-        }
+        
 
 
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('category', category);
-        formData.append('subCategory', subCategory);
-        formData.append('color', color);
-        formData.append('size', size);
-        formData.append('season', season);
-        formData.append('image', file);
-        formData.append('notes', notes);
+        const body = {
+            address: address,
+            city: city,
+            country: country,
+            clothingStoreId: store
+        };
 
-        const res = await fetch('http://localhost:8000/clothing', {
+        const res = await fetch('http://localhost:8000/locations', {
             method: 'POST',
             credentials: 'include',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
         });
-        const data = await res.json();
 
+        const data = await res.json();
         setUploaded(true);
     }
 
@@ -76,30 +73,20 @@ function AddClothingItem(props) {
         <form className="form-group" onSubmit={onSubmit}>
            
             {uploaded ? <Navigate replace to="/" /> : ""}
-            <input type="text" className="form-control" name="name" placeholder="Clothing item name" value={name} onChange={(e)=>{setName(e.target.value)}}/>
-            <label>Choose a category:</label>
-             {categories.map(cat => (
-            <div key={cat}>
-                <input type="radio" name="category" value={cat} checked={category === cat} onChange={(e) => setCategory(e.target.value)} />
-            <label>{cat}</label>
-            </div>
+            <label>Store:
+            <select name="clothingStoreId" value= {store} onChange={(e) => setStore(e.target.value)} required>
+            <option value="">Select Store</option>
+            {stores.map(store => (
+                <option key={store._id} value={store._id}>{store.name}</option>
             ))}
-            <input type="text" className="form-control" name="subCategory" placeholder="Sub category" value={subCategory} onChange={(e)=>{setSubCategory(e.target.value)}}/>
-            <input type="text" className="form-control" name="color" placeholder="Clothing item color" value={color} onChange={(e)=>{setColor(e.target.value)}}/>
-            <input type="text" className="form-control" name="size" placeholder="Clothing item size" value={size} onChange={(e)=>{setSize(e.target.value)}}/>
-             <input type="text" className="form-control" name="notes" placeholder="Notes" value={notes} onChange={(e)=>{setNotes(e.target.value)}}/>
-            <label>Choose a season:</label>
-             {seasons.map(seasonOption => (
-                <div key={seasonOption}>
-                <input type="radio" name="season" value={seasonOption} checked={season === seasonOption} onChange={(e) => setSeason(e.target.value)} />
-            <label>{seasonOption}</label>
-            </div>
-            ))}
-            <label>Choose photo</label>
-            <input type="file" id="file" onChange={(e)=>{setFile(e.target.files[0])}}/>
+            </select>
+            </label>
+            <input type="text" className="form-control" name="address" placeholder="Address" value={address} onChange={(e)=>{setAddress(e.target.value)}}/>
+            <input type="text" className="form-control" name="city" placeholder="City" value={city} onChange={(e)=>{setCity(e.target.value)}}/>
+            <input type="text" className="form-control" name="country" placeholder="Country" value={country} onChange={(e)=>{setCountry(e.target.value)}}/>
             <input className="btn btn-primary" type="submit" name="submit" value="Naloži" />
         </form>
     )
 }
 
-export default AddClothingItem;
+export default AddClothingStoreLocation;
