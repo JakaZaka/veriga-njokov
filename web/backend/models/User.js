@@ -31,7 +31,7 @@ const userSchema = mongoose.Schema(
       phoneNumber: {
         type: String,
       },
-      emailAdress: {
+      emailAddress: {
         type: String,
       },
     },
