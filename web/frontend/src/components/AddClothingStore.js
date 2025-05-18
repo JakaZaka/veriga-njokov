@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react'
-import { Navigate } from 'react-router';
+import { Navigate } from 'react-router-dom';
 import { UserContext } from '../userContext';
 import { use } from 'react';
 import { useEffect } from 'react';
@@ -48,7 +48,7 @@ function AddClothingStore(props) {
         <form className="form-group" onSubmit={onSubmit}>
            
             {uploaded ? <Navigate replace to="/" /> : ""}
-            <input type="text" className="form-control" name="name" placeholder="Clothing item name" value={name} onChange={(e)=>{setName(e.target.value)}}/>
+            <input type="text" className="form-control" name="name" placeholder="Clothing store name" value={name} onChange={(e)=>{setName(e.target.value)}}/>
             <input type="text" className="form-control" name="website" placeholder="Store website" value={website} onChange={(e)=>{setWebsite(e.target.value)}}/>
             <input className="btn btn-primary" type="submit" name="submit" value="Naloži" />
         </form>

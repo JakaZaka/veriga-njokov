@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react'
-import { Navigate } from 'react-router';
+import { Navigate } from 'react-router-dom';
 import { UserContext } from '../userContext';
 import { use } from 'react';
 import { useEffect } from 'react';
@@ -17,7 +17,7 @@ function AddClothingStoreLocation(props) {
     
     useEffect(() => {
         async function fetchStores() {
-            const res = await fetch('http://localhost:8000/stores/existing', {
+            const res = await fetch('/api/stores/existing', {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -56,7 +56,7 @@ function AddClothingStoreLocation(props) {
             clothingStoreId: store
         };
 
-        const res = await fetch('http://localhost:8000/locations', {
+        const res = await fetch('/api/locations', {
             method: 'POST',
             credentials: 'include',
             headers: {

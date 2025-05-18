@@ -5,11 +5,14 @@ import Login from './components/Login';
 import Logout from './components/Logout';
 import Profile from './components/Profile';
 import Header from './components/Header';
-import ClothingItems from './components/ClothingIntems';
-import AddClothingItem from './components/AddClothingIntem';
-import ClothingItemInfo from './components/ClothingIntemInfo';
+import ClothingItems from './components/ClothingItems';
+import AddClothingItem from './components/AddClothingItem';
+import ClothingItemInfo from './components/ClothingItemInfo';
 import AddOutfit from './components/AddOutfit';
 import OutfitInfo from './components/OutfitInfo';
+import ClothingStores from './components/ClothingStores';
+import AddClothingStore from './components/AddClothingStore';
+import AddClothingStoreLocation from './components/AddClothingStoreLocation';
 import { UserContext } from './userContext';
 import OutfitList from './components/OutfitList';
 
@@ -36,6 +39,9 @@ function App() {
                 <Link to="/logout">Logout</Link> |{' '}
                 <Link to="/profile">Profile</Link> |{' '}
                 <Link to="/addClothingItem">Add Item</Link> |{' '}
+                <Link to="/addClothingStore">Add Store</Link> |{' '}
+                <Link to="/addClothingStoreLocation">Add Store location</Link> |{' '}
+                <Link to="/stores">Stores</Link> |{' '}
                 <Link to="/addOutfit">Add Outfit</Link>
               </>
             )}
@@ -51,6 +57,9 @@ function App() {
             <Route path="/addOutfit" element={<AddOutfit />} />
             <Route path="/outfits" element={<OutfitList />} />
             <Route path="/outfit/:id" element={<OutfitInfo />} />
+            <Route path="/stores" element={<ClothingStores />} />
+            <Route path="/addClothingStore" element={<AddClothingStore />} />
+            <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />} />
           </Routes>
         </div>
       </UserContext.Provider>

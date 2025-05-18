@@ -43,6 +43,7 @@ const clothingStoreRoutes = require('./routes/clothingStoreRoutes');
 const enumRoutes = require('./routes/enumRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 
+
 // API routes
 app.use('/api/users', userRoutes);
 app.use('/api/clothing', clothingItemRoutes);
