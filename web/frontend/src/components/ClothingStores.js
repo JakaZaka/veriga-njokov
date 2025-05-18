@@ -9,7 +9,7 @@ function Stores(){
     const getStores = async function() {
        
         
-        const res = await fetch('http://localhost:8000/locations', {
+        const res = await fetch('/api/locations', {
             method: 'GET',
             credentials: 'include'
         });

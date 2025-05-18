@@ -1,6 +1,7 @@
 const ClothingStore = require('../models/ClothingStore');
 const Location = require('../models/Location');
-const fetch = require('node-fetch');
+const NodeGeocoder = require('node-geocoder');
+const geocoder = NodeGeocoder({ provider: 'openstreetmap' });
 
 async function geocodeAddress(address) {
   const apiKey = process.env.OPENCAGE_API_KEY;
@@ -60,8 +61,8 @@ const createLocation = async (req, res) => {
   try {
    
     console.log("Request body:", req.body);
-
     const { address, city, country, clothingStoreId } = req.body;
+
     if (!address || !city || !country || !clothingStoreId) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -69,18 +70,31 @@ const createLocation = async (req, res) => {
     const fullAddress = `${address}, ${city}, ${country}`;
     console.log("Full address to geocode:", fullAddress);
 
-    const [lng, lat] = await geocodeAddress(fullAddress);
-    console.log("Geocoded coordinates:", lng, lat);
+    const geoRes = await geocoder.geocode(fullAddress);
+
+    let coordinates = null;
+    let geoCity = city;
+    let geoCountry = country;
+
+    if (geoRes && geoRes.length > 0) {
+      const geo = geoRes[0];
+      coordinates = {
+        type: 'Point',
+        coordinates: [geo.longitude, geo.latitude],
+      };
+      geoCity = geo.city || city;
+      geoCountry = geo.country || country;
+      console.log("Geocoded coordinates:", coordinates.coordinates);
+    } else {
+      console.warn("Geocoding failed. Proceeding without coordinates.");
+    }
 
     const newLocation = new Location({
       address,
-      city,
-      country,
+      city: geoCity,
+      country: geoCountry,
       clothingStoreId,
-      coordinates: {
-        type: 'Point',
-        coordinates: [lng, lat],
-      },
+      ...(coordinates && { coordinates })
     });
 
     const savedLocation = await newLocation.save();
