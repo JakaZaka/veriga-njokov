@@ -1,8 +1,11 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const asyncHandler = require('express-async-handler');
 
-const protect = async (req, res, next) => {
+// 🔐 Middleware to protect routes (authenticated users only)
+const protect = asyncHandler(async (req, res, next) => {
   let token;
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -21,7 +24,7 @@ const protect = async (req, res, next) => {
   } else {
     res.status(401).json({ message: 'Not authorized, no token' });
   }
-};
+});
 
 const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {

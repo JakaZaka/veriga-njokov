@@ -10,23 +10,33 @@ function Login() {
 
     async function handleLogin(e) {
         e.preventDefault();
-        const res = await fetch("/api/users/login", {
-            method: "POST",
-            credentials: "include",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            })
-        });
-        const data = await res.json();
-        if (data._id !== undefined) {
-            localStorage.setItem('token', data.token);
-            userContext.setUserContext(data);
-        } else {
-            setUsername("");
-            setPassword("");
-            setError("Invalid username or password. Please try again.");
+        setError(""); // clear previous errors
+        try {
+            const res = await fetch("/api/users/login", {
+                method: "POST",
+                credentials: "include",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
+            let data;
+            try {
+                data = await res.json();
+            } catch {
+                data = {};
+            }
+            if (res.ok && data._id !== undefined) {
+                localStorage.setItem('token', data.token);
+                userContext.setUserContext(data);
+            } else {
+                setUsername("");
+                setPassword("");
+                setError(data.message || "Invalid username or password. Please try again.");
+            }
+        } catch (err) {
+            setError("Network or server error.");
         }
     }
 

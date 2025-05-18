@@ -19,6 +19,15 @@ const getClothingStores = async (req, res) => {
   }
 };
 
+const getExistingStores = async (req, res) => {
+  try {
+     const stores = await ClothingStore.find({}, 'name _id'); 
+      res.json(stores);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Get a specific clothing store
 // @route   GET /api/stores/:id
 // @access  Public
@@ -150,4 +159,5 @@ module.exports = {
   deleteClothingStore,
   getStoreItems,
   getNearbyStores,
+  getExistingStores
 };

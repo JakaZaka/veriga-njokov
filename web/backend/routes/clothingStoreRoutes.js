@@ -6,7 +6,8 @@ const {
   updateClothingStore,
   deleteClothingStore,
   getStoreItems,
-  getNearbyStores
+  getNearbyStores,
+  getExistingStores,
 } = require('../controllers/clothingStoreController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -14,6 +15,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getClothingStores);
+router.get('/existing', getExistingStores);
 router.get('/nearby', getNearbyStores);
 router.get('/:id', getClothingStoreById);
 router.get('/:id/items', getStoreItems);

@@ -10,35 +10,43 @@ function Register() {
 
     async function handleRegister(e) {
         e.preventDefault();
-
-        const res = await fetch("/api/users/register", {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                username: username,
-                password: password,
-                contactInfo: {
-                    phoneNumber: phoneNumber,
-                    emailAdress: emailAdress
-                }
-            })
-        });
-        
-        const data = await res.json();
-        if (res.ok && data._id !== undefined) {
-            localStorage.setItem('token', data.token);
-            window.location.href = "/";
-        } else {
-            setUsername("");
-            setPassword("");
-            setEmail("");
-            setPhoneNumber("");
-            setEmailAdress("");
-            setError(data.message || "Registration failed. Please try again.");
+        setError(""); // clear previous errors
+        try {
+            const res = await fetch("/api/users/register", {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    username: username,
+                    password: password,
+                    contactInfo: {
+                        phoneNumber: phoneNumber,
+                        emailAdress: emailAdress
+                    }
+                })
+            });
+            let data;
+            try {
+                data = await res.json();
+            } catch {
+                data = {};
+            }
+            if (res.ok && data._id !== undefined) {
+                localStorage.setItem('token', data.token);
+                window.location.href = "/";
+            } else {
+                setUsername("");
+                setPassword("");
+                setEmail("");
+                setPhoneNumber("");
+                setEmailAdress("");
+                setError(data.message || "Registration failed. Please try again.");
+            }
+        } catch (err) {
+            setError("Network or server error.");
         }
     }
 
