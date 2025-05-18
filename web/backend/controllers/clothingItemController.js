@@ -1,3 +1,4 @@
+const { notify } = require('../app');
 const ClothingItem = require('../models/ClothingItem');
 
 // @desc    Get all clothing items for a user
@@ -5,14 +6,16 @@ const ClothingItem = require('../models/ClothingItem');
 // @access  Private
 const getClothingItems = async (req, res) => {
   try {
-    const filter = { user: req.user._id };
+    //const filter = { user: req.user._id };
     
     // Handle query parameters for filtering
-    if (req.query.category) filter.category = req.query.category;
-    if (req.query.favorite === 'true') filter.favorite = true;
-    if (req.query.status) filter.status = req.query.status;
+    //if (req.query.category) filter.category = req.query.category;
+    //if (req.query.favorite === 'true') filter.favorite = true;
+    //if (req.query.status) filter.status = req.query.status;
     
-    const clothingItems = await ClothingItem.find(filter);
+    const clothingItems = await ClothingItem.find(/*filter*/).populate('user', 'username')
+    var data = [];
+    data.clothingItems = clothingItems;
     res.json(clothingItems);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -26,8 +29,8 @@ const getClothingItemById = async (req, res) => {
   try {
     const clothingItem = await ClothingItem.findOne({
       _id: req.params.id,
-      user: req.user._id,
-    });
+      //user: req.user._id,
+    }).populate('user');
 
     if (!clothingItem) {
       return res.status(404).json({ message: 'Clothing item not found' });
@@ -45,8 +48,15 @@ const getClothingItemById = async (req, res) => {
 const createClothingItem = async (req, res) => {
   try {
     const clothingItem = new ClothingItem({
-      ...req.body,
-      user: req.user._id,
+      name: req.body.name,
+      category: req.body.category,
+      subCategory: req.body.subCategory,
+      season: req.body.season,
+      color: req.body.color,
+      size: req.body.size,
+      imageUrl: "/images/"+req.file.filename,
+      notes: req.body.notes,
+      //user: req.user._id,
     });
 
     const createdClothingItem = await clothingItem.save();
