@@ -7,8 +7,11 @@ import Profile from './components/Profile';
 import Header from './components/Header';
 import ClothingItems from './components/ClothingIntems';
 import AddClothingItem from './components/AddClothingIntem';
-import ClothingItemInfo from './components/ClothingIntemInfo'; 
+import ClothingItemInfo from './components/ClothingIntemInfo';
+import AddOutfit from './components/AddOutfit';
+import OutfitInfo from './components/OutfitInfo';
 import { UserContext } from './userContext';
+import OutfitList from './components/OutfitList';
 
 function App() {
   const [user, setUser] = useState(localStorage.user ? JSON.parse(localStorage.user) : null);
@@ -27,11 +30,13 @@ function App() {
             <Link to="/">Home</Link> |{' '}
             <Link to="/register">Register</Link> |{' '}
             <Link to="/login">Login</Link> |{' '}
+            <Link to="/outfits">Outfits</Link> |{' '}
             {user && (
               <>
                 <Link to="/logout">Logout</Link> |{' '}
                 <Link to="/profile">Profile</Link> |{' '}
-                <Link to="/addClothingItem">Add Item</Link>
+                <Link to="/addClothingItem">Add Item</Link> |{' '}
+                <Link to="/addOutfit">Add Outfit</Link>
               </>
             )}
           </nav>
@@ -43,6 +48,9 @@ function App() {
             <Route path="/" element={<ClothingItems />} />
             <Route path="/addClothingItem" element={<AddClothingItem />} />
             <Route path="/clothingItem/:id" element={<ClothingItemInfo />} />
+            <Route path="/addOutfit" element={<AddOutfit />} />
+            <Route path="/outfits" element={<OutfitList />} />
+            <Route path="/outfit/:id" element={<OutfitInfo />} />
           </Routes>
         </div>
       </UserContext.Provider>

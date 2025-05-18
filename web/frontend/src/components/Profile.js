@@ -25,7 +25,7 @@ function Profile() {
           const token = localStorage.getItem('token');
           const res = await fetch("/api/users/profile", {
               credentials: "include",
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              headers: token ? { Authorization: `Bearer ${token}` } : {}, //JWT
           });
           const data = await res.json();
           setProfile(data);
@@ -114,7 +114,7 @@ function Profile() {
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})//JWT
                 },
                 body: JSON.stringify({
                     username: form.username,
