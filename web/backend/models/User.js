@@ -17,6 +17,10 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    avatar: {
+      type: String,
+      default: "", // Default avatar URL
+    },
     role: {
       type: String,
       enum: ['user', 'admin'],
@@ -64,7 +68,7 @@ const userSchema = mongoose.Schema(
 // Password encryption middleware
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

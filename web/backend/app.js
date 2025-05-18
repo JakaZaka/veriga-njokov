@@ -1,6 +1,7 @@
 const express = require('express');
 const connectDB = require('./config/db');
 require('dotenv').config();
+const cors = require('cors');
 
 // Connect to MongoDB
 connectDB();
@@ -8,7 +9,8 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(express.json());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(express.json( {limit: '100mb'})); // Limit request size to 10MB
 
 // Basic route for testing
 app.get('/', (req, res) => {
@@ -20,14 +22,14 @@ const userRoutes = require('./routes/userRoutes');
 const clothingItemRoutes = require('./routes/clothingItemRoutes');
 const outfitRoutes = require('./routes/outfitRoutes');
 const weatherRoutes = require('./routes/weatherRoutes');
-const clothingStoreRoutes = require('./routes/clothingStoreRoutes'); // Add this line
+const clothingStoreRoutes = require('./routes/clothingStoreRoutes');
 
 // API routes
 app.use('/api/users', userRoutes);
 app.use('/api/clothing', clothingItemRoutes);
 app.use('/api/outfits', outfitRoutes);
 app.use('/api/weather', weatherRoutes);
-app.use('/api/stores', clothingStoreRoutes); // Add this line
+app.use('/api/stores', clothingStoreRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
