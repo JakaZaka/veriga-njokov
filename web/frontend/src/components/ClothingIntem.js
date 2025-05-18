@@ -13,14 +13,15 @@ function ClothingItem(props){
         navigate(`/clothingItem/${props.clothingItem._id}`);
     }
 
-
-    
-
     return (
         <div className="clothingItem-card" onClick={handleClick} style={{ cursor: 'pointer' }}>
           <img
             className="clothingItem-card-img"
-            src={`/api/${props.clothingItem.imageUrl}`}
+            src={
+              props.clothingItem.imageUrl?.startsWith('/images/')
+                ? props.clothingItem.imageUrl
+                : `/images/${props.clothingItem.imageUrl}`
+            }
             alt={props.clothingItem.name}
             style={{ width: '150px', height: '150px', objectFit: 'cover' }}
           />

@@ -15,7 +15,7 @@ function Profile() {
         email: "",
         password: "",
         phoneNumber: "",
-        emailAdress: "",
+        emailAddress: "",
         address: "",
     });
     const fileInputRef = useRef();
@@ -35,7 +35,7 @@ function Profile() {
               email: data.email || "",
               password: "",
               phoneNumber: data.contactInfo?.phoneNumber || "",
-              emailAdress: data.contactInfo?.emailAdress || "",
+              emailAddress: data.contactInfo?.emailAddress || "",
               address: data.location?.address || "", // <-- add this
           });
           setLoading(false);
@@ -122,7 +122,7 @@ function Profile() {
                     password: form.password ? form.password : undefined,
                     contactInfo: {
                         phoneNumber: form.phoneNumber,
-                        emailAdress: form.emailAdress
+                        emailAddress: form.emailAddress
                     },
                     address: form.address,
                 }),
@@ -140,7 +140,7 @@ function Profile() {
                 email: data.email || "",
                 password: "",
                 phoneNumber: data.contactInfo?.phoneNumber || "",
-                emailAdress: data.contactInfo?.emailAdress || ""
+                emailAddress: data.contactInfo?.emailAddress || ""
             });
             userContext.setUserContext(data);
             setEditing(false);
@@ -225,8 +225,8 @@ function Profile() {
                             <input
                                 type="email"
                                 className="form-control"
-                                name="emailAdress"
-                                value={form.emailAdress}
+                                name="emailAddress"
+                                value={form.emailAddress}
                                 onChange={handleEditChange}
                             />
                         </div>
@@ -260,7 +260,7 @@ function Profile() {
                         </li>
                         <li className="list-group-item d-flex justify-content-between align-items-center">
                             <strong><i className="bi bi-at"></i> Contact Email:</strong>
-                            <span>{profile.contactInfo?.emailAdress || "-"}</span>
+                            <span>{profile.contactInfo?.emailAddress || "-"}</span>
                         </li>
                         <li className="list-group-item d-flex justify-content-between align-items-center">
                             <strong><i className="bi bi-geo-alt"></i> Address:</strong>

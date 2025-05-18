@@ -9,17 +9,19 @@ connectDB();
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 app.use(cors({
   credentials: true,
   origin: function(origin, callback){
-    // Allow requests with no origin (mobile apps, curl)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin)===-1){
-      var msg = "The CORS policy does not allow access from the specified Origin.";
-      return callback(new Error(msg), false);
+    if (!origin) return callback(null, true);
+    if (
+      origin.startsWith('http://localhost:') ||
+      origin.startsWith('http://127.0.0.1:')
+    ) {
+      return callback(null, true);
     }
-    return callback(null, true);
+    var msg = "The CORS policy does not allow access from the specified Origin.";
+    return callback(new Error(msg), false);
   }
 }));
 

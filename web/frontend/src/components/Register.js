@@ -5,26 +5,26 @@ function Register() {
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [emailAdress, setEmailAdress] = useState("");
+    const [emailAddress, setEmailAddress] = useState("");
     const [error, setError] = useState("");
 
     async function handleRegister(e) {
         e.preventDefault();
-        setError(""); // clear previous errors
+        setError("");
         try {
-            const res = await fetch("/api/users/register", {
+            const res = await fetch("/api/users", {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    email: email,
-                    username: username,
-                    password: password,
+                    email,
+                    username,
+                    password,
                     contactInfo: {
-                        phoneNumber: phoneNumber,
-                        emailAdress: emailAdress
+                        phoneNumber,
+                        emailAddress
                     }
                 })
             });
@@ -38,11 +38,6 @@ function Register() {
                 localStorage.setItem('token', data.token);
                 window.location.href = "/";
             } else {
-                setUsername("");
-                setPassword("");
-                setEmail("");
-                setPhoneNumber("");
-                setEmailAdress("");
                 setError(data.message || "Registration failed. Please try again.");
             }
         } catch (err) {
@@ -108,14 +103,14 @@ function Register() {
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="emailAdress" className="form-label">Contact Email</label>
+                        <label htmlFor="emailAddress" className="form-label">Contact Email</label>
                         <input 
                             type="email" 
                             className="form-control" 
-                            id="emailAdress" 
+                            id="emailAddress" 
                             placeholder="Enter your contact email" 
-                            value={emailAdress} 
-                            onChange={(e) => setEmailAdress(e.target.value)} 
+                            value={emailAddress} 
+                            onChange={(e) => setEmailAddress(e.target.value)} 
                         />
                     </div>
                     <button type="submit" className="btn btn-primary w-100">Register</button>
