@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import ClothingItem from './ClothingIntem';
+import ClothingItem from './ClothingItem';
 import { useLocation } from 'react-router-dom';
 
 function Clothes(){

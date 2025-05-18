@@ -49,10 +49,14 @@ const getClothingStoreById = async (req, res) => {
 // @route   POST /api/stores
 // @access  Private/Admin
 const createClothingStore = async (req, res) => {
-  try {
-    const clothingStore = new ClothingStore(req.body);
-    const createdClothingStore = await clothingStore.save();
-    res.status(201).json(createdClothingStore);
+   try {
+    const clothingStore = new ClothingStore({
+      name: req.body.name,
+      website: req.body.website,
+    });
+
+    const createClothingStore = await clothingStore.save();
+    res.status(201).json(createClothingStore);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

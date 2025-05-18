@@ -18,8 +18,8 @@ router.get('/', getLocations);
 router.get('/:id', getLocationById);
 
 // Protected routes - Admin only
-router.post('/', protect, admin, createLocation);
-router.put('/:id', protect, admin, updateLocation);
-router.delete('/:id', protect, admin, deleteLocation);
+router.post('/', /*protect, admin,*/ createLocation);
+router.put('/:id', /*protect, admin,*/ updateLocation);
+router.delete('/:id', /*protect, admin,*/ deleteLocation);
 
 module.exports = router;
