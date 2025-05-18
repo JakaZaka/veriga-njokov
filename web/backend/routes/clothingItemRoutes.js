@@ -1,4 +1,6 @@
 const express = require('express');
+var multer = require('multer');
+var upload = multer({ dest: 'public/images/' });
 const { 
   getClothingItems,
   getClothingItemById,
@@ -12,11 +14,11 @@ const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.use(protect);
+//router.use(protect);
 
 router.route('/')
   .get(getClothingItems)
-  .post(createClothingItem);
+  .post(upload.single('image'), createClothingItem);
 
 router.route('/:id')
   .get(getClothingItemById)
