@@ -27,10 +27,10 @@ class ARSOWeatherScraper {
                 val cells = row.select("td")
                 
                 if (cells.size >= 9) {
-                    // Extract data from cells using correct indices (based on debugging)
+                    // Extract data from cells using correct indices
                     val location = cells[0].text()
                     val temperature = cells[2].text().trim() // Temperature is in cell[2]
-                    val humidity = cells[3].text().trim() // Humidity is in cell[3]
+                    val humidity = cells[3].text().trim() // Humidity in cell[3]
                     val windSpeed = if (cells[5].text().isNotBlank()) cells[5].text().trim() else ""
                     val precipitation = if (cells[8].text().isNotBlank()) cells[8].text().trim() else "0"
                     
