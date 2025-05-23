@@ -16,7 +16,8 @@ app.use(cors({
     if (!origin) return callback(null, true);
     if (
       origin.startsWith('http://localhost:') ||
-      origin.startsWith('http://127.0.0.1:')
+      origin.startsWith('http://127.0.0.1:') ||
+      /^http:\/\/172\.\d+\.\d+\.\d+:\d+$/.test(origin) // Allow Docker network IPs
     ) {
       return callback(null, true);
     }
