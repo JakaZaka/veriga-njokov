@@ -12,7 +12,7 @@ const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// All routes are protected
+// All routes are protected by default
 //router.use(protect);
 
 router.route('/')
