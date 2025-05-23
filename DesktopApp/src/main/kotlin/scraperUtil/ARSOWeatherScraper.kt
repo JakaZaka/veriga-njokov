@@ -13,7 +13,6 @@ class ARSOWeatherScraper {
     fun scrapeWeatherData() {
         println("Fetching weather data from ARSO...")
         
-        
         try {
             // Connect to the ARSO website and get the HTML document
             val doc: Document = Jsoup.connect(arsoUrl).get()
