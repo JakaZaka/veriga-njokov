@@ -10,6 +10,7 @@ fun toGeoJSON(): String{
     result.append(blocks.joinToString(separator = ",\n"){it.toGeoJSON()})
     result.append("]\n}\n")
     return result.toString()
+
 }
 }
 
