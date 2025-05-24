@@ -1,12 +1,18 @@
 import com.sun.org.apache.xpath.internal.operations.Variable
+import jdk.incubator.vector.VectorOperators.Operator
 import jdk.internal.net.http.common.Pair.pair
+
+enum class Operators{
+    Equall, GreaterThan, LessThan, GreaterThanOrEqual, LessThanOrEqual
+}
 
 class Parser(
     val scanner: Scanner,
     var currentToken: Token = scanner.nextToken(),
     val varVal: MutableMap<String, Int> = mutableMapOf("x" to 1, "y" to 3),
-    val variables: MutableMap<String, Int> = mutableMapOf(),
+    val variables: MutableMap<String, Float> = mutableMapOf(),
     val forRange: MutableMap<Int, Int> = mutableMapOf()
+
 ) {
     fun nextToken() {
         if (!scanner.eof()) currentToken = scanner.nextToken()
@@ -17,20 +23,21 @@ class Parser(
         return currentToken.tokenMap[currentToken.token].equals(token)
     }
 
-    fun primary(): Boolean {
+    fun primary(): Float {
         if (isToken("int")) {
-            var value: Int = currentToken.lexem.toInt()
+            var value: Float = currentToken.lexem.toFloat()
             nextToken()
             //println("primary ok, ${currentToken.tokenMap[currentToken.token]}")
-            return true
+            return value
         } else if (isToken("double")) {
+            var value: Float = currentToken.lexem.toFloat()
             nextToken()
-            return true
+            return value
 
         }else if (isToken("variable")) {
-            //var value: Int = variables.getValue(currentToken.lexem)
+            var value: Float = variables.getValue(currentToken.lexem)
             nextToken()
-            return true
+            return value
         } else if (isToken("lparen")) {
             nextToken()
             //val value: Int = bitwise()
@@ -38,22 +45,20 @@ class Parser(
                 nextToken()
                 return aditive()
             } else if (scanner.eof()) {
-                return false
-                //throw Exception("Expected closing parenthesis ')'")
+                throw Exception("Expected closing parenthesis ')'")
             } else {
-                return false
                 //println("Error: Expected closing parenthesis ')', found ${currentToken.tokenMap[currentToken.token]}")
-                //throw Exception("Unexpected token ${currentToken.tokenMap[currentToken.token]}")
+                throw Exception("Unexpected token ${currentToken.tokenMap[currentToken.token]}")
             }
             /*if(isToken("rparen")) {
                 if(!scanner.eof()) nextToken()
                 println("primary ok, ${currentToken.tokenMap[currentToken.token]}")
                 return true
             } else return false*/
-        } else return false//throw Exception("Unexpected token ${currentToken.tokenMap[currentToken.token]}")
+        } else throw Exception("Unexpected token ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun unary(): Boolean {
+    fun unary(): Float {
         if (isToken("plus")) {
             nextToken()
             //println("unary ok, ${currentToken.tokenMap[currentToken.token]}")
@@ -65,101 +70,108 @@ class Parser(
         } else return primary()
     }
 
-    fun secondMultiplicative(): Boolean {
+    fun secondMultiplicative(unary: Float): Float {
         if (isToken("times")) {
             nextToken()
             //println("multiplicative prim ok, ${currentToken.tokenMap[currentToken.token]}")
-            return unary() && secondMultiplicative()
+            return secondMultiplicative(unary.times(unary()))
         } else if (isToken("divide")){
             nextToken()
-            return unary() && secondMultiplicative()
+            return secondMultiplicative(unary.div(unary()))
         }
-        else return true
+        else return unary
     }
 
-    fun multiplicative(): Boolean {
+    fun multiplicative(): Float {
         //println("multiplicative ok, ${currentToken.tokenMap[currentToken.token]}")
-        return unary() && secondMultiplicative()
+        return secondMultiplicative(unary())
     }
 
-    fun secondAditive(): Boolean {
+    fun secondAditive(multiplicative: Float): Float {
         if (isToken("plus")) {
             //println("aditive prim ok, ${currentToken.tokenMap[currentToken.token]}")
             nextToken()
             //println("aditive prim ok, ${currentToken.tokenMap[currentToken.token]}")
-            return multiplicative() && secondAditive()
+            return secondAditive(multiplicative.plus(multiplicative()))
         } else if (isToken("minus")) {
             nextToken()
-            return multiplicative() && secondAditive()
-        } else return true
+            return secondAditive(multiplicative.minus(multiplicative()))
+        } else return multiplicative
     }
 
-    fun aditive(): Boolean {
+    fun aditive(): Float {
         //println("aditive ok, ${currentToken.tokenMap[currentToken.token]}")
-        return multiplicative() && secondAditive()
+        return secondAditive(multiplicative())
     }
 
 
 
-    fun expr(): Boolean {
+    fun expr(): Float {
         //println("exor ok, ${currentToken.tokenMap[currentToken.token]}")
         return aditive()
     }
 
-    fun name(): Boolean{
+    fun name(): String{
         if(isToken("name")) {
+            var name: String = currentToken.lexem.removePrefix("\"").removeSuffix("\"")
             nextToken()
-            return true
+            return name
         }
-        return false
+        throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun angle(): Boolean {
+    fun angle(): Float {
         if(isToken("int")){
+            var value = currentToken.lexem.toFloat()
             nextToken()
-            return true
+            if(value < -180 || value > 180 ) throw Exception("The angle is not correct, it needs to be on the range from -180 to 180")
+            return value
         }
         else if (isToken("double")){
+            var value = currentToken.lexem.toFloat()
             nextToken()
-            return true
+            if(value < -180 || value > 180 ) throw Exception("The angle is not correct, it needs to be on the range from -180 to 180")
+            return value
         }
-        return false
+        throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun operator(): Boolean {
+    fun operator(): Operators {
         if (isToken("equal")) {
             nextToken()
-            return true
+            return Operators.Equall
         }
         else if (isToken("greaterThan")){
             nextToken()
-            return true
+            return Operators.GreaterThan
         }
         else if (isToken("lessThan")) {
             nextToken()
-            return true
+            return Operators.LessThan
         }
         else if (isToken("greaterThanOrEqual")) {
             nextToken()
-            return true
+            return Operators.GreaterThanOrEqual
         }
         else if (isToken("lessThanOrEqual")) {
             nextToken()
-            return true
+            return Operators.LessThanOrEqual
         }
-        return false
+        throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun number(): Boolean{
+    fun number(): Float{
         if (isToken("int")) {
+            var value = currentToken.lexem.toFloat()
             nextToken()
-            return true
+            return value
         }
         else if (isToken("double")) {
+            var value = currentToken.lexem.toFloat()
             nextToken()
-            return true
+            return value
         }
-        return false
+        throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
     fun point(): Boolean{
@@ -168,6 +180,7 @@ class Parser(
             nextToken()
             return expr()
         }
+        //POINT
         return true
 
 
@@ -182,6 +195,7 @@ class Parser(
 
     fun compare(): Boolean{
         if (!isToken("variable")) return false
+
         nextToken()
         if (!operator()) return false
         if (!number()) return false
