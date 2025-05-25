@@ -386,6 +386,8 @@ class Scanner(private val input: File) {
         markColumn = column
     }
 
+
+
     fun resetToMark(){
             val remaining = content.substring(markCharsRead)
             reader = PushbackReader(StringReader(remaining))
@@ -426,4 +428,13 @@ class Scanner(private val input: File) {
         }
     }
 
+}
+
+class MiniScanner(var input: MutableList<Token>){
+    var current = 0
+    fun nextToken(): Token{
+        var token = input[current]
+        current++
+        return token
+    }
 }

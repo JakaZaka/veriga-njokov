@@ -1,4 +1,4 @@
-class City(val name: String, var blocks: List<Block>){
+class City(val name: String, var blocks: MutableList<Block>){
 //FEATURE COLLECTION
 fun toGeoJSON(): String{
     var result = StringBuilder()
@@ -19,7 +19,7 @@ abstract class Block(){
     abstract fun toGeoJSON(): String;
 }
 
-open class Building(var commands: List<Command>) : Block(){
+open class Building(var commands: MutableList<Command>) : Block(){
     override fun toGeoJSON(): String {
         var result = StringBuilder()
         result.append("{\n" +
@@ -37,13 +37,13 @@ open class Building(var commands: List<Command>) : Block(){
     }
 }
 
-class Road(val name: String, var commands: List<Command>) : Block(){
+class Road(val name: String, var commands: MutableList<Command>) : Block(){
     override fun toGeoJSON(): String {
         var result = StringBuilder()
         result.append("{\n" +
                 " \"type\": \"Feature\", \n" +
                 " \"properties\": {\n" +
-                " \"type\": \"road\"\n" +
+                " \"type\": \"road\",\n" +
                 " \"name\": \"$name\"\n" +
                 " },\n" +
                 "\"geometry\": {\n" +
@@ -61,12 +61,12 @@ class User(val name: String, var point: Point) : Block(){
         result.append("{\n" +
                 " \"type\": \"Feature\", \n" +
                 " \"properties\": {\n" +
-                " \"type\": \"user\"\n" +
+                " \"type\": \"user\",\n" +
                 " \"name\": \"$name\"\n" +
                 " },\n" +
                 "\"geometry\": {\n" +
                 "    \"type\": \"Point\",\n" +
-                "    \"coordinates\": ${point.toGeoJSON()}\n")
+                "    \"coordinates\": ${point.toGeoJSON()}\n }}")
         return result.toString();
     }
 }
@@ -77,8 +77,8 @@ class Store(val name: String, val building: Building) : Block(){
         result.append("{\n" +
                 " \"type\": \"Feature\", \n" +
                 " \"properties\": {\n" +
-                " \"type\": \"store\"\n" +
-                " \"type\": \"$name\"\n" +
+                " \"type\": \"store\",\n" +
+                " \"name\": \"$name\"\n" +
                 " },\n" +
                 "\"geometry\": {\n" +
                 "    \"type\": \"GeometryCollection\",\n" +
@@ -93,7 +93,7 @@ abstract class Command(){
     abstract fun toGeoJSON(): String;
 }
 
-class Bend(var pointA: Point, var pointB: Point, var angle: Float): Command(){
+class Bend(var pointA: Point, var pointB: Point, var angle: Double): Command(){
 
     fun calculateArcPoints(segments: Int = 20): List<Point> {
         val midX = (pointA.x + pointB.x) / 2
@@ -131,16 +131,16 @@ class Bend(var pointA: Point, var pointB: Point, var angle: Float): Command(){
         val polygon = calculateArcPoints()
         var result = StringBuilder()
         result.append("{\n" +
-                "        \"type\": \"Polygon\",\n" +
-                "        \"coordinates\":" )
+                "        \"type\": \"LineString\",\n" +
+                "        \"coordinates\": [" )
         result.append(polygon.joinToString(", ") { it.toGeoJSON() })
-        result.append("}")
+        result.append("]}")
         return result.toString();
     }
 
 }
 
-class Circle(var center: Point, var radius: Float) : Command(){
+class Circle(var center: Point, var radius: Double) : Command(){
     fun calculateCircle(segments: Int = 36): List<Point> {
         val angleStep = 2 * Math.PI / segments
         return (0..segments).map { i ->
@@ -156,9 +156,9 @@ class Circle(var center: Point, var radius: Float) : Command(){
         var result = StringBuilder()
         result.append("{\n" +
                 "        \"type\": \"Polygon\",\n" +
-                "        \"coordinates\":" )
+                "        \"coordinates\": [" )
         result.append(polygon.joinToString(", ") { it.toGeoJSON() })
-        result.append("}")
+        result.append("]}\n")
         return result.toString();
     }
 
@@ -170,7 +170,7 @@ class Line(var pointA: Point, var pointB: Point): Command(){
         var result = StringBuilder()
         result.append("{\n" +
                 "        \"type\": \"LineString\",\n" +
-                "        \"coordinates\": ${pointA.toGeoJSON()}, ${pointB.toGeoJSON()} }" )
+                "        \"coordinates\": [ ${pointA.toGeoJSON()}, ${pointB.toGeoJSON()} ] }" )
         return result.toString();
     }
 
@@ -191,17 +191,24 @@ class Box(var pointA: Point, var pointB: Point): Command(){
         var result = StringBuilder()
         result.append("{\n" +
                 "        \"type\": \"Polygon\",\n" +
-                "        \"coordinates\":" )
+                "        \"coordinates\": [" )
         result.append(polygon.joinToString(", ") { it.toGeoJSON() })
-        result.append("}")
+        result.append("]}\n")
         return result.toString();
     }
 }
 
 class Point(var x: Double, var y: Double){
+    var highlighted: Boolean = false
     fun toGeoJSON(): String {
         return "[$x,$y]"
     }
 }
 
+class Function(var fname: String, var argumentName: String, var miniScanner: MiniScanner = MiniScanner(mutableListOf())){
+    fun execute(): MutableList<Command>{
+        var commands = mutableListOf<Command>()
+        return commands
+    }
+}
 

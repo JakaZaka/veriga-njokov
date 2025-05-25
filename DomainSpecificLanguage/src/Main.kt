@@ -70,7 +70,7 @@ fun main() {
     val parser = Parser(scanner)
 
     try {
-        println(parser.parse())
+        println(parser.parse().toGeoJSON())
     }catch (e:Exception){
         println(e.message)
     }
