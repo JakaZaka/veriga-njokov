@@ -9,12 +9,13 @@ enum class Operators{
 class Parser(
     val scanner: Scanner,
     var currentToken: Token = scanner.nextToken(),
-    val varVal: MutableMap<String, Int> = mutableMapOf("x" to 1, "y" to 3),
+
     val variables: MutableMap<String, Double> = mutableMapOf(),
     val pointVars: MutableMap<String, Point> = mutableMapOf(),
     val nullVars: MutableMap<String, Double?> = mutableMapOf(),
     val neighVars: MutableMap<String, Circle> = mutableMapOf(),
-    val functions: MutableList<Function> = mutableListOf()
+    val functions: MutableMap<String, Pair<String, MutableList<Int>>> = mutableMapOf(),
+    //val loops: MutableMap<String, MutableList<Int>>
 
     //val forRange: MutableMap<Int, Int> = mutableMapOf()
 
@@ -126,16 +127,16 @@ class Parser(
         throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun angle(willExec: Boolean, read: Boolean, currentFun: Function?): Double {
+    fun angle(willExec: Boolean): Double {
         if(isToken("int")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             var value = currentToken.lexem.toDouble()
             nextToken()
             if(value < -180 || value > 180 ) throw Exception("The angle is not correct, it needs to be on the range from -180 to 180")
             return value
         }
         else if (isToken("double")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             var value = currentToken.lexem.toDouble()
             nextToken()
             if(value < -180 || value > 180 ) throw Exception("The angle is not correct, it needs to be on the range from -180 to 180")
@@ -144,44 +145,44 @@ class Parser(
         throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun operator(willExec: Boolean, read: Boolean, currentFun: Function?): Operators {
+    fun operator(willExec: Boolean): Operators {
         if (isToken("equal")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             return Operators.Equall
         }
         else if (isToken("greaterThan")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             return Operators.GreaterThan
         }
         else if (isToken("lessThan")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             return Operators.LessThan
         }
         else if (isToken("greaterThanOrEqual")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             return Operators.GreaterThanOrEqual
         }
         else if (isToken("lessThanOrEqual")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             return Operators.LessThanOrEqual
         }
         throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun number(willExec: Boolean, read: Boolean, currentFun: Function?): Double{
+    fun number(willExec: Boolean): Double{
         if (isToken("int")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             var value = currentToken.lexem.toDouble()
             nextToken()
             return value
         }
         else if (isToken("double")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             var value = currentToken.lexem.toDouble()
             nextToken()
             return value
@@ -189,11 +190,11 @@ class Parser(
         throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun point(willExec: Boolean, read: Boolean, currentFun: Function?): Point{
+    fun point(willExec: Boolean): Point{
         var x = expr()
         //if(!expr()) return false
         if (isToken("comma")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             var y = expr()
             return Point(x, y)
@@ -212,124 +213,130 @@ class Parser(
         * */
     }
 
-    fun compare(willExec: Boolean, read: Boolean, currentFun: Function?): Boolean{
+    fun compare(willExec: Boolean): Boolean{
         if (!isToken("variable")) return false
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+        if(!willExec) {
+
+            nextToken()
+            operator(!willExec)
+            number(!willExec)
+            return true
+        }
         val varName = currentToken.lexem
         val varVal = variables[varName] ?: throw Exception("Variable '$varName' does not exist")
 
         nextToken()
 
-        val operator = operator(willExec, read, currentFun)
+        val operator = operator(willExec)
 
         return when (operator) {
-            Operators.Equall -> varVal == number(willExec, read, currentFun)
-            Operators.GreaterThan -> varVal > number(willExec, read, currentFun)
-            Operators.LessThan -> varVal < number(willExec, read, currentFun)
-            Operators.GreaterThanOrEqual -> varVal >= number(willExec, read, currentFun)
-            Operators.LessThanOrEqual -> varVal <= number(willExec, read, currentFun)
+            Operators.Equall -> varVal == number(willExec)
+            Operators.GreaterThan -> varVal > number(willExec)
+            Operators.LessThan -> varVal < number(willExec)
+            Operators.GreaterThanOrEqual -> varVal >= number(willExec)
+            Operators.LessThanOrEqual -> varVal <= number(willExec)
         }
 
     }
 
-    fun line(willExec: Boolean, read: Boolean, currentFun: Function?): Line{
+    fun line(willExec: Boolean): Line{
         if(!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
-        var A = point(willExec, read, currentFun)
+        var A = point(willExec)
         //if (!point()) return false
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("comma")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
-        var B = point(willExec, read, currentFun)
+        var B = point(willExec)
         //if (!point()) return false
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         return Line(A, B)
     }
 
-    fun bend(willExec: Boolean, read: Boolean, currentFun: Function?): Bend{
+    fun bend(willExec: Boolean): Bend{
         //BEND ::= ((POINT), (POINT), ANGLE);
         if(!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
-        var A = point(willExec, read, currentFun)
+        var A = point(willExec)
         //if (!point()) return false
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("comma")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
-        var B = point(willExec, read, currentFun)
+        var B = point(willExec)
         //if (!point()) return false
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("comma")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
-        var angle = angle(willExec, read, currentFun)
+        var angle = angle(willExec)
         //if(!angle()) return false
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         return Bend(A, B, angle)
     }
 
-    fun box(willExec: Boolean, read: Boolean, currentFun: Function?): Box{
+    fun box(willExec: Boolean): Box{
         if(!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
-        var A = point(willExec, read, currentFun)
+        var A = point(willExec)
         //if (!point()) return false
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("comma")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
-        var B = point(willExec, read, currentFun)
+        var B = point(willExec)
         //if (!point()) return false
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
         if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
         nextToken()
 
         return Box(A, B)
@@ -345,43 +352,43 @@ class Parser(
         * */
     }
 
-    fun circle(willExec: Boolean, read: Boolean, currentFun: Function?): Circle {
+    fun circle(willExec: Boolean): Circle {
         if (isToken("lparen")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
-            var center = point(willExec, read, currentFun)
+            var center = point(willExec)
             //if (!point()) return false
             if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             if (!isToken("comma")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
-            var radius = number(willExec, read, currentFun)
+            var radius = number(willExec)
            return Circle(center, radius)
         }
         return throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun cvalue(name: String, willExec: Boolean, read: Boolean, currentFun: Function?){
+    fun cvalue(name: String, willExec: Boolean){
         if (isToken("point")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
-            var point = point(willExec, read, currentFun)
+            var point = point(willExec)
             if(willExec) pointVars[name]=point
             //if (!point()) return false
             if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             /*if (!isToken("semi")) return false
             nextToken()*/
             //return true
         }
         else if (isToken("null")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             if(willExec) nullVars[name]=null
             /*if (!isToken("semi")) return false
@@ -389,29 +396,24 @@ class Parser(
             //return true
         }
         else if(isToken("neigh")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
-            var circle = circle(willExec, read, currentFun)
+            var circle = circle(willExec)
             if (willExec) neighVars[name]=circle
             //if (!circle()) return false
             if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()/*
             if (!isToken("semi")) return false
             nextToken()*/
             //return true
         }
         else{
-            if(willExec && read) {
-                var row = currentToken.row
-                var column = currentToken.column
-                var value = expr()
-                currentFun?.miniScanner?.input?.add(Token(value.toString(), row, column, 13, false))
-            }
-            else if(willExec && !read) variables[name]=expr()
+
+            if(willExec) variables[name]=expr()
             else expr()
             //if(!expr()) return false
             /*if (!isToken("semi")) return false
@@ -420,23 +422,23 @@ class Parser(
         }
     }
 
-    fun value(name: String, willExec: Boolean, read: Boolean, currentFun: Function?) {
+    fun value(name: String, willExec: Boolean) {
         if (isToken("point")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
-            pointVars[name]=point(willExec, read, currentFun)
+            pointVars[name]=point(willExec)
             //if (!point()) return false
             if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
 
             //return true
         }
         else if (isToken("null")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             nullVars[name]=null
             /*if (!isToken("semi")) return false
@@ -444,13 +446,7 @@ class Parser(
             //return true
         }
         else{
-            if(willExec && read) {
-                var row = currentToken.row
-                var column = currentToken.column
-                var value = expr()
-                currentFun?.miniScanner?.input?.add(Token(value.toString(), row, column, 13, false))
-            }
-            else if(willExec && !read) variables[name]=expr()
+            if(willExec) variables[name]=expr()
             else expr()
             //if(!expr()) return false
             /*if (!isToken("semi")) return false
@@ -459,44 +455,50 @@ class Parser(
         }
     }
 
-    fun declaration(name: String, willExec: Boolean, read: Boolean, currentFun: Function?){
+    fun declaration(name: String, willExec: Boolean){
         if (isToken("assign")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
-            value(name, willExec, read, currentFun)
+            value(name, willExec)
             return
         }
         throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun cdeclaration(name: String, willExec: Boolean, read: Boolean, currentFun: Function?){
+    fun cdeclaration(name: String, willExec: Boolean){
         if (isToken("assign")) {
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
-            cvalue(name, willExec, read, currentFun)
+            cvalue(name, willExec)
             return
         }
         throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
     }
 
-    fun variableopt(name: String, willExec: Boolean, read: Boolean, currentFun: Function?){
+    fun variableopt(name: String, willExec: Boolean, city: City?){
         if (isToken("highlight")){
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
-            if (!pointVars.containsKey(name)) throw Exception("No such point: $name")
+
+            if (!pointVars.containsKey(name) && !neighVars.containsKey(name)) throw Exception("No such point: $name")
             nextToken()
             if(!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
             if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun?.miniScanner?.input?.add(currentToken)
+
             nextToken()
-            pointVars[name]?.highlighted=true
+            if(city != null) {
+                if (pointVars.containsKey(name)) pointVars[name]?.highlighted = true
+                else if (neighVars.containsKey(name)) {
+                    highlightFeaturesInCircles(city, neighVars[name]!!)
+                }
+            }
+
             return
         }
-        declaration(name, willExec, read, currentFun)
+        declaration(name, willExec)
         if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
         nextToken()
         return
@@ -505,7 +507,7 @@ class Parser(
     fun ifProduction(city: City, oldWillExec: Boolean): Boolean{
         if (!isToken("lparen")) return false
         nextToken()
-        var willExec = compare(oldWillExec, false, null)
+        var willExec = compare(oldWillExec)
         println(willExec)
         if (!oldWillExec) willExec = oldWillExec
         if (!isToken("rparen")) return false
@@ -523,7 +525,8 @@ class Parser(
     fun bIfProduction(building: Building, oldWillExec: Boolean): Boolean{
         if (!isToken("lparen")) return false
         nextToken()
-        var willExec = compare(oldWillExec, false, null)
+        var willExec = compare(oldWillExec)
+        println(willExec)
         if (!isToken("rparen")) return false
         nextToken()
         if (!isToken("lbracket")) return false
@@ -538,7 +541,7 @@ class Parser(
     fun rIfProduction(road: Road, oldWillExec: Boolean): Boolean{
         if (!isToken("lparen")) return false
         nextToken()
-        var willExec = compare(oldWillExec, false, null)
+        var willExec = compare(oldWillExec)
         if (!isToken("rparen")) return false
         nextToken()
         if (!isToken("lbracket")) return false
@@ -550,24 +553,24 @@ class Parser(
         return rElseProduction(road, willExec)
     }
 
-    fun fIfProduction(oldWillExec: Boolean, read: Boolean, currentFun: Function): MutableList<Command>{
+    fun fIfProduction(oldWillExec: Boolean): MutableList<Command>{
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(oldWillExec && read) currentFun.miniScanner.input.add(currentToken)
+
         nextToken()
-        var willExec = compare(oldWillExec, read, currentFun)
+        var willExec = compare(oldWillExec)
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
         nextToken()
         if (!isToken("lbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
         nextToken()
         var commands = mutableListOf<Command>()
-        commands.addAll(functionLine(willExec, read, currentFun))//) return false
-        functionLines(willExec, read, currentFun, commands)//) return false
+        commands.addAll(functionLine(willExec))//) return false
+        functionLines(willExec, commands)//) return false
         if (!isToken("rbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
         nextToken()
-        return fElseProduction(willExec, read, currentFun, commands)
+        return fElseProduction(willExec, commands)
     }
 
     fun elseProduction(city: City, willExec: Boolean): Boolean{
@@ -588,8 +591,8 @@ class Parser(
             nextToken()
             if (!isToken("lbracket")) return false
             nextToken()
-            if (!buildingCommand(building, willExec)) return false
-            if (!buildingCommands(building, willExec)) return false
+            if (!buildingCommand(building, !willExec)) return false
+            if (!buildingCommands(building, !willExec)) return false
             if (!isToken("rbracket")) return false
             nextToken()
         }
@@ -609,17 +612,17 @@ class Parser(
         return true
     }
 
-    fun fElseProduction(willExec: Boolean, read: Boolean, currentFun: Function, commands: MutableList<Command>): MutableList<Command>{
+    fun fElseProduction(willExec: Boolean, commands: MutableList<Command>): MutableList<Command>{
         if (isToken("else")) {
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
             if (!isToken("lbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
-            commands.addAll(functionLine(willExec, read, currentFun)) //return false
-            commands.addAll(functionLines(willExec, read, currentFun, commands)) //return false
+            commands.addAll(functionLine(willExec)) //return false
+            commands.addAll(functionLines(willExec, commands)) //return false
             if (!isToken("rbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
             //return commands
         }
@@ -632,8 +635,9 @@ class Parser(
         if (!isToken("variable")) return false
         var name = currentToken.lexem
         nextToken()
-        declaration(name, willExec, false, null)
+        declaration(name, willExec)
         val start = variables[name] ?: throw Exception("Variable does not exist")
+        println(start)
         if (!isToken("to")) return false
         nextToken()
         if (!isToken("int")) return false
@@ -641,11 +645,12 @@ class Parser(
         nextToken()
         if (!isToken("rparen")) return false
         nextToken()
-        scanner.markPosition()
+        var list = scanner.markFunPosition()
         if (!isToken("lbracket")) return false
         nextToken()
         for (i in start.toInt() .. end) {
-            scanner.resetToMark()
+            variables[name]=i.toDouble()
+            scanner.resetToMark(list[0], list[1], list[2])
             currentToken = scanner.nextToken()
             while (!isToken("rbracket") && !scanner.eof()){
                 cityLine(city, true)
@@ -664,20 +669,29 @@ class Parser(
         if (!isToken("variable")) return false
         var name = currentToken.lexem
         nextToken()
-        declaration(name, willExec, false, null)
+        declaration(name, willExec)
+        val start = variables[name] ?: throw Exception("Variable does not exist")
         if (!isToken("to")) return false
         nextToken()
         if (!isToken("int")) return false
+        val end = currentToken.lexem.toInt()
         nextToken()
         if (!isToken("rparen")) return false
         nextToken()
+        var list = scanner.markFunPosition()
         if (!isToken("lbracket")) return false
         nextToken()
-        if (!buildingCommand(building, true)) return false
-        if (!buildingCommands(building, true)) return false
-        //BUILDINGCOMMAND BUILDINGCOMMANDS
-        if (!isToken("rbracket")) return false
-        nextToken()
+        for (i in start.toInt() .. end) {
+            scanner.resetToMark(list[0], list[1], list[2])
+            currentToken = scanner.nextToken()
+            while (!isToken("rbracket") && !scanner.eof()){
+                buildingCommand(building, true)
+            }
+
+            //if (!cityLines(city, true)) return false
+            if (!isToken("rbracket")) return false
+            nextToken()
+        }
         return true
     }
 
@@ -687,49 +701,62 @@ class Parser(
         if (!isToken("variable")) return false
         var name = currentToken.lexem
         nextToken()
-        declaration(name, willExec, false, null)
+        declaration(name, willExec)
+        val start = variables[name] ?: throw Exception("Variable does not exist")
         if (!isToken("to")) return false
         nextToken()
         if (!isToken("int")) return false
+        val end = currentToken.lexem.toInt()
         nextToken()
         if (!isToken("rparen")) return false
         nextToken()
+        var list = scanner.markFunPosition()
         if (!isToken("lbracket")) return false
         nextToken()
-        if (!roadCommand(road, true)) return false
-        if (!roadCommands(road, true)) return false
-        if (!isToken("rbracket")) return false
-        nextToken()
+        for (i in start.toInt() .. end) {
+            scanner.resetToMark(list[0], list[1], list[2])
+            currentToken = scanner.nextToken()
+            while (!isToken("rbracket") && !scanner.eof()){
+                roadCommand(road, true)
+            }
+
+            //if (!cityLines(city, true)) return false
+            if (!isToken("rbracket")) return false
+            nextToken()
+        }
         return true
     }
 
-    fun fForProduction(willExec: Boolean, read: Boolean, currentFun: Function): MutableList<Command>{
+    fun fForProduction(willExec: Boolean): MutableList<Command>{
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
         nextToken()
         if (!isToken("variable")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
         var name = currentToken.lexem
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
         nextToken()
-        declaration(name, willExec, read, currentFun)//) return false
+        declaration(name, willExec)
+        val start = variables[name] ?: throw Exception("Variable does not exist")
         if (!isToken("to")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
         nextToken()
         if (!isToken("int")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+        val end = currentToken.lexem.toInt()
         nextToken()
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
         nextToken()
+        var list = scanner.markFunPosition()
         if (!isToken("lbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
         nextToken()
         var commands = mutableListOf<Command>()
-        commands.addAll(functionLine(true, read, currentFun))//) return false
-        functionLines(true, read, currentFun, commands)//) return false
-        if (!isToken("rbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-        if(willExec && read) currentFun.miniScanner.input.add(currentToken)
-        nextToken()
+        for (i in start.toInt() .. end) {
+            scanner.resetToMark(list[0], list[1], list[2])
+            currentToken = scanner.nextToken()
+            while (!isToken("rbracket") && !scanner.eof()){
+                commands.addAll(functionLine(true))
+            }
+
+            //if (!cityLines(city, true)) return false
+            if (!isToken("rbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+            nextToken()
+        }
         return commands
     }
 
@@ -742,117 +769,146 @@ class Parser(
         nextToken()
         if (!isToken("variable")) return false
         val argName = currentToken.lexem
+        variables[argName]= Double.MAX_VALUE
         nextToken()
         if (!isToken("rparen")) return false
         nextToken()
+        functions[fname] = argName to scanner.markFunPosition()
         if (!isToken("lbracket")) return false
         nextToken()
-        var currentFun = Function(fname, argName)
-        functions.add(currentFun)
-        functionLine(willExec, true, currentFun)//) return false
-        functionLines(willExec, true, currentFun, mutableListOf())//) return false
-        if (!isToken("rbracket")) return false
+        functionLine(false/*, false*/)//) return false
+        functionLines(false, mutableListOf()/*, false*/)//) return false
+
+        if (!isToken("rbracket")) {
+            /*if(isToken("return")){
+                nextToken()
+                if(isToken("semi")) {
+                    nextToken()
+                    return true
+                }
+                return false
+            }
+            return false*/
+        }
         nextToken()
         return true
     }
 
-    fun functionLine(willExec: Boolean, read: Boolean, currentFun: Function): MutableList<Command>{
+    fun functionLine(willExec: Boolean/*, called: Boolean*/): MutableList<Command>{
+
         var commands = mutableListOf<Command>()
         if (isToken("for")){
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
-            commands.addAll(fForProduction(willExec, read, currentFun))
+            commands.addAll(fForProduction(willExec))
             return commands
         }
         if (isToken("if")){
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
-            commands.addAll(fIfProduction(willExec, read, currentFun))
+            commands.addAll(fIfProduction(willExec))
             return commands
         }
         if (isToken("let")){
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
             if(!isToken("variable")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
 
             //if(willExec) functions[fname]?.add(currentToken)
             var name = currentToken.lexem
             nextToken()
-            cdeclaration(name, willExec, read, currentFun)
+            cdeclaration(name, willExec)
             if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
             return commands
         }
         if (isToken("box")) {
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
-            commands.add(box(willExec, read, currentFun))
+            commands.add(box(willExec))
             //box(willExec, read, currentFun)
             return commands//box()
         }
         if (isToken("variable")){
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             var name = currentToken.lexem
             nextToken()
-            variableopt(name, willExec, read, currentFun)
-            if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
-            nextToken()
+            variableopt(name, willExec, null)
+            //if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+
+            //nextToken()
             return commands
         }
         if (isToken("line")){
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
-            commands.add(line(willExec, read, currentFun))//line()
+            commands.add(line(willExec))//line()
             return commands//line()
         }
         if (isToken("bend")){
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
-            commands.add(bend(willExec, read, currentFun))
+            commands.add(bend(willExec))
             //bend()
             return commands //bend()
         }
         if (isToken("call")){
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
             nextToken()
             if(!isToken("fname")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+            var fname = currentToken.lexem
             nextToken()
             if(!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
             nextToken()
-            if(!isToken("variable"))throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
-            nextToken()
+            var varVal = number(willExec)
             if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
             nextToken()
+            if(!functions.containsKey(fname)) throw Exception("Function not defined")
+            functions[fname]?.second?.addAll(scanner.markFunPosition())
+            variables[functions[fname]!!.first] = varVal
             if(!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
             nextToken()
+
+            scanner.resetToMark(functions[fname]!!.second[0], functions[fname]!!.second[1], functions[fname]!!.second[2])
+            currentToken=scanner.nextToken()
+            commands.addAll(functionLine(willExec))
+            functionLines(willExec, commands)
+            if (!isToken("rbracket")) {
+                /*if(isToken("return")){
+                    nextToken()
+                    if(isToken("semi")) {
+                        nextToken()
+                        return true
+                    }
+                    return false
+                }*/
+                return commands
+            }
+            nextToken()
+            variables.remove(functions[fname]!!.first)
+            scanner.resetToMark(functions[fname]!!.second[3], functions[fname]!!.second[4], functions[fname]!!.second[5])
+            currentToken=scanner.nextToken()
             return commands
         }
         if (isToken("return")){
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
             if (!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
-            if(willExec && read) currentFun.miniScanner.input.add(currentToken)
+
             nextToken()
             return commands
         }
-        throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+        return commands
 
     }
 
-    fun functionLines(willExec: Boolean, read: Boolean, currentFun: Function, commands: MutableList<Command>): MutableList<Command>{
-        var newcommands = functionLine(willExec, read, currentFun)
+    fun functionLines(willExec: Boolean, commands: MutableList<Command>): MutableList<Command>{
+        var newcommands = functionLine(willExec)
         if(newcommands.isEmpty()) return commands
         else{
             commands.addAll(newcommands)
-            return functionLines(willExec, read, currentFun, commands)
+            return functionLines(willExec, commands)
         }
 
         //return true
@@ -872,7 +928,7 @@ class Parser(
             if(!isToken("variable"))return false
             var name = currentToken.lexem
             nextToken()
-            cdeclaration(name, willExec, false, null)
+            cdeclaration(name, willExec)
             if (!isToken("semi"))return false
             nextToken()
             return true
@@ -881,7 +937,7 @@ class Parser(
         if (isToken("variable")){
             var name = currentToken.lexem
             nextToken()
-            variableopt(name, willExec, false, null)
+            variableopt(name, willExec, city)
             if (!isToken("semi"))return false
             nextToken()
             return true
@@ -890,15 +946,38 @@ class Parser(
         if (isToken("call")){
             nextToken()
             if(!isToken("fname")) return false
+            var fname = currentToken.lexem
             nextToken()
             if(!isToken("lparen")) return false
             nextToken()
-            if(!isToken("variable"))return false
-            nextToken()
+            var varVal = number(willExec)
             if (!isToken("rparen"))return false
             nextToken()
+            if(!functions.containsKey(fname)) throw Exception("Function not defined")
+            functions[fname]?.second?.addAll(scanner.markFunPosition())
+            variables[functions[fname]!!.first] = varVal
             if(!isToken("semi"))return false
             nextToken()
+
+            scanner.resetToMark(functions[fname]!!.second[0], functions[fname]!!.second[1], functions[fname]!!.second[2])
+            currentToken=scanner.nextToken()
+            functionLine(willExec)
+            functionLines(willExec, mutableListOf())
+            if (!isToken("rbracket")) {
+                /*if(isToken("return")){
+                    nextToken()
+                    if(isToken("semi")) {
+                        nextToken()
+                        return true
+                    }
+                    return false
+                }*/
+                return false
+            }
+            nextToken()
+            //variables.remove(functions[fname]!!.first)
+            scanner.resetToMark(functions[fname]!!.second[3], functions[fname]!!.second[4], functions[fname]!!.second[5])
+            currentToken=scanner.nextToken()
             return true
         }
         if(isToken("fun")){
@@ -923,7 +1002,7 @@ class Parser(
             if(!isToken("variable"))return false
             var name = currentToken.lexem
             nextToken()
-            cdeclaration(name, willExec, false, null)
+            cdeclaration(name, willExec)
             if (!isToken("semi"))return false
             nextToken()
             return true
@@ -932,7 +1011,7 @@ class Parser(
         if (isToken("variable")){
             nextToken()
             var name = currentToken.lexem
-            variableopt(name, willExec, false, null)//) return false
+            variableopt(name, willExec, null)//) return false
             if (!isToken("semi"))return false
             nextToken()
             return true
@@ -940,16 +1019,39 @@ class Parser(
 
         if (isToken("call")){
             nextToken()
-            if(!isToken("fname")) return false
+            if(!isToken("fname")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+            var fname = currentToken.lexem
             nextToken()
-            if(!isToken("lparen")) return false
+            if(!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
             nextToken()
-            if(!isToken("variable"))return false
+            var varVal = number(willExec)
+            if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
             nextToken()
-            if (!isToken("rparen"))return false
+            if(!functions.containsKey(fname)) throw Exception("Function not defined")
+            functions[fname]?.second?.addAll(scanner.markFunPosition())
+            variables[functions[fname]!!.first] = varVal
+            if(!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
             nextToken()
-            if(!isToken("semi"))return false
+
+            scanner.resetToMark(functions[fname]!!.second[0], functions[fname]!!.second[1], functions[fname]!!.second[2])
+            currentToken=scanner.nextToken()
+            building.commands.addAll(functionLine(willExec))
+            functionLines(willExec, building.commands)
+            if (!isToken("rbracket")) {
+                /*if(isToken("return")){
+                    nextToken()
+                    if(isToken("semi")) {
+                        nextToken()
+                        return true
+                    }
+                    return false
+                }*/
+                return true
+            }
             nextToken()
+            variables.remove(functions[fname]!!.first)
+            scanner.resetToMark(functions[fname]!!.second[3], functions[fname]!!.second[4], functions[fname]!!.second[5])
+            currentToken=scanner.nextToken()
             return true
         }
         return false
@@ -970,7 +1072,7 @@ class Parser(
             if(!isToken("variable"))return false
             var name = currentToken.lexem
             nextToken()
-            cdeclaration(name, willExec, false, null)
+            cdeclaration(name, willExec)
             if (!isToken("semi"))return false
             nextToken()
             return true
@@ -979,7 +1081,7 @@ class Parser(
         if (isToken("variable")){
             var name = currentToken.lexem
             nextToken()
-            variableopt(name, willExec, false, null) //return false
+            variableopt(name, willExec, null) //return false
             if (!isToken("semi"))return false
             nextToken()
             return true
@@ -987,16 +1089,39 @@ class Parser(
 
         if (isToken("call")){
             nextToken()
-            if(!isToken("fname")) return false
+            if(!isToken("fname")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+            var fname = currentToken.lexem
             nextToken()
-            if(!isToken("lparen")) return false
+            if(!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
             nextToken()
-            if(!isToken("variable"))return false
+            var varVal = number(willExec)
+            if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
             nextToken()
-            if (!isToken("rparen"))return false
+            if(!functions.containsKey(fname)) throw Exception("Function not defined")
+            functions[fname]?.second?.addAll(scanner.markFunPosition())
+            variables[functions[fname]!!.first] = varVal
+            if(!isToken("semi")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
             nextToken()
-            if(!isToken("semi"))return false
+
+            scanner.resetToMark(functions[fname]!!.second[0], functions[fname]!!.second[1], functions[fname]!!.second[2])
+            currentToken=scanner.nextToken()
+            road.commands.addAll(functionLine(willExec))
+            functionLines(willExec, road.commands)
+            if (!isToken("rbracket")) {
+                /*if(isToken("return")){
+                    nextToken()
+                    if(isToken("semi")) {
+                        nextToken()
+                        return true
+                    }
+                    return false
+                }*/
+                return true
+            }
             nextToken()
+            variables.remove(functions[fname]!!.first)
+            scanner.resetToMark(functions[fname]!!.second[3], functions[fname]!!.second[4], functions[fname]!!.second[5])
+            currentToken=scanner.nextToken()
             return true
         }
         return false
@@ -1006,12 +1131,14 @@ class Parser(
     fun buildingCommand(building: Building, willExec: Boolean): Boolean{
         if (isToken("box")){
             nextToken()
-            building.commands.add(box(willExec, false, null))
+            if(willExec) building.commands.add(box(willExec))
+            else box(willExec)
             return true
         }
         if (isToken("line")){
             nextToken()
-            building.commands.add(line(willExec, false, null))
+            if(willExec) building.commands.add(line(willExec))
+            else line(willExec)
             return true
         }
         return bCodeLine(building, willExec)
@@ -1025,12 +1152,12 @@ class Parser(
     fun roadCommand(road: Road, willExec: Boolean): Boolean{
         if (isToken("bend")){
             nextToken()
-            road.commands.add(bend(willExec, false, null))
+            road.commands.add(bend(willExec))
             return true
         }
         if (isToken("line")){
             nextToken()
-            road.commands.add(line(willExec, false, null))
+            road.commands.add(line(willExec))
             return true
         }
         return rCodeLine(road, willExec)
@@ -1085,7 +1212,7 @@ class Parser(
         nextToken()
         if (!isToken("lparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
         nextToken()
-        var point = point(willExec, false, null)
+        var point = point(willExec)
         //if(!point()) return false
         if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
         nextToken()
@@ -1167,6 +1294,8 @@ class Parser(
         //if (!city())return false
         if (!isToken("rbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
         nextToken()
+        //highlightFeaturesInCircles(city, neighVars)
+        //functions.forEach(){ it -> println(it) }
         return city
     }
 
@@ -1181,6 +1310,64 @@ class Parser(
         if (scanner.eof() && !isToken("rparen")) return value
         else throw Exception("Unexpected token ${currentToken.tokenMap[currentToken.token]} at ${currentToken.column} ${currentToken.row}  lex val ${currentToken.lexem}")
     }
+
+
+
+    fun highlightFeaturesInCircles(city: City, circle: Circle) {
+        for (block in city.blocks) {
+            when (block) {
+                is Building -> block.commands.forEach { highlightCommand(it, circle) }
+                is Road     -> block.commands.forEach { highlightCommand(it, circle) }
+                is Store    -> block.building.commands.forEach { highlightCommand(it, circle) }
+                is User     -> highlightPoint(block.point, circle)
+            }
+        }
+    }
+
+    fun highlightCommand(cmd: Command, circle: Circle) {
+        when (cmd) {
+            is Line -> {
+                highlightPoint(cmd.pointA, circle)
+                highlightPoint(cmd.pointB, circle)
+                if(cmd.pointA.highlighted && cmd.pointB.highlighted) cmd.highlighted = true
+            }
+            is Box -> {
+                var highlight = true
+                cmd.points.forEach { highlightPoint(it, circle)
+                if(!it.highlighted) highlight = false
+                }
+                if (highlight) cmd.highlighted=true
+
+            }
+            is Bend -> {
+                var highlight = true
+                cmd.points.forEach { highlightPoint(it, circle)
+                    if(!it.highlighted) highlight = false
+                }
+                if (highlight) cmd.highlighted=true
+            }
+            is Circle -> {
+                var highlight = true
+                cmd.calculateCircle().forEach { highlightPoint(it, circle)
+                    if(!it.highlighted) highlight = false
+                }
+                if (highlight) cmd.highlighted=true
+            }
+        }
+    }
+
+
+    fun highlightPoint(point: Point, circle: Circle) {
+            val dx = point.x - circle.center.x
+            val dy = point.y - circle.center.y
+            val distance = Math.sqrt(dx * dx + dy * dy)
+            if (distance <= circle.radius) {
+                point.highlighted = true
+                return
+            }
+
+    }
+
 
 
 }

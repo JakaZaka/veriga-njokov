@@ -4,6 +4,7 @@ import java.io.PushbackReader
 import java.io.StringReader
 
 
+
 class Scanner(private val input: File) {
     private val content = input.readText()
     private var reader = PushbackReader(FileReader(input))
@@ -388,7 +389,7 @@ class Scanner(private val input: File) {
 
 
 
-    fun resetToMark(){
+    fun resetToMark(markCharsRead: Int, markRow: Int, markColumn: Int) {
             val remaining = content.substring(markCharsRead)
             reader = PushbackReader(StringReader(remaining))
             charsRead = markCharsRead
@@ -396,6 +397,14 @@ class Scanner(private val input: File) {
             column = markColumn
             lastToken = null
 
+    }
+
+    fun markFunPosition(): MutableList<Int>{
+        var list: MutableList<Int> = mutableListOf()
+        list.add(charsRead)
+        list.add(row)
+        list.add(column)
+        return list
     }
 
     fun nextTokenImp(): Token {
@@ -430,11 +439,3 @@ class Scanner(private val input: File) {
 
 }
 
-class MiniScanner(var input: MutableList<Token>){
-    var current = 0
-    fun nextToken(): Token{
-        var token = input[current]
-        current++
-        return token
-    }
-}
