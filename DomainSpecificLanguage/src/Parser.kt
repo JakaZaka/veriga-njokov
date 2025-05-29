@@ -446,8 +446,8 @@ class Parser(
             //return true
         }
         else{
-            if(willExec) variables[name]=expr()
-            else expr()
+            variables[name]=expr()
+            //expr()
             //if(!expr()) return false
             /*if (!isToken("semi")) return false
             nextToken()*/
@@ -637,7 +637,7 @@ class Parser(
         nextToken()
         declaration(name, willExec)
         val start = variables[name] ?: throw Exception("Variable does not exist")
-        println(start)
+        //println(start)
         if (!isToken("to")) return false
         nextToken()
         if (!isToken("int")) return false
@@ -682,6 +682,7 @@ class Parser(
         if (!isToken("lbracket")) return false
         nextToken()
         for (i in start.toInt() .. end) {
+            variables[name]=i.toDouble()
             scanner.resetToMark(list[0], list[1], list[2])
             currentToken = scanner.nextToken()
             while (!isToken("rbracket") && !scanner.eof()){
@@ -714,6 +715,7 @@ class Parser(
         if (!isToken("lbracket")) return false
         nextToken()
         for (i in start.toInt() .. end) {
+            variables[name]=i.toDouble()
             scanner.resetToMark(list[0], list[1], list[2])
             currentToken = scanner.nextToken()
             while (!isToken("rbracket") && !scanner.eof()){
@@ -734,6 +736,24 @@ class Parser(
         var name = currentToken.lexem
         nextToken()
         declaration(name, willExec)
+        if(!willExec){
+            if (!isToken("to")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+            nextToken()
+            if (!isToken("int")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+            nextToken()
+            if (!isToken("rparen")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+            nextToken()
+
+            if (!isToken("lbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+            nextToken()
+            var commands = mutableListOf<Command>()
+            commands.addAll(functionLine(false))
+            functionLines(false, commands)
+
+            if (!isToken("rbracket")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
+            nextToken()
+            return commands
+        }
         val start = variables[name] ?: throw Exception("Variable does not exist")
         if (!isToken("to")) throw Exception("Unexpected token: ${currentToken.tokenMap[currentToken.token]}")
         nextToken()
@@ -747,6 +767,7 @@ class Parser(
         nextToken()
         var commands = mutableListOf<Command>()
         for (i in start.toInt() .. end) {
+            variables[name]=i.toDouble()
             scanner.resetToMark(list[0], list[1], list[2])
             currentToken = scanner.nextToken()
             while (!isToken("rbracket") && !scanner.eof()){
