@@ -5,7 +5,7 @@ const outfitSchema = mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
     },
     name: {
       type: String,
@@ -41,6 +41,11 @@ const outfitSchema = mongoose.Schema(
     imageUrl: {
       type: String,
     },
+        images: [
+      {
+        type: String, // store image URLs (e.g., "/images/filename.jpg")
+      }
+    ],
   },
   { timestamps: true }
 );

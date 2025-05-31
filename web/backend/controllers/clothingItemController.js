@@ -56,7 +56,7 @@ const createClothingItem = async (req, res) => {
       size: req.body.size,
       imageUrl: "/images/"+req.file.filename,
       notes: req.body.notes,
-      //user: req.user._id,
+      user: req.user ? req.user._id : undefined,
     });
 
     const createdClothingItem = await clothingItem.save();

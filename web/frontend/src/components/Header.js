@@ -7,7 +7,7 @@ function Header(props) {
         <header className="main-header">
   <div className="header-container">
     <h1 className="logo">{props.title}</h1>
-    <nav>
+    {/*<nav>
       <ul className="nav-links">
         <li><Link to="/">Home</Link></li>
          <UserContext.Consumer>
@@ -31,7 +31,7 @@ function Header(props) {
           }
         </UserContext.Consumer>
       </ul>
-    </nav>
+    </nav>*/}
   </div>
 </header>
     );
