@@ -20,7 +20,7 @@ function AddClothingItem(props) {
 
     useEffect(() => {
         async function fetchEnums() {
-            const res = await fetch('http://localhost:8000/enums/clothing', {
+            const res = await fetch('/api/enums/clothing', {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -70,7 +70,7 @@ function AddClothingItem(props) {
         formData.append('image', file);
         formData.append('notes', notes);
 
-        const res = await fetch('http://localhost:8000/clothing', {
+        const res = await fetch('/api/clothing', {
             method: 'POST',
             credentials: 'include',
             body: formData
