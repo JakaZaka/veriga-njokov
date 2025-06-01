@@ -20,7 +20,7 @@ function ClothingItem(props){
         <div className="clothingItem-card" onClick={handleClick} style={{ cursor: 'pointer' }}>
           <img
             className="clothingItem-card-img"
-            src={`http://localhost:8000/${props.clothingItem.imageUrl}`}
+            src={`${props.clothingItem.imageUrl}`}
             alt={props.clothingItem.name}
             style={{ width: '150px', height: '150px', objectFit: 'cover' }}
           />

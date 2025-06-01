@@ -45,13 +45,13 @@ const locationRoutes = require('./routes/locationRoutes');
 
 // API routes
 app.use('/api/users', userRoutes);
-app.use('/clothing', clothingItemRoutes);
+app.use('/api/clothing', clothingItemRoutes);
 app.use('/api/outfits', outfitRoutes);
 app.use('/api/weather', weatherRoutes);
 
-app.use('/stores', clothingStoreRoutes); 
-app.use('/enums', enumRoutes); 
-app.use('/locations', locationRoutes);
+app.use('/api/stores', clothingStoreRoutes); 
+app.use('/api/enums', enumRoutes); 
+app.use('/api/locations', locationRoutes);
 /* Start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
