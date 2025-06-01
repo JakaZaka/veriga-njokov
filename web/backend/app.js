@@ -41,14 +41,16 @@ const weatherRoutes = require('./routes/weatherRoutes');
 const clothingStoreRoutes = require('./routes/clothingStoreRoutes'); // Add this line
 const enumRoutes = require('./routes/enumRoutes'); // Add this line
 const locationRoutes = require('./routes/locationRoutes'); 
+const adminRoutes = require('./routes/adminRoutes');
 
+// Register routes
+app.use('/api/admin', adminRoutes);
 
 // API routes
 app.use('/api/users', userRoutes);
 app.use('/api/clothing', clothingItemRoutes);
 app.use('/api/outfits', outfitRoutes);
 app.use('/api/weather', weatherRoutes);
-
 app.use('/api/stores', clothingStoreRoutes); 
 app.use('/api/enums', enumRoutes); 
 app.use('/api/locations', locationRoutes);

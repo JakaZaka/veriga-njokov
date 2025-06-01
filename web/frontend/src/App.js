@@ -12,6 +12,7 @@ import ClothingItemInfo from "./components/ClothingItemInfo";
 import AddClothingStore from "./components/AddClothingStore";
 import AddClothingStoreLocation from "./components/AddClothingStoreLocation";
 import ClothingStores from "./components/ClothingStores";
+import AdminDashboard from "./components/AdminDashboard";
 import { useState } from 'react';
 //import './style.css';
 
@@ -38,6 +39,11 @@ function App() {
             <Route path="/addClothingStore" element={<AddClothingStore />}></Route>
             <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />}></Route>
             <Route path="/stores" element={<ClothingStores />}></Route>
+            <Route path="/admin" element={<AdminDashboard />}></Route>
+            <Route path="/login" element={<Login />}></Route>
+            <Route path="/register" element={<Register />}></Route>
+            <Route path="/profile" element={<Profile />}></Route>
+            <Route path="/logout" element={<Logout />}></Route>
           </Routes>
         </div>
       </UserContext.Provider>
