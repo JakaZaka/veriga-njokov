@@ -9,10 +9,16 @@ services:
     environment:
       - MONGO_URI=mongodb+srv://closy:naj@veriganjokov.tiar0wm.mongodb.net/?retryWrites=true&w=majority&appName=VerigaNjokov
       - JWT_SECRET=your_jwt_secret
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-  
+    depends_on:
+      - mongo
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - node_modules/
+
   frontend:
     build: ./frontend
     ports:
@@ -22,6 +28,20 @@ services:
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
