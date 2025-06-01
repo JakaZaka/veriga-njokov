@@ -24,11 +24,19 @@ dependencies {
     implementation("org.jsoup:jsoup:1.16.1")
     implementation("org.json:json:20231013")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Selenium dependencies
+    implementation("org.seleniumhq.selenium:selenium-java:4.15.0")
+    implementation("org.seleniumhq.selenium:selenium-edge-driver:4.15.0")
+    implementation("org.seleniumhq.selenium:selenium-support:4.15.0")
+    
+    // WebDriverManager za avtomatsko upravljanje driverjev
+    implementation("io.github.bonigarcia:webdrivermanager:5.6.2")
 }
 
 compose.desktop {
     application {
-        mainClass = "MainScraperKt"
+        mainClass = "MainKt" // Spremeni iz "MainScraperKt" v "MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

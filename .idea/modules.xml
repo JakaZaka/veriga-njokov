@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/clothsy.iml" filepath="$PROJECT_DIR$/.idea/clothsy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/veriga-njokov.iml" filepath="$PROJECT_DIR$/veriga-njokov.iml" />
     </modules>
   </component>
 </project>
