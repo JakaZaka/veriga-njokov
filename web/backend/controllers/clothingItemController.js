@@ -5,7 +5,6 @@ const ClothingItem = require('../models/ClothingItem');
 // @route   GET /api/clothing
 // @access  Private
 const getClothingItems = async (req, res) => {
-  try {
     //const filter = { user: req.user._id };
     
     // Handle query parameters for filtering
@@ -13,9 +12,13 @@ const getClothingItems = async (req, res) => {
     //if (req.query.favorite === 'true') filter.favorite = true;
     //if (req.query.status) filter.status = req.query.status;
     
-    const clothingItems = await ClothingItem.find(/*filter*/).populate('user', 'username')
-    var data = [];
-    data.clothingItems = clothingItems;
+  try {
+    let filter = {};
+    // If ?mine=true is passed, filter by logged-in user
+    if (req.query.mine === 'true' && req.user && req.user._id) {
+      filter.user = req.user._id;
+    }
+    const clothingItems = await ClothingItem.find(filter).populate('user', 'username _id');
     res.json(clothingItems);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -47,6 +50,10 @@ const getClothingItemById = async (req, res) => {
 // @access  Private
 const createClothingItem = async (req, res) => {
   try {
+    const userId = req.user && req.user._id
+      ? req.user._id
+      : req.body.user;
+
     const clothingItem = new ClothingItem({
       name: req.body.name,
       category: req.body.category,
@@ -54,9 +61,9 @@ const createClothingItem = async (req, res) => {
       season: req.body.season,
       color: req.body.color,
       size: req.body.size,
-      imageUrl: "/images/"+req.file.filename,
+      imageUrl: "/images/" + req.file.filename,
       notes: req.body.notes,
-      user: req.user ? req.user._id : undefined,
+      user: userId, 
     });
 
     const createdClothingItem = await clothingItem.save();
