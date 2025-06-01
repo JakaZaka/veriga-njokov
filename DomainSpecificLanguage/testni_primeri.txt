@@ -1,0 +1,80 @@
+city "TestCity1" {
+    building {
+        box ((0, 0), (10, 10));
+    };
+}
+
+city "TestCity2" {
+    road "MainRoad" {
+        line ((1, 1), (5, 5));
+        bend ((5, 5), (10, 10), 45);
+    };
+}
+
+city "TestCity3" {
+    store "ClothesShop" {
+        building {
+            box ((2, 2), (4, 4));
+            line ((2, 2), (4, 4));
+        };
+    };
+}
+
+city "TestCity4" {
+    user "Alice" {
+        coordinates (7.5, 3.2);
+    };
+}
+
+city "TestCity5" {
+    let a = 1.2;
+    let b = (a + 3, 4 * 2);
+    road "ExprRoad" {
+        box (b, (5, 5));
+    };
+}
+
+city "TestCity6" {
+    building {
+        if x > 0 {
+            line ((0, 0), (0, x));
+        } else {
+            box ((x, x), (x+1, x+1));
+        }
+    };
+}
+
+city "TestCity7" {
+    building {
+        for (i = 0 to 3) {
+            box ((i, i), (i+1, i+2));
+        }
+    };
+}
+
+city "TestCity8" {
+    fun fname(p) {
+        line ((0, 0), p);
+        if p == 0 {
+            return
+        } else {
+            call fname(p-1);
+        }
+    };
+}
+
+city "TestCity9" {
+    let region = neigh(((4, 4), 3));
+    region.highlight();
+}
+
+city "TestCity10" {
+    fun process(p) {
+        for (i = 1 to 3) {
+            for (j = 0 to i) {
+                box ((i, j), (i+1, j+1));
+            }
+        }
+        return
+    };
+}
