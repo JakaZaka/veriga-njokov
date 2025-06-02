@@ -1,28 +1,161 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../userContext';
+import { Navigate } from 'react-router-dom';
 
 function AdminDashboard() {
   const userContext = useContext(UserContext);
   const [activeTab, setActiveTab] = useState('users');
-  
-  // Mock data za demo
-  const [users] = useState([
-    { _id: '1', username: 'testuser', email: 'test@example.com', role: 'user', createdAt: '2024-01-15' },
-    { _id: '2', username: 'admin', email: 'admin@closy.com', role: 'admin', createdAt: '2024-01-10' }
-  ]);
+  const [users, setUsers] = useState([]);
+  const [settings, setSettings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  // Začasno odstranimo auth check za demo
-  // if (!userContext.user || userContext.user.role !== 'admin') {
-  //   return <Navigate replace to="/" />;
-  // }
+  // Preveri, ali je trenutni uporabnik admin
+  if (!userContext.user || userContext.user.role !== 'admin') {
+    return <Navigate replace to="/" />;
+  }
+
+  // Pridobi seznam uporabnikov
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (activeTab === 'users') {
+        try {
+          setLoading(true);
+          const response = await fetch('/api/admin/users', {
+            headers: {
+              'Authorization': `Bearer ${userContext.user.token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`API napaka: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setUsers(data);
+          setError(null);
+        } catch (err) {
+          console.error('Napaka pri pridobivanju uporabnikov:', err);
+          setError('Napaka pri pridobivanju uporabnikov. Poskusite ponovno.');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUsers();
+  }, [activeTab, userContext.user.token]);
+
+  // Pridobi sistemske nastavitve
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (activeTab === 'settings') {
+        try {
+          setLoading(true);
+          const response = await fetch('/api/admin/settings', {
+            headers: {
+              'Authorization': `Bearer ${userContext.user.token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`API napaka: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setSettings(data);
+          setError(null);
+        } catch (err) {
+          console.error('Napaka pri pridobivanju nastavitev:', err);
+          setError('Napaka pri pridobivanju nastavitev. Poskusite ponovno.');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchSettings();
+  }, [activeTab, userContext.user.token]);
+
+  // Brisanje uporabnika
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Ali res želite izbrisati tega uporabnika?')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${userContext.user.token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Napaka pri brisanju: ${response.status}`);
+      }
+
+      setUsers(users.filter(user => user._id !== userId));
+      setSuccess('Uporabnik uspešno izbrisan.');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Napaka pri brisanju uporabnika:', err);
+      setError('Napaka pri brisanju uporabnika. Poskusite ponovno.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Sprememba vloge uporabnika
+  const handleToggleRole = async (userId, currentRole) => {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/admin/users/${userId}/role`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userContext.user.token}`
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Napaka pri spremembi vloge: ${response.status}`);
+      }
+
+      // Posodobi seznam uporabnikov
+      setUsers(users.map(user => 
+        user._id === userId ? { ...user, role: newRole } : user
+      ));
+      setSuccess(`Vloga uporabnika spremenjena v "${newRole}".`);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Napaka pri spremembi vloge:', err);
+      setError('Napaka pri spremembi vloge. Poskusite ponovno.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container mt-4">
-      <div className="alert alert-info" role="alert">
-        <strong>Demo Mode:</strong> Admin dashboard preview
-      </div>
-      
       <h2>Admin Dashboard</h2>
+      
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
+      
+      {success && (
+        <div className="alert alert-success" role="alert">
+          {success}
+        </div>
+      )}
       
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
@@ -43,7 +176,15 @@ function AdminDashboard() {
         </li>
       </ul>
 
-      {activeTab === 'users' && (
+      {loading && (
+        <div className="text-center my-4">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'users' && !loading && (
         <div>
           <h3>User Management</h3>
           <div className="table-responsive">
@@ -63,10 +204,18 @@ function AdminDashboard() {
                     <td>{user.email}</td>
                     <td>{user.role}</td>
                     <td>
-                      <button className="btn btn-sm btn-outline-primary me-1">
-                        Edit
+                      <button 
+                        className="btn btn-sm btn-outline-primary me-1"
+                        onClick={() => handleToggleRole(user._id, user.role)}
+                        disabled={user._id === userContext.user._id}
+                      >
+                        Toggle Role
                       </button>
-                      <button className="btn btn-sm btn-outline-danger">
+                      <button 
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDeleteUser(user._id)}
+                        disabled={user._id === userContext.user._id}
+                      >
                         Delete
                       </button>
                     </td>
@@ -78,10 +227,31 @@ function AdminDashboard() {
         </div>
       )}
 
-      {activeTab === 'settings' && (
+      {activeTab === 'settings' && !loading && (
         <div>
           <h3>System Settings</h3>
-          <p>Settings management interface would be here.</p>
+          <div className="table-responsive">
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                </tr>
+              </thead>
+              <tbody>
+                {settings.map(setting => (
+                  <tr key={setting.key}>
+                    <td>{setting.key}</td>
+                    <td>{setting.value}</td>
+                    <td>{setting.description}</td>
+                    <td>{setting.category}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

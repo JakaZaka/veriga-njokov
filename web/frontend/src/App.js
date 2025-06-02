@@ -17,7 +17,6 @@ import { UserContext } from './userContext';
 import OutfitList from './components/OutfitList';
 import ExploreClothingItems from './components/ExploreClothingItems';
 import AdminDashboard from "./components/AdminDashboard";
-import { useState } from 'react';
 
 function App() {
   const [user, setUser] = useState(localStorage.user ? JSON.parse(localStorage.user) : null);
