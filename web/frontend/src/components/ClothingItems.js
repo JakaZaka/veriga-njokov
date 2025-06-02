@@ -2,47 +2,35 @@ import { useState, useEffect } from 'react';
 import ClothingItem from './ClothingItem';
 import { useLocation } from 'react-router-dom';
 
-function Clothes(){
+function ClothingItems() {
     const location = useLocation();
     const [clothes, setClothes] = useState([]);
 
-    const getClothes = async function() {
-       
-        
-        const res = await fetch('/api/clothing', {
-            method: 'GET',
-            credentials: 'include'
-        });
-        const data = await res.json();
-        setClothes(data);
-    };
-
-    
     useEffect(() => {
+        async function getClothes() {
+            const res = await fetch('/api/clothing?mine=true', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            const data = await res.json();
+            setClothes(data);
+        }
         getClothes();
 
-        
-        const interval = setInterval(() => {
-            getClothes();
-        }, 1000 * 60 * 5);  
-
-        
+        const interval = setInterval(getClothes, 1000 * 60 * 5);
         return () => clearInterval(interval);
     }, [location.pathname]);
 
-    function handleDelete(id) {
-        setClothes(prev => prev.filter(clothingItem => clothingItem._id !== id));
-    }
-
-    return(
+    return (
         <div>
-            <h3>Clothes:</h3>
-            
-            <ul>
-                <div className='clothes-grid'>{clothes.map(clothingItem=>(<ClothingItem clothingItem={clothingItem} key={clothingItem._id} onDelete={handleDelete}></ClothingItem>))}</div>
-            </ul>
+            <h3>Your Clothes:</h3>
+            <div className='clothes-grid'>
+                {clothes.map(clothingItem => (
+                    <ClothingItem clothingItem={clothingItem} key={clothingItem._id} />
+                ))}
+            </div>
         </div>
     );
 }
 
-export default Clothes;
+export default ClothingItems;

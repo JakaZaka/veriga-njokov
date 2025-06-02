@@ -9,22 +9,16 @@ connectDB();
 const app = express();
 
 var cors = require('cors');
-var allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
 app.use(cors({
   credentials: true,
-  origin: function(origin, callback){
-    // Allow requests with no origin (mobile apps, curl)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin)===-1){
-      var msg = "The CORS policy does not allow access from the specified Origin.";
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  }
+  origin: true // Allow all origins *POPRAVI KASNEJE
 }));
 
+
 // Middleware
-app.use(express.json());
+app.use(express.json({limit: '100mb'})); 
 
 // Basic route for testing
 app.get('/', (req, res) => {

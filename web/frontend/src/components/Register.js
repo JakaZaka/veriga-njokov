@@ -11,7 +11,7 @@ function Register() {
     async function handleRegister(e) {
         e.preventDefault();
 
-        const res = await fetch("/api/users/register", {
+        const res = await fetch("/api/users", {
             method: 'POST',
             credentials: 'include',
             headers: { 
