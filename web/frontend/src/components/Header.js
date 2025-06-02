@@ -16,12 +16,14 @@ function Header(props) {
                             <>
                                 <li><Link to="/addClothingItem">Add Item</Link></li>
                                 {userContext.user.role === 'admin' && (
-                                    <li><Link to="/admin">Admin</Link></li>
+                                    <>
+                                        <li><Link to="/admin">Admin</Link></li>
+                                        <li><Link to="/addClothingStore">Add Store</Link></li>
+                                        <li><Link to="/addClothingStoreLocation">Add Store Location</Link></li>
+                                    </>
                                 )}
                                 <li><Link to="/profile">Profile</Link></li>
                                 <li><Link to="/logout">Logout</Link></li>
-                                <li><Link to="/addClothingStore">Add Store</Link></li>
-                                <li><Link to="/addClothingStoreLocation">Add store location</Link></li>
                                 <li><Link to="/stores">Stores</Link></li>
                             </>
                         ) : (
