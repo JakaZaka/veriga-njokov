@@ -16,6 +16,8 @@ import AddClothingStoreLocation from './components/AddClothingStoreLocation';
 import { UserContext } from './userContext';
 import OutfitList from './components/OutfitList';
 import ExploreClothingItems from './components/ExploreClothingItems';
+import AdminDashboard from "./components/AdminDashboard";
+import { useState } from 'react';
 
 function App() {
   const [user, setUser] = useState(localStorage.user ? JSON.parse(localStorage.user) : null);
@@ -63,22 +65,23 @@ function App() {
               </>
             )}
           </nav>
-          <Routes>
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/logout" element={<Logout />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/" element={<ClothingItems />} />
-            <Route path="/explore" element={<ExploreClothingItems />} />
-            <Route path="/addClothingItem" element={<AddClothingItem />} />
-            <Route path="/clothingItem/:id" element={<ClothingItemInfo />} />
-            <Route path="/addOutfit" element={<AddOutfit />} />
-            <Route path="/outfits" element={<OutfitList />} />
-            <Route path="/outfit/:id" element={<OutfitInfo />} />
-            <Route path="/stores" element={<ClothingStores />} />
-            <Route path="/addClothingStore" element={<AddClothingStore />} />
-            <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />} />
-          </Routes>
+            <Routes>
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/logout" element={<Logout />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/" element={<ClothingItems />} />
+              <Route path="/explore" element={<ExploreClothingItems />} />
+              <Route path="/addClothingItem" element={<AddClothingItem />} />
+              <Route path="/clothingItem/:id" element={<ClothingItemInfo />} />
+              <Route path="/addOutfit" element={<AddOutfit />} />
+              <Route path="/outfits" element={<OutfitList />} />
+              <Route path="/outfit/:id" element={<OutfitInfo />} />
+              <Route path="/stores" element={<ClothingStores />} />
+              <Route path="/addClothingStore" element={<AddClothingStore />} />
+              <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Routes>
         </div>
       </UserContext.Provider>
     </Router>
