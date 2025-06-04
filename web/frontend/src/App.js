@@ -17,6 +17,8 @@ import { UserContext } from './userContext';
 import OutfitList from './components/OutfitList';
 import ExploreClothingItems from './components/ExploreClothingItems';
 import WeatherTab from './components/WeatherTab';
+import AdminDashboard from "./components/AdminDashboard";
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function App() {
   const [user, setUser] = useState(localStorage.user ? JSON.parse(localStorage.user) : null);
@@ -62,7 +64,26 @@ function App() {
             <Route path="/addClothingStore" element={<AddClothingStore />} />
             <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />} />
             <Route path="/weather" element={<WeatherTab />} />
+            <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
+          <nav>
+            <Link to="/">Home</Link> |{' '}
+            <Link to="/explore">Explore</Link> |{' '}
+            <Link to="/register">Register</Link> |{' '}
+            <Link to="/login">Login</Link> |{' '}
+            <Link to="/outfits">Outfits</Link> |{' '}
+            {user && (
+              <>
+                <Link to="/logout">Logout</Link> |{' '}
+                <Link to="/profile">Profile</Link> |{' '}
+                <Link to="/addClothingItem">Add Item</Link> |{' '}
+                <Link to="/addClothingStore">Add Store</Link> |{' '}
+                <Link to="/addClothingStoreLocation">Add Store location</Link> |{' '}
+                <Link to="/stores">Stores</Link> |{' '}
+                <Link to="/addOutfit">Add Outfit</Link>
+              </>
+            )}
+          </nav>
         </div>
       </UserContext.Provider>
     </Router>

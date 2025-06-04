@@ -20,6 +20,8 @@ function Profile() {
         address: "",
     });
     const fileInputRef = useRef();
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     useEffect(function () {
         const getProfile = async function () {
@@ -50,29 +52,38 @@ function Profile() {
         return <Navigate replace to="/login" />;
     }
 
-    if (loading) return <div>Loading...</div>;
-
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
-        setAvatarFile(file);
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatarPreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+        
+        // Simple validation for file size (2MB max)
+        if (file.size > 2 * 1024 * 1024) {
+            setError("Image is too large. Maximum size is 2MB.");
+            return;
         }
+        
+        setAvatarFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setAvatarPreview(reader.result);
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleAvatarUpload = async (e) => {
         e.preventDefault();
         if (!avatarFile) return;
+        
         setSaving(true);
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-            const base64Avatar = reader.result;
-            const token = localStorage.getItem('token');
-            try {
+        setError("");
+        setSuccess("");
+        
+        try {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64Avatar = reader.result;
+                const token = localStorage.getItem('token');
+                
                 const res = await fetch("/api/users/profile", {
                     method: "PUT",
                     credentials: "include",
@@ -82,22 +93,25 @@ function Profile() {
                     },
                     body: JSON.stringify({ avatar: base64Avatar }),
                 });
+                
                 if (!res.ok) {
                     const err = await res.json();
-                    alert(err.message || "Failed to update avatar.");
-                    setSaving(false);
-                    return;
+                    throw new Error(err.message || "Failed to update avatar");
                 }
+                
                 const data = await res.json();
                 setProfile(data);
                 setAvatarPreview(data.avatar || null);
                 userContext.setUserContext(data);
-            } catch (err) {
-                alert("Network or server error.");
-            }
+                setSuccess("Profile picture updated successfully!");
+                setAvatarFile(null);
+            };
+            reader.readAsDataURL(avatarFile);
+        } catch (err) {
+            setError(err.message || "Failed to update profile picture");
+        } finally {
             setSaving(false);
-        };
-        reader.readAsDataURL(avatarFile);
+        }
     };
 
     const handleEditChange = (e) => {
@@ -108,8 +122,11 @@ function Profile() {
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
-        const token = localStorage.getItem('token');
+        setError("");
+        setSuccess("");
+        
         try {
+            const token = localStorage.getItem('token');
             const res = await fetch("/api/users/profile", {
                 method: "PUT",
                 credentials: "include",
@@ -128,12 +145,12 @@ function Profile() {
                     address: form.address,
                 }),
             });
+            
             if (!res.ok) {
                 const err = await res.json();
-                alert(err.message || "Failed to update profile.");
-                setSaving(false);
-                return;
+                throw new Error(err.message || "Failed to update profile");
             }
+            
             const data = await res.json();
             setProfile(data);
             setForm({
@@ -146,10 +163,12 @@ function Profile() {
             });
             userContext.setUserContext(data);
             setEditing(false);
+            setSuccess("Profile updated successfully!");
         } catch (err) {
-            alert("Network or server error.");
+            setError(err.message || "Failed to update profile");
+        } finally {
+            setSaving(false);
         }
-        setSaving(false);
     };
 
     return (
