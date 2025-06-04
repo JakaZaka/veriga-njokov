@@ -16,6 +16,7 @@ import AddClothingStoreLocation from './components/AddClothingStoreLocation';
 import { UserContext } from './userContext';
 import OutfitList from './components/OutfitList';
 import ExploreClothingItems from './components/ExploreClothingItems';
+import WeatherTab from './components/WeatherTab';
 import AdminDashboard from "./components/AdminDashboard";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -47,6 +48,24 @@ function App() {
       <UserContext.Provider value={{ user, setUserContext: updateUserData }}>
         <div className="App">
           <Header title="Closy" />
+          <Routes>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/" element={<ClothingItems />} />
+            <Route path="/explore" element={<ExploreClothingItems />} />
+            <Route path="/addClothingItem" element={<AddClothingItem />} />
+            <Route path="/clothingItem/:id" element={<ClothingItemInfo />} />
+            <Route path="/addOutfit" element={<AddOutfit />} />
+            <Route path="/outfits" element={<OutfitList />} />
+            <Route path="/outfit/:id" element={<OutfitInfo />} />
+            <Route path="/stores" element={<ClothingStores />} />
+            <Route path="/addClothingStore" element={<AddClothingStore />} />
+            <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />} />
+            <Route path="/weather" element={<WeatherTab />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Routes>
           <nav>
             <Link to="/">Home</Link> |{' '}
             <Link to="/explore">Explore</Link> |{' '}
@@ -65,23 +84,6 @@ function App() {
               </>
             )}
           </nav>
-            <Routes>
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/logout" element={<Logout />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/" element={<ClothingItems />} />
-              <Route path="/explore" element={<ExploreClothingItems />} />
-              <Route path="/addClothingItem" element={<AddClothingItem />} />
-              <Route path="/clothingItem/:id" element={<ClothingItemInfo />} />
-              <Route path="/addOutfit" element={<AddOutfit />} />
-              <Route path="/outfits" element={<OutfitList />} />
-              <Route path="/outfit/:id" element={<OutfitInfo />} />
-              <Route path="/stores" element={<ClothingStores />} />
-              <Route path="/addClothingStore" element={<AddClothingStore />} />
-              <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-            </Routes>
         </div>
       </UserContext.Provider>
     </Router>

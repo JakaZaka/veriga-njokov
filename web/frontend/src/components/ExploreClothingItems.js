@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import ClothingItem from './ClothingItem';
 import { useLocation } from 'react-router-dom';
 import { UserContext } from '../userContext';
+import '../ClothingGrid.css';
 
 function ExploreClothingItems() {
     const location = useLocation();

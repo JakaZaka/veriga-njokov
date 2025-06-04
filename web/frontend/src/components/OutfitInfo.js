@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import '../DetailsCard.css';
 
 function OutfitInfo() {
   const { id } = useParams();
@@ -20,18 +21,17 @@ function OutfitInfo() {
   if (!outfit || outfit.message) return <div>Outfit not found.</div>;
 
   return (
-    <div>
-      <h2>{outfit.name}</h2>
-      <div>
+    <div className="details-card">
+      <div className="details-title">{outfit.name}</div>
+      <div className="details-section">
         <h4>Outfit Images:</h4>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <div className="details-img-list">
           {outfit.images && outfit.images.length > 0 ? (
             outfit.images.map((img, idx) => (
               <img
                 key={idx}
                 src={img.startsWith('/images/') ? img : `/images/${img}`}
                 alt={`Outfit item ${idx + 1}`}
-                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
               />
             ))
           ) : (
@@ -39,13 +39,13 @@ function OutfitInfo() {
           )}
         </div>
       </div>
-      <div>
+      <div className="details-section">
         <h4>Clothing Items in this Outfit:</h4>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <div className="details-items-list">
           {outfit.items && outfit.items.length > 0 ? (
             outfit.items.map((entry, idx) =>
               entry.item ? (
-                <div key={entry.item._id || idx} style={{ textAlign: 'center' }}>
+                <div key={entry.item._id || idx} className="details-item-card">
                   <img
                     src={
                       entry.item.imageUrl?.startsWith('/images/')
@@ -53,7 +53,6 @@ function OutfitInfo() {
                         : `/images/${entry.item.imageUrl}`
                     }
                     alt={entry.item.name}
-                    style={{ width: '80px', height: '80px', objectFit: 'cover' }}
                   />
                   <div>{entry.item.name}</div>
                   <div style={{ fontSize: '0.8em', color: '#666' }}>{entry.position}</div>
@@ -65,10 +64,13 @@ function OutfitInfo() {
           )}
         </div>
       </div>
-      <div style={{ marginTop: '20px' }}>
-        <strong>Season:</strong> {outfit.season && outfit.season.join(', ')}
-        <br />
-        <strong>Occasion:</strong> {outfit.occasion}
+      <div className="details-section">
+        <div className="details-meta">
+          <strong>Season:</strong> {outfit.season && outfit.season.join(', ')}
+        </div>
+        <div className="details-meta">
+          <strong>Occasion:</strong> {outfit.occasion}
+        </div>
       </div>
     </div>
   );

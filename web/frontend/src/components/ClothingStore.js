@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../userContext';
+import '../FormAndStoreCard.css';
+
 
 
 function ClothingStore(props){

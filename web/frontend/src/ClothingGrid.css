@@ -1,0 +1,129 @@
+.clothes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+  padding: 32px 0;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.clothingItem-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: transform 0.18s, box-shadow 0.18s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.clothingItem-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18), 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.clothingItem-card-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+  background: #f7f7f7;
+}
+
+.clothingItem-card-overlay {
+  padding: 18px 12px 12px 12px;
+  width: 100%;
+  text-align: center;
+}
+
+.clothingItem-card-overlay h5 {
+  margin: 6px 0;
+  font-size: 1.08em;
+  color: #1976d2;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.clothingItem-card-overlay p {
+  margin: 2px 0;
+  color: #555;
+  font-size: 0.98em;
+}
+
+.outfits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 32px;
+  padding: 32px 0;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.outfit-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: transform 0.18s, box-shadow 0.18s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 260px;
+}
+
+.outfit-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18), 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.outfit-card-img-frame {
+  width: 100%;
+  aspect-ratio: 1.6/1; /* Wider frame for better layout */
+  background: #f7f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+.outfit-card-img-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 4px;
+  width: 90%;
+  height: 90%;
+  margin: auto;
+}
+
+.outfit-card-img-grid img,
+.outfit-card-img-single {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eee;
+  display: block;
+}
+
+.outfit-card-img-single {
+  width: 90%;
+  height: 90%;
+  margin: auto;
+  border-radius: 12px;
+}
+
+.outfit-card-title {
+  padding: 16px 0 10px 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #1976d2;
+  text-align: center;
+  width: 100%;
+  background: #fafbfc;
+}

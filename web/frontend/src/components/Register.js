@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import '../FormCard.css';
 
 function Register() {
     const [username, setUsername] = useState("");
@@ -43,9 +44,9 @@ function Register() {
     }
 
     return (
-        <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: "80vh" }}>
-            <div className="card shadow-lg p-4 rounded-4" style={{ width: "100%", maxWidth: "400px" }}>
-                <h2 className="text-center mb-4">Register</h2>
+        <div className="form-card-container">
+            <div className="form-card">
+                <h2>Register</h2>
                 {error && (
                     <div className="alert alert-danger" role="alert">
                         {error}
@@ -56,58 +57,58 @@ function Register() {
                         <label htmlFor="email" className="form-label">Email</label>
                         <input 
                             type="email" 
-                            className="form-control" 
-                            id="email" 
-                            placeholder="Enter your email" 
-                            value={email} 
-                            onChange={(e) => setEmail(e.target.value)} 
+                            className="form-control"
+                            id="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             required
                         />
                     </div>
                     <div className="mb-3">
                         <label htmlFor="username" className="form-label">Username</label>
                         <input 
-                            type="text" 
-                            className="form-control" 
-                            id="username" 
-                            placeholder="Choose a username" 
-                            value={username} 
-                            onChange={(e) => setUsername(e.target.value)} 
+                            type="text"
+                            className="form-control"
+                            id="username"
+                            placeholder="Choose a username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             required
                         />
                     </div>
                     <div className="mb-3">
                         <label htmlFor="password" className="form-label">Password</label>
                         <input 
-                            type="password" 
-                            className="form-control" 
-                            id="password" 
-                            placeholder="Create a password" 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)} 
+                            type="password"
+                            className="form-control"
+                            id="password"
+                            placeholder="Create a password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                     </div>
                     <div className="mb-3">
                         <label htmlFor="phoneNumber" className="form-label">Phone Number</label>
                         <input 
-                            type="tel" 
-                            className="form-control" 
-                            id="phoneNumber" 
-                            placeholder="Enter your phone number" 
-                            value={phoneNumber} 
-                            onChange={(e) => setPhoneNumber(e.target.value)} 
+                            type="tel"
+                            className="form-control"
+                            id="phoneNumber"
+                            placeholder="Enter your phone number"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
                         />
                     </div>
                     <div className="mb-3">
                         <label htmlFor="emailAdress" className="form-label">Contact Email</label>
                         <input 
-                            type="email" 
-                            className="form-control" 
-                            id="emailAdress" 
-                            placeholder="Enter your contact email" 
-                            value={emailAdress} 
-                            onChange={(e) => setEmailAdress(e.target.value)} 
+                            type="email"
+                            className="form-control"
+                            id="emailAdress"
+                            placeholder="Enter your contact email"
+                            value={emailAdress}
+                            onChange={(e) => setEmailAdress(e.target.value)}
                         />
                     </div>
                     <button type="submit" className="btn btn-primary w-100">Register</button>

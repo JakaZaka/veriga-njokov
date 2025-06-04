@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { UserContext } from '../userContext';
 import { Navigate } from 'react-router-dom';
+import '../ProfileCard.css';
 
 function Profile() {
     const userContext = useContext(UserContext);
@@ -24,38 +25,27 @@ function Profile() {
 
     useEffect(function () {
         const getProfile = async function () {
-            setError("");
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch("/api/users/profile", {
-                    credentials: "include",
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                });
-                
-                if (!res.ok) {
-                    throw new Error("Failed to fetch profile");
-                }
-                
-                const data = await res.json();
-                setProfile(data);
-                setAvatarPreview(data.avatar || null);
-                setForm({
-                    username: data.username || "",
-                    email: data.email || "",
-                    password: "",
-                    phoneNumber: data.contactInfo?.phoneNumber || "",
-                    emailAddress: data.contactInfo?.emailAddress || "",
-                    address: data.location?.address || "",
-                });
-                userContext.setUserContext(data);
-            } catch (err) {
-                setError("Could not load your profile. Please try again later.");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
+            const token = localStorage.getItem('token');
+            const res = await fetch("/api/users/profile", {
+                credentials: "include",
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+            const data = await res.json();
+            setProfile(data);
+            setAvatarPreview(data.avatar || null);
+            setForm({
+                username: data.username || "",
+                email: data.email || "",
+                password: "",
+                phoneNumber: data.contactInfo?.phoneNumber || "",
+                emailAddress: data.contactInfo?.emailAddress || "",
+                address: data.location?.address || "",
+            });
+            setLoading(false);
+            userContext.setUserContext(data);
         }
         getProfile();
+        // eslint-disable-next-line
     }, []);
 
     if (!userContext.user) {
@@ -182,206 +172,116 @@ function Profile() {
     };
 
     return (
-        <div className="container py-5">
-            {loading ? (
-                <div className="text-center my-5">
-                    <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
+        <div className="profile-card-container">
+            <div className="profile-card">
+                <div className="text-center mb-4">
+                    <img
+                        src={avatarPreview || "https://via.placeholder.com/150"}
+                        alt="User Avatar"
+                        className="profile-avatar-preview"
+                        onClick={() => fileInputRef.current.click()}
+                    />
+                    <form onSubmit={handleAvatarUpload}>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            ref={fileInputRef}
+                            onChange={handleAvatarChange}
+                        />
+                        <button type="submit" className="btn btn-secondary mt-2" disabled={saving || !avatarFile}>
+                            {saving ? "Saving..." : "Save new profile picture"}
+                        </button>
+                    </form>
                 </div>
-            ) : (
-                <div className="row">
-                    {/* Profile sidebar with avatar */}
-                    <div className="col-md-4 mb-4">
-                        <div className="card shadow rounded-4">
-                            <div className="card-body text-center">
-                                <div className="position-relative d-inline-block mb-3">
-                                    <img
-                                        src={avatarPreview || "https://via.placeholder.com/150"}
-                                        alt="User Avatar"
-                                        className="rounded-circle img-thumbnail"
-                                        style={{ width: "150px", height: "150px", objectFit: "cover" }}
-                                        onClick={() => fileInputRef.current.click()}
-                                    />
-                                    <div className="position-absolute bottom-0 end-0">
-                                        <button 
-                                            type="button" 
-                                            className="btn btn-sm btn-primary rounded-circle"
-                                            onClick={() => fileInputRef.current.click()}
-                                        >
-                                            <i className="bi bi-camera-fill"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <h3 className="mb-1">{profile.username}</h3>
-                                <p className="text-muted">
-                                    {profile.role === 'admin' ? (
-                                        <span className="badge bg-danger">Administrator</span>
-                                    ) : (
-                                        <span className="badge bg-primary">User</span>
-                                    )}
-                                </p>
-                                <form onSubmit={handleAvatarUpload} className="mt-3">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        style={{ display: "none" }}
-                                        ref={fileInputRef}
-                                        onChange={handleAvatarChange}
-                                    />
-                                    {avatarFile && (
-                                        <button type="submit" className="btn btn-sm btn-outline-success" disabled={saving}>
-                                            {saving ? "Saving..." : "Save new picture"}
-                                        </button>
-                                    )}
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Profile content */}
-                    <div className="col-md-8">
-                        {error && (
-                            <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                                {error}
-                                <button type="button" className="btn-close" onClick={() => setError("")}></button>
-                            </div>
-                        )}
-                        
-                        {success && (
-                            <div className="alert alert-success alert-dismissible fade show" role="alert">
-                                {success}
-                                <button type="button" className="btn-close" onClick={() => setSuccess("")}></button>
-                            </div>
-                        )}
-
-                        <div className="card shadow rounded-4">
-                            <div className="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                                <h4 className="mb-0">Profile Information</h4>
-                                {!editing && (
-                                    <button 
-                                        className="btn btn-primary" 
-                                        onClick={() => setEditing(true)}
-                                    >
-                                        <i className="bi bi-pencil-square me-1"></i>
-                                        Edit
-                                    </button>
-                                )}
-                            </div>
-                            <div className="card-body">
-                                {editing ? (
-                                    <form onSubmit={handleEditSubmit}>
-                                        <div className="row">
-                                            <div className="col-md-6 mb-3">
-                                                <label className="form-label">Username</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="username"
-                                                    value={form.username}
-                                                    onChange={handleEditChange}
-                                                    required
-                                                />
-                                            </div>
-                                            <div className="col-md-6 mb-3">
-                                                <label className="form-label">Email</label>
-                                                <input
-                                                    type="email"
-                                                    className="form-control"
-                                                    name="email"
-                                                    value={form.email}
-                                                    onChange={handleEditChange}
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="mb-3">
-                                            <label className="form-label">Password</label>
-                                            <input
-                                                type="password"
-                                                className="form-control"
-                                                name="password"
-                                                value={form.password}
-                                                onChange={handleEditChange}
-                                                placeholder="Leave blank to keep current password"
-                                            />
-                                            <small className="text-muted">Only fill this if you want to change your password</small>
-                                        </div>
-                                        <div className="mb-3">
-                                            <label className="form-label">Address</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                name="address"
-                                                value={form.address}
-                                                onChange={handleEditChange}
-                                                placeholder="Enter your address"
-                                            />
-                                        </div>
-                                        <div className="row">
-                                            <div className="col-md-6 mb-3">
-                                                <label className="form-label">Phone Number</label>
-                                                <input
-                                                    type="tel"
-                                                    className="form-control"
-                                                    name="phoneNumber"
-                                                    value={form.phoneNumber}
-                                                    onChange={handleEditChange}
-                                                />
-                                            </div>
-                                            <div className="col-md-6 mb-3">
-                                                <label className="form-label">Contact Email</label>
-                                                <input
-                                                    type="email"
-                                                    className="form-control"
-                                                    name="emailAddress"
-                                                    value={form.emailAddress}
-                                                    onChange={handleEditChange}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="d-flex gap-2">
-                                            <button type="submit" className="btn btn-success" disabled={saving}>
-                                                {saving ? "Saving..." : "Save Changes"}
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                className="btn btn-outline-secondary" 
-                                                onClick={() => setEditing(false)}
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    </form>
-                                ) : (
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <h6>Account Info</h6>
-                                            <dl className="row">
-                                                <dt className="col-sm-4">Username</dt>
-                                                <dd className="col-sm-8">{profile.username}</dd>
-                                                <dt className="col-sm-4">Email</dt>
-                                                <dd className="col-sm-8">{profile.email}</dd>
-                                            </dl>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <h6>Contact Info</h6>
-                                            <dl className="row">
-                                                <dt className="col-sm-4">Phone</dt>
-                                                <dd className="col-sm-8">{profile.contactInfo?.phoneNumber || "-"}</dd>
-                                                <dt className="col-sm-4">Contact Email</dt>
-                                                <dd className="col-sm-8">{profile.contactInfo?.emailAddress || "-"}</dd>
-                                                <dt className="col-sm-4">Address</dt>
-                                                <dd className="col-sm-8">{profile.location?.address || "-"}</dd>
-                                            </dl>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+                <h2 className="text-center mb-4">{profile.username}</h2>
+                {editing ? (
+                    <form onSubmit={handleEditSubmit}>
+                        <label className="form-label">Username</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            name="username"
+                            value={form.username}
+                            onChange={handleEditChange}
+                            required
+                        />
+                        <label className="form-label">Email</label>
+                        <input
+                            type="email"
+                            className="form-control"
+                            name="email"
+                            value={form.email}
+                            onChange={handleEditChange}
+                            required
+                        />
+                        <label className="form-label">New Password</label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            name="password"
+                            value={form.password}
+                            onChange={handleEditChange}
+                            placeholder="Leave blank to keep current password"
+                        />
+                        <label className="form-label">Phone Number</label>
+                        <input
+                            type="tel"
+                            className="form-control"
+                            name="phoneNumber"
+                            value={form.phoneNumber}
+                            onChange={handleEditChange}
+                        />
+                        <label className="form-label">Contact Email</label>
+                        <input
+                            type="email"
+                            className="form-control"
+                            name="emailAddress"
+                            value={form.emailAddress}
+                            onChange={handleEditChange}
+                        />
+                        <label className="form-label">Address</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            name="address"
+                            value={form.address}
+                            onChange={handleEditChange}
+                            placeholder="Enter your address"
+                        />
+                        <button type="submit" className="btn btn-primary" disabled={saving}>
+                            {saving ? "Saving..." : "Save Changes"}
+                        </button>
+                        <button type="button" className="btn btn-secondary mt-2" onClick={() => setEditing(false)}>
+                            Cancel
+                        </button>
+                    </form>
+                ) : (
+                    <ul className="list-group list-group-flush">
+                        <li className="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Email:</strong>
+                            <span>{profile.email}</span>
+                        </li>
+                        <li className="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Phone Number:</strong>
+                            <span>{profile.contactInfo?.phoneNumber || "-"}</span>
+                        </li>
+                        <li className="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Contact Email:</strong>
+                            <span>{profile.contactInfo?.emailAddress || "-"}</span>
+                        </li>
+                        <li className="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Address:</strong>
+                            <span>{profile.location?.address || "-"}</span>
+                        </li>
+                    </ul>
+                )}
+                {!editing && (
+                    <button className="btn btn-outline-primary mt-3" onClick={() => setEditing(true)}>
+                        Edit Profile
+                    </button>
+                )}
+            </div>
         </div>
     );
 }
