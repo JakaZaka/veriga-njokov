@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../userContext";
+import '../TabNav.css';
 
 function Header({ title }) {
   const { user } = useContext(UserContext);
@@ -10,21 +11,25 @@ function Header({ title }) {
       <div className="header-container">
         <h1 className="logo">{title}</h1>
         <nav>
-          <ul className="nav-links">
+          <ul className="tab-nav">
             <li><Link to="/">Home</Link></li>
-            <li><Link to="/addClothingItem">Add Item</Link></li>
-            <li><Link to="/addClothingStore">Add Store</Link></li>
-            <li><Link to="/addClothingStoreLocation">Add Store Location</Link></li>
+            <li><Link to="/explore">Explore</Link></li>
+            <li><Link to="/outfits">Outfits</Link></li>
+            <li><Link to="/weather">Weather</Link></li>
             <li><Link to="/stores">Stores</Link></li>
             {user ? (
               <>
                 <li><Link to="/profile">Profile</Link></li>
                 <li><Link to="/logout">Logout</Link></li>
+                <li><Link to="/addClothingItem">Add Item</Link></li>
+                <li><Link to="/addClothingStore">Add Store</Link></li>
+                <li><Link to="/addClothingStoreLocation">Add Store Location</Link></li>
+                <li><Link to="/addOutfit">Add Outfit</Link></li>
               </>
             ) : (
               <>
-                <li><Link to="/login">Login</Link></li>
                 <li><Link to="/register">Register</Link></li>
+                <li><Link to="/login">Login</Link></li>
               </>
             )}
           </ul>

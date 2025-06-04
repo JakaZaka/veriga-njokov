@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import { UserContext } from '../userContext';
 import { Navigate } from 'react-router-dom';
+import '../FormCard.css';
 
 function Login() {
     const [username, setUsername] = useState("");
@@ -35,9 +36,9 @@ function Login() {
     }
 
     return (
-        <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: "80vh" }}>
-            <div className="card shadow-lg p-4 rounded-4" style={{ width: "100%", maxWidth: "400px" }}>
-                <h2 className="text-center mb-4">Login</h2>
+        <div className="form-card-container">
+            <div className="form-card">
+                <h2>Login</h2>
                 {error && (
                     <div className="alert alert-danger" role="alert">
                         {error}
@@ -68,6 +69,7 @@ function Login() {
                             required
                         />
                     </div>
+                
                     <button type="submit" className="btn btn-primary w-100">Login</button>
                 </form>
             </div>

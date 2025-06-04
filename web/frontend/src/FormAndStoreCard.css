@@ -1,0 +1,125 @@
+/* General form card styling */
+.form-card-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f8fa;
+}
+
+.form-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.10), 0 1.5px 4px rgba(0,0,0,0.06);
+  padding: 36px 28px 28px 28px;
+  width: 100%;
+  max-width: 500px;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.form-card h2 {
+  text-align: center;
+  color: #1976d2;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.form-card .form-label {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.form-card .form-control {
+  border-radius: 8px;
+  border: 1px solid #b0bec5;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  font-size: 1em;
+  background: #fafdff;
+}
+
+.form-card .btn-primary, .form-card .btn-secondary {
+  width: 100%;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 1.08em;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.form-card .btn-primary {
+  background: #1976d2;
+  border: none;
+  color: #fff;
+}
+
+.form-card .btn-primary:hover {
+  background: #1565c0;
+}
+
+.form-card .btn-secondary {
+  background: #e3eafc;
+  border: none;
+  color: #1976d2;
+}
+
+.form-card .btn-secondary:hover {
+  background: #bbdefb;
+}
+
+.form-card .alert {
+  margin-bottom: 16px;
+}
+
+/* Store grid and card styling */
+.stores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+  padding: 24px 0;
+  margin: 0 auto;
+  max-width: 1100px;
+}
+
+.clothingStore-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  min-height: 170px;
+}
+
+.clothingStore-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.13);
+}
+
+.clothingStore-card h4 {
+  color: #1976d2;
+  font-size: 1.18em;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.clothingStore-card h5 {
+  color: #444;
+  font-size: 1em;
+  margin: 2px 0;
+  font-weight: 400;
+  word-break: break-all;
+}
+
+@media (max-width: 600px) {
+  .form-card {
+    padding: 16px 4vw;
+  }
+  .stores-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

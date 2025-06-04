@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ClothingItem from './ClothingItem';
 import { useLocation } from 'react-router-dom';
+import '../ClothingGrid.css';
 
 function ClothingItems() {
     const location = useLocation();
@@ -8,9 +9,11 @@ function ClothingItems() {
 
     useEffect(() => {
         async function getClothes() {
+            const token = localStorage.getItem('token');
             const res = await fetch('/api/clothing?mine=true', {
                 method: 'GET',
-                credentials: 'include'
+                credentials: 'include',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
             const data = await res.json();
             setClothes(data);

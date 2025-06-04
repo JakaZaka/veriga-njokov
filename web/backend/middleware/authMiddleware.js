@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User'); // Adjust the path if needed
 
-// 🔐 Middleware to protect routes (authenticated users only)
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
@@ -33,7 +32,6 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-// 🛡 Middleware to check if user is an admin
 const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
@@ -43,5 +41,4 @@ const admin = (req, res, next) => {
   }
 };
 
-// ✅ Export both middlewares
 module.exports = { protect, admin };

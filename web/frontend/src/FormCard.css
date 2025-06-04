@@ -1,0 +1,87 @@
+.form-card-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f8fa;
+}
+
+.form-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.10), 0 1.5px 4px rgba(0,0,0,0.06);
+  padding: 36px 28px 28px 28px;
+  width: 100%;
+  max-width: 420px;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.form-card h2 {
+  text-align: center;
+  color: #1976d2;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.form-card .form-label {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.form-card .form-control {
+  border-radius: 8px;
+  border: 1px solid #b0bec5;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  font-size: 1em;
+  background: #fafdff;
+}
+
+.form-card .btn-primary, .form-card .btn-secondary {
+  width: 100%;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 1.08em;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.form-card .btn-primary {
+  background: #1976d2;
+  border: none;
+  color: #fff;
+}
+
+.form-card .btn-primary:hover {
+  background: #1565c0;
+}
+
+.form-card .btn-secondary {
+  background: #e3eafc;
+  border: none;
+  color: #1976d2;
+}
+
+.form-card .btn-secondary:hover {
+  background: #bbdefb;
+}
+
+.form-card .alert {
+  margin-bottom: 16px;
+}
+
+.form-card .avatar-preview {
+  display: block;
+  margin: 0 auto 18px auto;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+}
+
+@media (max-width: 600px) {
+  .form-card {
+    padding: 16px 4vw;
+  }
+}

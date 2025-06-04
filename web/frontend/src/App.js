@@ -16,6 +16,7 @@ import AddClothingStoreLocation from './components/AddClothingStoreLocation';
 import { UserContext } from './userContext';
 import OutfitList from './components/OutfitList';
 import ExploreClothingItems from './components/ExploreClothingItems';
+import WeatherTab from './components/WeatherTab';
 
 function App() {
   const [user, setUser] = useState(localStorage.user ? JSON.parse(localStorage.user) : null);
@@ -45,24 +46,6 @@ function App() {
       <UserContext.Provider value={{ user, setUserContext: updateUserData }}>
         <div className="App">
           <Header title="Closy" />
-          <nav>
-            <Link to="/">Home</Link> |{' '}
-            <Link to="/explore">Explore</Link> |{' '}
-            <Link to="/register">Register</Link> |{' '}
-            <Link to="/login">Login</Link> |{' '}
-            <Link to="/outfits">Outfits</Link> |{' '}
-            {user && (
-              <>
-                <Link to="/logout">Logout</Link> |{' '}
-                <Link to="/profile">Profile</Link> |{' '}
-                <Link to="/addClothingItem">Add Item</Link> |{' '}
-                <Link to="/addClothingStore">Add Store</Link> |{' '}
-                <Link to="/addClothingStoreLocation">Add Store location</Link> |{' '}
-                <Link to="/stores">Stores</Link> |{' '}
-                <Link to="/addOutfit">Add Outfit</Link>
-              </>
-            )}
-          </nav>
           <Routes>
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
@@ -78,6 +61,7 @@ function App() {
             <Route path="/stores" element={<ClothingStores />} />
             <Route path="/addClothingStore" element={<AddClothingStore />} />
             <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />} />
+            <Route path="/weather" element={<WeatherTab />} />
           </Routes>
         </div>
       </UserContext.Provider>

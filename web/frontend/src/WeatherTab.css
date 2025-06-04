@@ -1,0 +1,83 @@
+.weather-tab.weather-card {
+  max-width: 420px;
+  margin: 40px auto;
+  background: #fafdff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.08), 0 1.5px 4px rgba(0,0,0,0.06);
+  padding: 32px 28px 24px 28px;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.weather-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.weather-icon {
+  font-size: 3.2em;
+  line-height: 1;
+}
+
+.weather-title {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.weather-date {
+  font-size: 1em;
+  color: #666;
+}
+
+.weather-details {
+  margin-bottom: 18px;
+  font-size: 1.08em;
+}
+
+.weather-label {
+  font-weight: 500;
+  color: #1976d2;
+}
+
+.weather-temp {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #e65100;
+}
+
+.weather-fetchedat {
+  font-size: 0.95em;
+  color: #888;
+  margin-top: 4px;
+}
+
+.weather-recommend {
+  margin-top: 18px;
+}
+
+.weather-message {
+  font-size: 1.15em;
+  font-weight: 500;
+  color: #388e3c;
+  margin-bottom: 10px;
+}
+
+.weather-items-list {
+  padding-left: 18px;
+  margin-bottom: 8px;
+}
+
+.weather-item-cat {
+  color: #888;
+  font-size: 0.95em;
+}
+
+.weather-loading,
+.weather-error {
+  text-align: center;
+  font-size: 1.2em;
+  color: #1976d2;
+  margin-top: 40px;
+}
