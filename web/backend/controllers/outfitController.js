@@ -73,15 +73,32 @@ const deleteOutfit = async (req, res) => {
   }
 };
 
-const favoriteOutfit = async (req, res) => {
+const likeOutfit = async (req, res) => {
+  if (!req.session || !req.session.userId) {
+  return res.status(401).json({ message: 'User not authenticated' });
+  }
+
+  const userId = req.session.userId
   try {
     const outfit = await Outfit.findById(req.params.id);
     if (!outfit) {
       return res.status(404).json({ message: 'Outfit not found' });
     }
-    outfit.liked = !outfit.liked;
-    const updatedOutfit = await outfit.save();
-    res.json(updatedOutfit);
+
+    const alreadyLiked = outfit.likedBy.includes(userId);
+    console.log(`User ${userId} has already liked this outfit: ${alreadyLiked}`);
+    if (alreadyLiked) {
+      //console.log('LikedBy before filter:', outfit.likedBy.map(id => id.toString()));
+      console.log('UserId:', userId);
+      //const array = outfit.likedBy;
+      outfit.likedBy.pull(userId);
+      outfit.liked = Math.max(0, (outfit.liked || 1) - 1);
+    } else {
+      outfit.likedBy.push(userId);
+      outfit.liked += 1;
+    }
+    await outfit.save();
+    res.json(outfit);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -107,6 +124,6 @@ module.exports = {
   createOutfit,
   updateOutfit,
   deleteOutfit,
-  favoriteOutfit,
+  likeOutfit,
   wearOutfit,
 };

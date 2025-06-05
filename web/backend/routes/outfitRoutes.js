@@ -5,7 +5,7 @@ const {
   createOutfit,
   updateOutfit,
   deleteOutfit,
-  favoriteOutfit,
+  likeOutfit,
   wearOutfit
 } = require('../controllers/outfitController');
 const { protect } = require('../middleware/authMiddleware');
@@ -24,7 +24,7 @@ router.route('/')
   .put(updateOutfit)
   .delete(deleteOutfit);
 
-//router.put('/:id/favorite', favoriteOutfit);
+router.post('/:id/like', likeOutfit);
 //router.put('/:id/wear', wearOutfit);
 
 module.exports = router;

@@ -82,7 +82,7 @@ function AddClothingItem(props) {
 
     return (
         <form className="form-group" onSubmit={onSubmit}>
-           
+           {!userContext.user ? <Navigate replace to="/login" /> : ""}
             {uploaded ? <Navigate replace to="/" /> : ""}
             <input type="text" className="form-control" name="name" placeholder="Clothing item name" value={name} onChange={(e)=>{setName(e.target.value)}}/>
             <label>Choose a category:</label>

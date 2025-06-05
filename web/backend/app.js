@@ -9,19 +9,21 @@ connectDB();
 const app = express();
 
 var cors = require('cors');
-var allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+var allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://frontend:3000', 'http://frontend:3001'];
 app.use(cors({
   credentials: true,
-  origin: function(origin, callback){
+  origin: true/*function(origin, callback){
     // Allow requests with no origin (mobile apps, curl)
     if(!origin) return callback(null, true);
     if(allowedOrigins.indexOf(origin)===-1){
-      var msg = "The CORS policy does not allow access from the specified Origin.";
+      var msg = "The CORS policy does not allow access from the specified Origin. ${origin}";
       return callback(new Error(msg), false);
     }
     return callback(null, true);
-  }
+  }*/
 }));
+
+//app.options('*', cors());
 
 // Middleware
 app.use(express.json());
@@ -41,6 +43,22 @@ const weatherRoutes = require('./routes/weatherRoutes');
 const clothingStoreRoutes = require('./routes/clothingStoreRoutes'); // Add this line
 const enumRoutes = require('./routes/enumRoutes'); // Add this line
 const locationRoutes = require('./routes/locationRoutes'); 
+
+
+var session = require('express-session');
+var MongoStore = require('connect-mongo');
+app.use(session({
+  secret: 'work hard',
+  resave: true,
+  saveUninitialized: false,
+  store: MongoStore.create({mongoUrl: process.env.MONGO_URI})
+}));
+//Shranimo sejne spremenljivke v locals
+//Tako lahko do njih dostopamo v vseh view-ih (glej layout.hbs)
+app.use(function (req, res, next) {
+  res.locals.session = req.session;
+  next();
+});
 
 
 // API routes

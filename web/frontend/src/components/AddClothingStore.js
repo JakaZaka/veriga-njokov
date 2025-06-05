@@ -28,7 +28,7 @@ function AddClothingStore(props) {
         formData.append('website', website);
         
 
-        const res = await fetch('api/stores', {
+        const res = await fetch('/api/stores', {
             method: 'POST',
             credentials: 'include',
             headers: {

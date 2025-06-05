@@ -20,12 +20,16 @@ function Header(props) {
                 <li><Link to="/addClothingStore">Add Store</Link></li>
                 <li><Link to="/addClothingStoreLocation">Add store location</Link></li>
                 <li><Link to="/stores">Stores</Link></li>
+                <li><Link to="/map">Map</Link></li>
+                <li><Link to="/outfits">Outfits</Link></li>
+                <li><Link to="/addOutfit">Add Outfit</Link></li>
               </>
             ) : (
               <>
                 <li><Link to="/login">Login</Link></li>
                 <li><Link to="/register">Register</Link></li>
                 <li><Link to="/addClothingItem">Publish</Link></li>
+                <li><Link to="/map">Map</Link></li>
               </>
             )
           }
