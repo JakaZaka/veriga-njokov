@@ -1,11 +1,12 @@
 {
-  "name": "frontend",
+  "name": "closy-frontend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^13.5.0",
+    "bootstrap-icons": "^1.13.1",
     "cors": "^2.8.5",
     "leaflet": "^1.9.4",
     "leaflet-routing-machine": "^3.2.12",
@@ -19,7 +20,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts start --host 0.0.0.0",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

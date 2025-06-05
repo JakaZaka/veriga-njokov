@@ -180,6 +180,66 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// @desc    Get all users (admin only)
+// @route   GET /api/users
+// @access  Private/Admin
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete user (admin only)
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
+const deleteUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (user.role === 'admin' && req.user._id.toString() === user._id.toString()) {
+      return res.status(400).json({ message: 'Cannot delete your own admin account' });
+    }
+    
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update user role (admin only)
+// @route   PUT /api/users/:id/role
+// @access  Private/Admin
+const updateUserRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    
+    if (!['user', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role' });
+    }
+    
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    user.role = role;
+    await user.save();
+    
+    res.json({ message: 'User role updated successfully', user: { ...user.toObject(), password: undefined } });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 const nearbyUsers = async (req, res) => {
   try {
@@ -225,4 +285,15 @@ const nearbyUsers = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, deleteUser, nearbyUsers };
+
+module.exports = { 
+  registerUser, 
+  loginUser, 
+  getUserProfile, 
+  updateUserProfile, 
+  deleteUser,
+  getAllUsers,
+  deleteUserById,
+  updateUserRole,
+  nearbyUsers
+};

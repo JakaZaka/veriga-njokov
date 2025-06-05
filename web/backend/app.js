@@ -9,24 +9,14 @@ connectDB();
 const app = express();
 
 var cors = require('cors');
-var allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://frontend:3000', 'http://frontend:3001'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 app.use(cors({
   credentials: true,
-  origin: true/*function(origin, callback){
-    // Allow requests with no origin (mobile apps, curl)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin)===-1){
-      var msg = "The CORS policy does not allow access from the specified Origin. ${origin}";
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  }*/
+    origin: true // Allow all origins *POPRAVI KASNEJE
 }));
 
-//app.options('*', cors());
-
 // Middleware
-app.use(express.json());
+app.use(express.json({limit: '100mb'})); 
 
 // Basic route for testing
 app.get('/', (req, res) => {
@@ -43,6 +33,7 @@ const weatherRoutes = require('./routes/weatherRoutes');
 const clothingStoreRoutes = require('./routes/clothingStoreRoutes'); // Add this line
 const enumRoutes = require('./routes/enumRoutes'); // Add this line
 const locationRoutes = require('./routes/locationRoutes'); 
+const adminRoutes = require('./routes/adminRoutes');
 
 
 var session = require('express-session');
@@ -60,13 +51,14 @@ app.use(function (req, res, next) {
   next();
 });
 
+// Register routes
+app.use('/api/admin', adminRoutes);
 
 // API routes
 app.use('/api/users', userRoutes);
 app.use('/api/clothing', clothingItemRoutes);
 app.use('/api/outfits', outfitRoutes);
 app.use('/api/weather', weatherRoutes);
-
 app.use('/api/stores', clothingStoreRoutes); 
 app.use('/api/enums', enumRoutes); 
 app.use('/api/locations', locationRoutes);

@@ -1,14 +1,13 @@
-import { useContext, useState } from 'react'
+import { useContext, useState, use, useEffect } from 'react'
 import { Navigate } from 'react-router-dom';
 import { UserContext } from '../userContext';
-import { use } from 'react';
-import { useEffect } from 'react';
+import '../FormAndStoreCard.css';
 
 function AddClothingStore(props) {
     const userContext = useContext(UserContext); 
-    const[name, setName] = useState('');
-    const[website, setWebsite] = useState('');
-    const[uploaded, setUploaded] = useState(false);
+    const [name, setName] = useState('');
+    const [website, setWebsite] = useState('');
+    const [uploaded, setUploaded] = useState(false);
 
     async function onSubmit(e){
         e.preventDefault();
@@ -35,9 +34,9 @@ function AddClothingStore(props) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-            name,
-            website
-        })
+                name,
+                website
+            })
         });
         const data = await res.json();
 
@@ -45,13 +44,39 @@ function AddClothingStore(props) {
     }
 
     return (
-        <form className="form-group" onSubmit={onSubmit}>
-           
-            {uploaded ? <Navigate replace to="/" /> : ""}
-            <input type="text" className="form-control" name="name" placeholder="Clothing store name" value={name} onChange={(e)=>{setName(e.target.value)}}/>
-            <input type="text" className="form-control" name="website" placeholder="Store website" value={website} onChange={(e)=>{setWebsite(e.target.value)}}/>
-            <input className="btn btn-primary" type="submit" name="submit" value="Naloži" />
-        </form>
+        <div className="form-card-container">
+            <div className="form-card">
+                <h2>Add Clothing Store</h2>
+                {uploaded ? <Navigate replace to="/" /> : ""}
+                <form onSubmit={onSubmit}>
+                    <div className="mb-3">
+                        <label className="form-label" htmlFor="name">Clothing store name</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="name"
+                            name="name"
+                            placeholder="Clothing store name"
+                            value={name}
+                            onChange={(e)=>{setName(e.target.value)}}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label" htmlFor="website">Store website</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="website"
+                            name="website"
+                            placeholder="Store website"
+                            value={website}
+                            onChange={(e)=>{setWebsite(e.target.value)}}
+                        />
+                    </div>
+                    <button className="btn btn-primary w-100" type="submit">Naloži</button>
+                </form>
+            </div>
+        </div>
     )
 }
 
