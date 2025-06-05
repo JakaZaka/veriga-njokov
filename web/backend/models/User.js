@@ -79,5 +79,8 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+userSchema.index({ 'location.coordinates': '2dsphere' });
+
+
 const User = mongoose.model('User', userSchema);
 module.exports = User;

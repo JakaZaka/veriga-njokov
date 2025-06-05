@@ -5,6 +5,8 @@ import '../TabNav.css';
 
 function Header(props) {
     const userContext = useContext(UserContext);
+    const user = userContext.user;
+    const title = props.title || "Closy";
 
   return (
     <header className="main-header">
@@ -31,11 +33,18 @@ function Header(props) {
                 )}
                 <li><Link to="/addClothingItem">Add Item</Link></li>
                 <li><Link to="/addOutfit">Add Outfit</Link></li>
+                
+                <li><Link to="/stores">Stores</Link></li>
+                <li><Link to="/map">Map</Link></li>
+                <li><Link to="/outfits">Outfits</Link></li>
+               
+                
               </>
             ) : (
               <>
                 <li><Link to="/register">Register</Link></li>
                 <li><Link to="/login">Login</Link></li>
+                <li><Link to="/map">Publish</Link></li>
               </>
             )}
           </ul>

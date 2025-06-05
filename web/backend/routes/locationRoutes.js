@@ -14,7 +14,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getLocations);
-//router.get('/nearby', getNearbyLocations);
+router.get('/nearby', getNearbyLocations);
 router.get('/:id', getLocationById);
 
 // Protected routes - Admin only

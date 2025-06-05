@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Outfit = require('../models/Outfit');
+const ClothingItem = require('../models/ClothingItem');
 const jwt = require('jsonwebtoken');
 const NodeGeocoder = require('node-geocoder');
 const geocoder = NodeGeocoder({ provider: 'openstreetmap' });
@@ -58,11 +60,13 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ username });
 
     if (user && (await user.matchPassword(password))) {
+      req.session.userId = user._id; // Store user ID in session
       res.json({
         _id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
+        location: user.location,
         token: generateToken(user._id),
       });
     } else {
@@ -236,6 +240,52 @@ const updateUserRole = async (req, res) => {
   }
 };
 
+
+const nearbyUsers = async (req, res) => {
+  try {
+    const { longitude, latitude, maxDistance} = req.query; // maxDistance in meters, default 10km
+    
+    if (!longitude || !latitude) {
+      return res.status(400).json({ message: 'Longitude and latitude are required' });
+    }
+    console.log(`Searching near [${longitude}, ${latitude}] within ${maxDistance}m`);
+
+    
+    // Find stores within the specified radius
+    const users = await User.find({
+      'location.coordinates': {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+          },
+          $maxDistance: parseInt(maxDistance),
+        },
+      },
+    });
+    
+   const usersWithExtras = await Promise.all(
+      users.map(async user => {
+        const outfits = await Outfit.find({ user: user._id }).populate('items.item');
+        const clothesForSale = await ClothingItem.find({ user: user._id, wantToGive: true });
+        console.log(clothesForSale);
+
+        return {
+          ...user.toObject(),
+          outfits,
+          clothesForSale,
+        };
+      })
+    );
+
+    res.json(usersWithExtras);
+  } catch (err) {
+    console.error('Error fetching nearby users:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
+
 module.exports = { 
   registerUser, 
   loginUser, 
@@ -244,5 +294,6 @@ module.exports = {
   deleteUser,
   getAllUsers,
   deleteUserById,
-  updateUserRole
+  updateUserRole,
+  nearbyUsers
 };

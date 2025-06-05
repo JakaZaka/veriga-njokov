@@ -11,11 +11,7 @@ function AdminDashboard() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  // Preveri, ali je trenutni uporabnik admin
-  if (!userContext.user || userContext.user.role !== 'admin') {
-    return <Navigate replace to="/" />;
-  }
-
+ 
   // Pridobi seznam uporabnikov
   useEffect(() => {
     const fetchUsers = async () => {
@@ -77,6 +73,12 @@ function AdminDashboard() {
 
     fetchSettings();
   }, [activeTab, userContext.user.token]);
+
+   // Preveri, ali je trenutni uporabnik admin
+  if (!userContext.user || userContext.user.role !== 'admin') {
+    return <Navigate replace to="/" />;
+  }
+
 
   // Brisanje uporabnika
   const handleDeleteUser = async (userId) => {

@@ -10,12 +10,10 @@ const app = express();
 
 var cors = require('cors');
 const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
-
 app.use(cors({
   credentials: true,
-  origin: true // Allow all origins *POPRAVI KASNEJE
+    origin: true // Allow all origins *POPRAVI KASNEJE
 }));
-
 
 // Middleware
 app.use(express.json({limit: '100mb'})); 
@@ -36,6 +34,22 @@ const clothingStoreRoutes = require('./routes/clothingStoreRoutes'); // Add this
 const enumRoutes = require('./routes/enumRoutes'); // Add this line
 const locationRoutes = require('./routes/locationRoutes'); 
 const adminRoutes = require('./routes/adminRoutes');
+
+
+var session = require('express-session');
+var MongoStore = require('connect-mongo');
+app.use(session({
+  secret: 'work hard',
+  resave: true,
+  saveUninitialized: false,
+  store: MongoStore.create({mongoUrl: process.env.MONGO_URI})
+}));
+//Shranimo sejne spremenljivke v locals
+//Tako lahko do njih dostopamo v vseh view-ih (glej layout.hbs)
+app.use(function (req, res, next) {
+  res.locals.session = req.session;
+  next();
+});
 
 // Register routes
 app.use('/api/admin', adminRoutes);

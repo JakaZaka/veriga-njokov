@@ -19,6 +19,7 @@ import ExploreClothingItems from './components/ExploreClothingItems';
 import WeatherTab from './components/WeatherTab';
 import AdminDashboard from "./components/AdminDashboard";
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import Map from "./components/Map.js"
 
 function App() {
   const [user, setUser] = useState(localStorage.user ? JSON.parse(localStorage.user) : null);
@@ -65,6 +66,7 @@ function App() {
             <Route path="/addClothingStoreLocation" element={<AddClothingStoreLocation />} />
             <Route path="/weather" element={<WeatherTab />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/map" element={<Map />}></Route>
           </Routes>
           <nav>
             <Link to="/">Home</Link> |{' '}

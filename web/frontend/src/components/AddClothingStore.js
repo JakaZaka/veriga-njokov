@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useState, use, useEffect } from 'react'
 import { Navigate } from 'react-router-dom';
 import { UserContext } from '../userContext';
 import '../FormAndStoreCard.css';
@@ -21,7 +21,13 @@ function AddClothingStore(props) {
             return;
         }
 
-        const res = await fetch('api/stores', {
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('website', website);
+        
+
+        const res = await fetch('/api/stores', {
             method: 'POST',
             credentials: 'include',
             headers: {
