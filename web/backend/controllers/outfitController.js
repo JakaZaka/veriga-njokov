@@ -1,3 +1,4 @@
+
 const Outfit = require('../models/Outfit');
 
 // @desc    Get all outfits for a user
@@ -118,6 +119,52 @@ const wearOutfit = async (req, res) => {
   }
 };
 
+const trendDataForChart = async (req, res) => {
+  try {
+    const outfits = await Outfit.find(); // optionally: `.where('user').equals(req.user._id)`
+    
+    const occasionTypes = ['casual', 'formal', 'sport', 'party', 'work', 'other'];
+    const trendMap = {};
+
+    outfits.forEach(outfit => {
+      if (!outfit.createdAt) return;
+
+      const dateKey = new Date(outfit.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric"
+      });
+
+      const occasion = outfit.occasion || "other";
+
+      if (!trendMap[dateKey]) {
+        trendMap[dateKey] = Object.fromEntries(occasionTypes.map(type => [type, 0]));
+      }
+
+      if (occasionTypes.includes(occasion)) {
+        trendMap[dateKey][occasion]++;
+      } else {
+        trendMap[dateKey]["other"]++;
+      }
+    });
+
+    const trendArray = Object.entries(trendMap).map(([date, counts]) => ({
+      date,
+      ...counts,
+    }));
+
+    // Optional: sort by date
+    trendArray.sort((a, b) => {
+      return new Date(a.date) - new Date(b.date);
+    });
+
+    res.json(trendArray);
+  } catch (error) {
+    console.error("Error building trend data:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
   getOutfits,
   getOutfitById,
@@ -126,4 +173,5 @@ module.exports = {
   deleteOutfit,
   likeOutfit,
   wearOutfit,
+  trendDataForChart,
 };

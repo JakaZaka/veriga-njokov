@@ -4,6 +4,11 @@ const ClothingItem = require('../models/ClothingItem');
 const jwt = require('jsonwebtoken');
 const NodeGeocoder = require('node-geocoder');
 const geocoder = NodeGeocoder({ provider: 'openstreetmap' });
+const path = require('path');
+const fs = require('fs');
+const turf = require('@turf/turf');
+
+
 
 // Generate JWT token
 const generateToken = (id) => {
@@ -286,6 +291,131 @@ const nearbyUsers = async (req, res) => {
 };
 
 
+const getSalesPerDistrict = async (req, res) => {
+  //for sorting the users into districts in maribor
+  const districtsGeoJSONPath = path.join(__dirname, '../public/geo/maribor_districts.json');
+  const districtsGeoJSON = JSON.parse(fs.readFileSync(districtsGeoJSONPath));
+
+  try {
+    const users = await User.find();
+    const items = await ClothingItem.find({ wantToGive: true });
+
+    // Create district lookup
+    const districtCounts = {};
+
+    for (const feature of districtsGeoJSON.features) {
+      const name = feature.properties.name;
+      districtCounts[name] = {
+        tops: 0,
+        bottoms: 0,
+        shoes: 0,
+        outerwear: 0,
+        accessories: 0,
+        other: 0,
+      };
+    }
+
+    for (const user of users) {
+      const coords = user.location?.coordinates?.coordinates;
+      if (!coords || coords.length !== 2) continue;
+
+      const userPoint = turf.point(coords);
+
+      const district = districtsGeoJSON.features.find((feature) =>
+        turf.booleanPointInPolygon(userPoint, feature.geometry)
+      );
+
+      if (!district) continue;
+      const districtName = district.properties.name;
+
+      // Find the user’s items they want to give
+      const userItems = items.filter((item) => item.user.toString() === user._id.toString() && item.wantToGive);
+
+      for (const item of userItems) {
+        const cat = item.category;
+        if (!districtCounts[districtName][cat]) {
+          districtCounts[districtName][cat] = 1;
+        } else {
+          districtCounts[districtName][cat]++;
+        }
+      }
+    }
+
+    const response = Object.entries(districtCounts).map(([district, categories]) => ({
+      district,
+      ...categories,
+    }));
+
+    res.json(response);
+  } catch (err) {
+    console.error("Error in getSalesPerDistrict:", err);
+    res.status(500).json({ message: "Server error while computing sales per district" });
+  }
+};
+
+const getClosetStats = async (req, res) => {
+  //for sorting the users into districts in maribor
+  const districtsGeoJSONPath = path.join(__dirname, '../public/geo/maribor_districts.json');
+  const districtsGeoJSON = JSON.parse(fs.readFileSync(districtsGeoJSONPath));
+
+  try {
+    const users = await User.find();
+    const items = await ClothingItem.find({ wantToGive: true });
+
+    // Create district lookup
+    const districtCounts = {};
+
+    for (const feature of districtsGeoJSON.features) {
+      const name = feature.properties.name;
+      districtCounts[name] = {
+        tops: 0,
+        bottoms: 0,
+        shoes: 0,
+        outerwear: 0,
+        accessories: 0,
+        other: 0,
+      };
+    }
+
+    for (const user of users) {
+      const coords = user.location?.coordinates?.coordinates;
+      if (!coords || coords.length !== 2) continue;
+
+      const userPoint = turf.point(coords);
+
+      const district = districtsGeoJSON.features.find((feature) =>
+        turf.booleanPointInPolygon(userPoint, feature.geometry)
+      );
+
+      if (!district) continue;
+      const districtName = district.properties.name;
+
+      // Find the user’s items they want to give
+      const userItems = items.filter((item) => item.user.toString() === user._id.toString() && item.wantToGive);
+
+      for (const item of userItems) {
+        const cat = item.category;
+        if (!districtCounts[districtName][cat]) {
+          districtCounts[districtName][cat] = 1;
+        } else {
+          districtCounts[districtName][cat]++;
+        }
+      }
+    }
+
+    const response = Object.entries(districtCounts).map(([district, categories]) => ({
+      district,
+      ...categories,
+    }));
+
+    res.json(response);
+  } catch (err) {
+    console.error("Error in getSalesPerDistrict:", err);
+    res.status(500).json({ message: "Server error while computing sales per district" });
+  }
+};
+
+
 module.exports = { 
   registerUser, 
   loginUser, 
@@ -295,5 +425,7 @@ module.exports = {
   getAllUsers,
   deleteUserById,
   updateUserRole,
-  nearbyUsers
+  nearbyUsers,
+  getSalesPerDistrict
+  
 };

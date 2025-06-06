@@ -8,7 +8,8 @@ const {
   updateClothingItem,
   deleteClothingItem,
   favoriteClothingItem,
-  incrementWearCount
+  incrementWearCount,
+  getClosetStats
 } = require('../controllers/clothingItemController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -19,6 +20,8 @@ const router = express.Router();
 router.route('/')
   .get(getClothingItems)
   .post(upload.single('image'), createClothingItem);
+
+router.get('/closetStats', getClosetStats); 
 
 router.route('/:id')
   .get(getClothingItemById)

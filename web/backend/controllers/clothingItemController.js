@@ -1,3 +1,4 @@
+const { get } = require('mongoose');
 const { notify } = require('../app');
 const ClothingItem = require('../models/ClothingItem');
 
@@ -159,6 +160,37 @@ const incrementWearCount = async (req, res) => {
   }
 };
 
+const getClosetStats = async (req, res) => {
+  try {
+    const clothingItems = await ClothingItem.find({ user: req.session.userId });
+
+    const occasionTypes = ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories', 'other'];
+
+   
+    const trendMap = Object.fromEntries(occasionTypes.map(type => [type, 0]));
+
+    clothingItems.forEach(item => {
+      const category = item.category?.toLowerCase() || 'other';
+      if (occasionTypes.includes(category)) {
+        trendMap[category]++;
+      } else {
+        trendMap["other"]++;
+      }
+    });
+
+    
+    const clothingArray = Object.entries(trendMap).map(([category, value]) => ({
+      category,
+      value
+    }));
+
+    res.json(clothingArray);
+  } catch (error) {
+    console.error("Error building trend data:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getClothingItems,
   getClothingItemById,
@@ -167,4 +199,5 @@ module.exports = {
   deleteClothingItem,
   favoriteClothingItem,
   incrementWearCount,
+  getClosetStats,
 };
