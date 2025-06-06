@@ -5,7 +5,9 @@ const {
   nearbyUsers,
   getUserProfile,
   updateUserProfile,
-  deleteUser
+  deleteUser,
+  getSalesPerDistrict,
+  getClosetStats
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -14,7 +16,9 @@ const router = express.Router();
 // Public routes
 router.post('/', registerUser);
 router.post('/login', loginUser);
-router.get('/nearby', nearbyUsers); // Assuming you have a nearbyUsers function in your controller
+router.get('/nearby', nearbyUsers); 
+router.get('/districtSales', getSalesPerDistrict);
+
 
 // Protected routes
 router.get('/profile', protect, getUserProfile);

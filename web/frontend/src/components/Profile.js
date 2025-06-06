@@ -3,6 +3,9 @@ import { UserContext } from '../userContext';
 import { Navigate } from 'react-router-dom';
 import '../ProfileCard.css';
 import OutfitTrendChart from './OutfitTrendChart';
+import DistrictSellingChart from './DistrictSellingChart';
+import ClosetStats from './ClosetStats';    
+
 
 function Profile() {
     const userContext = useContext(UserContext);
@@ -24,6 +27,8 @@ function Profile() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [chartData, setChartData] = useState([]);
+    const [districtData, setDistrictData] = useState([]);
+    const [closetData, setClosetData] = useState([]);
 
     useEffect(function () {
         const getProfile = async function () {
@@ -54,6 +59,20 @@ function Profile() {
     fetch('/api/outfits/trends')
         .then(res => res.json())
         .then(setChartData)
+        .catch(err => console.error("Failed to fetch trends", err));
+    }, []);
+
+    useEffect(() => {
+    fetch('/api/users/districtSales')
+        .then(res => res.json())
+        .then(setDistrictData)
+        .catch(err => console.error("Failed to fetch trends", err));
+    }, []);
+
+    useEffect(() => {
+    fetch('/api/clothing/closetStats')
+        .then(res => res.json())
+        .then(setClosetData)
         .catch(err => console.error("Failed to fetch trends", err));
     }, []);
 
@@ -300,6 +319,8 @@ function Profile() {
             <div className='graphs'>
                 <h3>Graphs and Statistics</h3>
                 <OutfitTrendChart data={chartData} />
+                <DistrictSellingChart data={districtData}/>
+                <ClosetStats data={closetData}/>
             </div>
         </div>
     </>

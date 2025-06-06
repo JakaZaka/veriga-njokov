@@ -2,7 +2,7 @@
 import * as d3 from "d3";
 import { useEffect, useRef } from "react";
 
-export default function DistrictCategoryBarChart({data}) {
+export default function DistrictSellingChart({data}) {
   const ref = useRef();
 
  
@@ -83,10 +83,10 @@ export default function DistrictCategoryBarChart({data}) {
         d3.select(this).attr("opacity", 1);
       });
 
-  }, []);
+  }, [data]);
 
   return (
-    <div style={{ position: "relative", marginTop: "40px" }}>
+    <div style={{ marginTop: "40px", textAlign: "center", position: "relative" }}>
       <h4 style={{ textAlign: "center" }}>Clothing Category Sales by District</h4>
       <svg ref={ref}></svg>
       <div id="tooltip" style={{

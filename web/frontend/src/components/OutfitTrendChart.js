@@ -64,9 +64,10 @@ export default function OutfitTrendChart({ data }) {
             .attr("height", d => y(d[0]) - y(d[1]))
             .attr("width", x.bandwidth())
             .on("mouseover", function (event, d) {
-                tooltip
-                    .style("display", "block")
-                    .html(`<strong>${d.key}</strong><br/>${d.data.date}: ${d.data[d.key]}`);
+            
+            tooltip
+                .style("display", "block")
+                .html(`<strong>${d.key}</strong><br/>${d.data.date}: ${d.data[d.key]}`);
             })
             .on("mousemove", function (event) {
                 tooltip
