@@ -36,6 +36,7 @@ function App() {
       username: userInfo.username,
       email: userInfo.email,
       role: userInfo.role,
+      location: userInfo.location, // Assuming location is a string or null
       // Only store avatar if it's a URL, not a base64 string
       avatar: (userInfo.avatar && userInfo.avatar.startsWith('http')) ? userInfo.avatar : "",
       token: userInfo.token,
