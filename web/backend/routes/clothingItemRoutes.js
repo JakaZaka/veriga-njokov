@@ -9,7 +9,8 @@ const {
   deleteClothingItem,
   favoriteClothingItem,
   incrementWearCount,
-  getClosetStats
+  getClosetStats,
+  transferItem
 } = require('../controllers/clothingItemController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -22,6 +23,7 @@ router.route('/')
   .post(upload.single('image'), createClothingItem);
 
 router.get('/closetStats', getClosetStats); 
+router.put('/transfer/:clothingId/:newUserId', transferItem);
 
 router.route('/:id')
   .get(getClothingItemById)

@@ -7,7 +7,7 @@ const {
   updateUserProfile,
   deleteUser,
   getSalesPerDistrict,
-  getClosetStats
+  getRequests
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -18,7 +18,7 @@ router.post('/', registerUser);
 router.post('/login', loginUser);
 router.get('/nearby', nearbyUsers); 
 router.get('/districtSales', getSalesPerDistrict);
-
+router.get('/requests', getRequests);
 
 // Protected routes
 router.get('/profile', protect, getUserProfile);

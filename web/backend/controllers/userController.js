@@ -353,68 +353,29 @@ const getSalesPerDistrict = async (req, res) => {
   }
 };
 
-const getClosetStats = async (req, res) => {
-  //for sorting the users into districts in maribor
-  const districtsGeoJSONPath = path.join(__dirname, '../public/geo/maribor_districts.json');
-  const districtsGeoJSON = JSON.parse(fs.readFileSync(districtsGeoJSONPath));
-
+const getRequests = async (req, res) => {
   try {
-    const users = await User.find();
-    const items = await ClothingItem.find({ wantToGive: true });
+    console.log("Session data:", req.session);
+    const clothes = await ClothingItem.find({
+      user: req.session.userId,
+      wantToGive: true,
+    }).populate('wantToGet', 'username email'); 
 
-    // Create district lookup
-    const districtCounts = {};
 
-    for (const feature of districtsGeoJSON.features) {
-      const name = feature.properties.name;
-      districtCounts[name] = {
-        tops: 0,
-        bottoms: 0,
-        shoes: 0,
-        outerwear: 0,
-        accessories: 0,
-        other: 0,
-      };
-    }
-
-    for (const user of users) {
-      const coords = user.location?.coordinates?.coordinates;
-      if (!coords || coords.length !== 2) continue;
-
-      const userPoint = turf.point(coords);
-
-      const district = districtsGeoJSON.features.find((feature) =>
-        turf.booleanPointInPolygon(userPoint, feature.geometry)
-      );
-
-      if (!district) continue;
-      const districtName = district.properties.name;
-
-      // Find the user’s items they want to give
-      const userItems = items.filter((item) => item.user.toString() === user._id.toString() && item.wantToGive);
-
-      for (const item of userItems) {
-        const cat = item.category;
-        if (!districtCounts[districtName][cat]) {
-          districtCounts[districtName][cat] = 1;
-        } else {
-          districtCounts[districtName][cat]++;
-        }
-      }
-    }
-
-    const response = Object.entries(districtCounts).map(([district, categories]) => ({
-      district,
-      ...categories,
+    const requests = clothes.map(item => ({
+      itemId: item._id,
+      name: item.name,
+      category: item.category,
+      imageUrl: item.imageUrl,
+      wantToGet: item.wantToGet, 
     }));
 
-    res.json(response);
-  } catch (err) {
-    console.error("Error in getSalesPerDistrict:", err);
-    res.status(500).json({ message: "Server error while computing sales per district" });
+    res.json(requests);
+  } catch (error) {
+    console.error("Error retrieving items with requests:", error);
+    res.status(500).json({ message: error.message });
   }
 };
-
 
 module.exports = { 
   registerUser, 
@@ -426,6 +387,6 @@ module.exports = {
   deleteUserById,
   updateUserRole,
   nearbyUsers,
-  getSalesPerDistrict
-  
+  getSalesPerDistrict,
+  getRequests
 };
