@@ -7,6 +7,7 @@ data class User(
     val id: String? = null,
     val username: String,
     val email: String,
+    val password: String? = null, // Add this field
     val avatar: String? = "",
     val role: String = "user",
     val contactInfo: ContactInfo? = null,

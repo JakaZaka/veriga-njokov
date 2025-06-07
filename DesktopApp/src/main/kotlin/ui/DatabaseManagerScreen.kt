@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import repositories.UserRepository
 import kotlinx.coroutines.launch
 import models.*
+import ui.dialogs.AddUserDialog
 
 @Composable
 fun DatabaseManagerScreen() {
@@ -19,6 +20,7 @@ fun DatabaseManagerScreen() {
     val users by userRepository.users.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showAddUserDialog by remember { mutableStateOf(false) }
     
     // Load users when screen initializes
     LaunchedEffect(Unit) {
@@ -49,24 +51,7 @@ fun DatabaseManagerScreen() {
             )
             
             Button(
-                onClick = {
-                    scope.launch {
-                        val newUser = User(
-                            username = "new_user",
-                            email = "new@example.com",
-                            contactInfo = ContactInfo(
-                                phoneNumber = "123456789",
-                                emailAddress = "contact@example.com"
-                            ),
-                            location = UserLocation(
-                                address = "123 Main St",
-                                city = "Example City",
-                                country = "Slovenia"
-                            )
-                        )
-                        userRepository.createUser(newUser)
-                    }
-                }
+                onClick = { showAddUserDialog = true }
             ) {
                 Text("Add User")
             }
@@ -123,6 +108,13 @@ fun DatabaseManagerScreen() {
                 }
             }
         }
+    }
+    
+    if (showAddUserDialog) {
+        AddUserDialog(
+            onDismiss = { showAddUserDialog = false },
+            userRepository = userRepository
+        )
     }
 }
 
