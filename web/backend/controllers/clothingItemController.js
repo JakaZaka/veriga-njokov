@@ -204,6 +204,19 @@ const transferItem = async (req, res) => {
     clothingItem.wantToGet = [];
 
     const updateClothingItem = await clothingItem.save();
+
+    const io = req.app.get('io');
+    const connectedUsers = req.app.get('connectedUsers');
+
+    const recipientSocketId = connectedUsers.get(req.params.newUserId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit('clothingItemTransferred', {
+        itemName: updateClothingItem.name,
+        imageUrl: updateClothingItem.imageUrl,
+        message: `You have received ${updateClothingItem.name} from ${req.user.username}! 🎊`
+      });
+    }
+
     res.json(updateClothingItem);
   } catch (error) {
     res.status(500).json({ message: error.message });
