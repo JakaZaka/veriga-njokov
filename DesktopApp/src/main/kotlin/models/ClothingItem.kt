@@ -1,23 +1,23 @@
 package models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ClothingItem(
-    val id: String = "",
-    val fromShop: Boolean = false,
-    val clothingStoreId: String? = null,
-    val userId: String? = null,
+    val id: String? = null,
     val name: String,
     val category: ClothingCategory,
     val subCategory: String? = null,
-    val color: String? = null,
-    val size: String? = null,
-    val season: List<Season> = emptyList(),
-    val wantToGet: Boolean = false,
-    val liked: Boolean = false,
-    val wantToGive: Boolean = false,
+    val color: String,
+    val size: String,
+    val season: List<Season>,
     val imageUrl: String? = null,
     val notes: String? = null,
-    val price: Double? = null,
-    val metadata: Map<String, Any> = emptyMap()
+    val liked: Boolean = false,
+    val wearCount: Int = 0,
+    val userId: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )
 
 enum class ClothingCategory(val displayName: String) {
