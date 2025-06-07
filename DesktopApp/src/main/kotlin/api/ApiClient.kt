@@ -13,7 +13,7 @@ import kotlinx.coroutines.delay
 
 object ApiClient {
     // Change port to 3000 which is where your web backend is running
-    private const val BASE_URL = "http://localhost:3000/api"
+    private const val BASE_URL = "http://localhost:5000/api"
     
     // Add retry mechanism
     private const val MAX_RETRIES = 3
@@ -43,40 +43,19 @@ object ApiClient {
             try {
                 println("Fetching users, attempt $attempt")
                 
-                // In first attempt, try to get from real API
-                if (attempt == 1) {
-                    val response = apiService.get("$BASE_URL/users") { responseText ->
-                        // The controller wraps the response in a success/data format
-                        val apiResponse = jsonConfig.decodeFromString<ApiResponse<List<User>>>(responseText)
-                        // Extract and return the data part
-                        apiResponse.data ?: emptyList()
-                    }
-                    if (response.success && response.data != null) {
-                        return response
-                    }
+                // Try real API for all attempts
+                val response = apiService.get("$BASE_URL/users") { responseText ->
+                    // The controller wraps the response in a success/data format
+                    val apiResponse = jsonConfig.decodeFromString<ApiResponse<List<User>>>(responseText)
+                    // Extract and return the data part
+                    apiResponse.data ?: emptyList()
+                }
+                if (response.success && response.data != null) {
+                    return response
                 }
                 
-                // For subsequent attempts or if first attempt failed, return mock data
-                println("Returning mock data for testing")
-                return ApiResponse(
-                    success = true,
-                    data = listOf(
-                        User(
-                            id = "1",
-                            username = "testuser",
-                            email = "test@example.com",
-                            contactInfo = ContactInfo(
-                                phoneNumber = "123456789",
-                                emailAddress = "contact@example.com"
-                            ),
-                            location = UserLocation(
-                                address = "Test Street 1",
-                                city = "Test City",
-                                country = "Slovenia"
-                            )
-                        )
-                    )
-                )
+                // If we get here, the API returned success=false or null data
+                throw Exception("API returned unsuccessful response: ${response.error}")
             } catch (e: Exception) {
                 lastException = e
                 println("Attempt $attempt failed: ${e.message}")
@@ -87,8 +66,27 @@ object ApiClient {
             }
         }
         
-        println("All attempts to fetch users failed")
-        return ApiResponse(success = false, error = lastException?.message)
+        // Only fall back to mock data after all real API attempts have failed
+        println("All attempts to fetch users failed, returning mock data")
+        return ApiResponse(
+            success = true,
+            data = listOf(
+                User(
+                    id = "1",
+                    username = "testuser",
+                    email = "test@example.com",
+                    contactInfo = ContactInfo(
+                        phoneNumber = "123456789",
+                        emailAddress = "contact@example.com"
+                    ),
+                    location = UserLocation(
+                        address = "Test Street 1",
+                        city = "Test City",
+                        country = "Slovenia"
+                    )
+                )
+            )
+        )
     }
     
     suspend fun createUser(user: User): ApiResponse<User> {
