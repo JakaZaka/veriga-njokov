@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
@@ -19,10 +19,46 @@ import ExploreClothingItems from './components/ExploreClothingItems';
 import WeatherTab from './components/WeatherTab';
 import AdminDashboard from "./components/AdminDashboard";
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import Map from "./components/Map.js"
+import Map from './components/Map.js';
+import socket from './socket';
+import ReceivedItemModal from './components/ReceivedItemModal.js';  
+
+
 
 function App() {
   const [user, setUser] = useState(localStorage.user ? JSON.parse(localStorage.user) : null);
+  const [receivedItem, setReceivedItem] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const showReceivedItemModal = (item) => {
+    setReceivedItem(item);
+    setModalIsOpen(true);
+  }
+
+  const closeReceivedItemModal = () => {
+    setReceivedItem(null);
+    setModalIsOpen(false);
+  }
+
+  useEffect(() => {
+      // Add event listener once when component mounts
+      socket.on('clothingItemTransferred', (item) => {
+        console.log('🎁 Received item via socket:', item);
+        showReceivedItemModal(item);
+      });
+
+      // Cleanup on unmount to prevent multiple listeners
+      return () => {
+        socket.off('clothingItemTransferred');
+      };
+  }, []);
+
+  useEffect(() => {
+  if (user && user._id) {
+    socket.emit('login', user._id);
+    console.log(`🔌 Socket login emitted for user ${user._id}`);
+  }
+  }, [user]);
 
   const updateUserData = (userInfo) => {
     if (!userInfo) {
@@ -93,6 +129,11 @@ function App() {
               </>
             )}
           </nav>
+          <ReceivedItemModal
+            isOpen={modalIsOpen}
+            onRequestClose={closeReceivedItemModal}
+            item={receivedItem}
+          />
         </div>
       </UserContext.Provider>
     </Router>
