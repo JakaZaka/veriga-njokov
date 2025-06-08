@@ -29,6 +29,7 @@ function Profile() {
     const [chartData, setChartData] = useState([]);
     const [districtData, setDistrictData] = useState([]);
     const [closetData, setClosetData] = useState([]);
+    const [requests, setRequests] = useState([]);
 
     useEffect(function () {
         const getProfile = async function () {
@@ -67,6 +68,21 @@ function Profile() {
         .then(res => res.json())
         .then(setDistrictData)
         .catch(err => console.error("Failed to fetch trends", err));
+    }, []);
+
+    const fetchRequests = async () => {
+    try {
+        const res = await fetch('/api/users/requests');
+        const data = await res.json();
+        setRequests(data);
+        console.log("Fetched requests:", data);
+    } catch (err) {
+        console.error("Failed to fetch requests", err);
+    }
+    };
+
+    useEffect(() => {
+        fetchRequests();
     }, []);
 
     useEffect(() => {
@@ -200,7 +216,28 @@ function Profile() {
     };
 
    
+    const handleAcceptRequest = async (userId, clothingId) => {
+    try {
+        const res = await fetch(`/api/clothing/transfer/${clothingId}/${userId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ newUserId: userId })
+        });
 
+        if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message);
+        }
+
+        alert("Transfer successful!");
+        fetchRequests(); 
+    } catch (err) {
+        console.error(err);
+        alert("Transfer failed: " + err.message);
+    }
+    };
 
     return (
         <>
@@ -314,6 +351,37 @@ function Profile() {
                     </button>
                 )}
             </div>
+        </div>
+        <div className="requests-container">
+        <h3>Requests</h3>
+        {requests.length > 0 && requests.some(item => item.wantToGet.length > 0) ? (
+            <div className="request-cards">
+            {requests.map((item) =>
+                item.wantToGet.map((user) => (
+                <div
+                    key={`${item.itemId}-${user._id}`}
+                    className="card mb-3 p-3 shadow-sm"
+                    style={{ borderRadius: "12px" }}
+                >
+                    <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{user.username}</strong> wants to buy <strong>{item.name}</strong>
+                    </div>
+                    <button className="btn btn-success btn-sm"
+                    onClick={() => {
+                    handleAcceptRequest(user._id, item.itemId);
+                    console.log(`Accepted request from ${user.username} for item ${item.name}`)
+                    }}>
+                        Accept
+                    </button>
+                    </div>
+                </div>
+                ))
+            )}
+            </div>
+        ) : (
+            <p>No requests found.</p>
+        )}
         </div>
         <div className='graphs-container'>
             <div className='graphs'>

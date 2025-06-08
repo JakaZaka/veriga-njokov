@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('vaja3:server');
 var http = require('http');
+const {Server} = require('socket.io');
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +21,51 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: true, // Allow all origins for simplicity, adjust as needed
+    methods: ['GET', 'POST'],
+    credentials: true, // Allow credentials to be sent
+  }
+});
+
+const connectedUsers = new Map();
+
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // Handle user loging in
+  socket.on('login', (userId) => {
+    connectedUsers.set(userId, socket.id);
+    console.log(`User ${userId} logged in with socket ID ${socket.id}`);
+  });
+
+   /*setTimeout(() => {
+    io.to(socket.id).emit('clothingItemTransferred', {
+      id: '123',
+      name: 'Test Jacket',
+      description: 'A nice test jacket',
+    });
+  }, 5000);*/
+
+  // Handle user disconnecting
+  socket.on('disconnect', () => {
+    console.log('A user disconnected:', socket.id);
+    // Remove the user from the connected users map
+    for (let [userId, id] of connectedUsers.entries()) {
+      if (id === socket.id) {
+        connectedUsers.delete(userId);
+        console.log(`User ${userId} disconnected`);
+        break;
+      }
+    }
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+app.set('io', io); // Make io available in the app
+app.set('connectedUsers', connectedUsers); // Make connectedUsers available in the app
 
 /**
  * Listen on provided port, on all network interfaces.

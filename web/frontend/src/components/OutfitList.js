@@ -31,6 +31,13 @@ function OutfitList() {
             style={{ textDecoration: 'none' }}
           >
             <div className="outfit-card-img-frame">
+              {outfit.imageUrl && (
+                <img
+                  className="outfit-card-img-single"
+                  src={`${outfit.imageUrl}`}
+                  alt="Outfit"
+                />
+              )}
               {outfit.images && outfit.images.length === 1 ? (
                 <img
                   className="outfit-card-img-single"
@@ -39,6 +46,7 @@ function OutfitList() {
                 />
               ) : (
                 <div className="outfit-card-img-grid">
+                  
                   {(outfit.images && outfit.images.length > 0
                     ? outfit.images.slice(0, 4)
                     : [null, null, null, null]
