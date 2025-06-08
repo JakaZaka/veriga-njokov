@@ -100,8 +100,13 @@ object ApiClient {
     suspend fun updateUser(user: User): ApiResponse<User> {
         try {
             val userId = user.id ?: throw IllegalArgumentException("User ID cannot be null")
-            return apiService.put("$BASE_URL/users/$userId", user) { responseText ->
-                jsonConfig.decodeFromString<User>(responseText)
+            
+            // Use desktop-admin endpoint instead of regular users endpoint
+            return apiService.put("$BASE_URL/desktop-admin/users/$userId", user) { responseText ->
+                // The response is wrapped in an ApiResponse format
+                val apiResponse = jsonConfig.decodeFromString<ApiResponse<User>>(responseText)
+                // Extract the user from the response
+                apiResponse.data ?: throw Exception("No user data in response")
             }
         } catch (e: Exception) {
             println("Exception when updating user: ${e.message}")

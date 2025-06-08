@@ -2,11 +2,10 @@ package ui.dialogs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.Alignment
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -17,18 +16,19 @@ import models.UserLocation
 import repositories.UserRepository
 
 @Composable
-fun AddUserDialog(
+fun EditUserDialog(
+    user: User,
     onDismiss: () -> Unit,
     userRepository: UserRepository
 ) {
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var contactEmail by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("Slovenia") }
+    var username by remember { mutableStateOf(user.username) }
+    var email by remember { mutableStateOf(user.email) }
+    var role by remember { mutableStateOf(user.role) }
+    var phoneNumber by remember { mutableStateOf(user.contactInfo?.phoneNumber ?: "") }
+    var contactEmail by remember { mutableStateOf(user.contactInfo?.emailAddress ?: "") }
+    var address by remember { mutableStateOf(user.location?.address ?: "") }
+    var city by remember { mutableStateOf(user.location?.city ?: "") }
+    var country by remember { mutableStateOf(user.location?.country ?: "Slovenia") }
     
     var isSubmitting by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -39,21 +39,20 @@ fun AddUserDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 550.dp),  // Maximum height to prevent off-screen content
+                .heightIn(max = 550.dp),
             elevation = 8.dp,
             shape = MaterialTheme.shapes.medium
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Dialog title with fixed position
+                // Header with title
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colors.primary.copy(alpha = 0.1f))
                         .padding(16.dp)
                 ) {
-                    Text("Add New User", style = MaterialTheme.typography.h6)
+                    Text("Edit User", style = MaterialTheme.typography.h6)
                     
-                    // Error display
                     if (error != null) {
                         Text(
                             text = error!!,
@@ -63,7 +62,7 @@ fun AddUserDialog(
                     }
                 }
                 
-                // Scrollable content
+                // Scrollable form fields
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -86,10 +85,11 @@ fun AddUserDialog(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                         )
                         
+                        // Role dropdown
                         OutlinedTextField(
-                            value = password,
-                            onValueChange = { password = it },
-                            label = { Text("Password*") },
+                            value = role,
+                            onValueChange = { role = it },
+                            label = { Text("Role") },
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                         )
                         
@@ -144,7 +144,7 @@ fun AddUserDialog(
                     }
                 }
                 
-                // Button row with fixed position at bottom
+                // Fixed button row
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -161,18 +161,18 @@ fun AddUserDialog(
                     Button(
                         onClick = {
                             // Validate required fields
-                            if (username.isBlank() || email.isBlank() || password.isBlank()) {
-                                error = "Username, email and password are required"
+                            if (username.isBlank() || email.isBlank()) {
+                                error = "Username and email are required"
                                 return@Button
                             }
                             
                             isSubmitting = true
                             scope.launch {
                                 try {
-                                    val newUser = User(
+                                    val updatedUser = user.copy(
                                         username = username,
                                         email = email,
-                                        password = password,
+                                        role = role,
                                         contactInfo = ContactInfo(
                                             phoneNumber = phoneNumber.takeIf { it.isNotBlank() },
                                             emailAddress = contactEmail.takeIf { it.isNotBlank() }
@@ -184,14 +184,13 @@ fun AddUserDialog(
                                         )
                                     )
                                     
-                                    val result = userRepository.createUser(newUser)
+                                    val result = userRepository.updateUser(updatedUser)
                                     if (result != null) {
-                                        // Success case - repository returned a User object
+                                        // Success case
                                         onDismiss()
-                                        // Note: No need to call getAllUsers() here since the repository already does this
                                     } else {
-                                        // Error case - repository returned null
-                                        error = "Failed to create user"
+                                        // Error case
+                                        error = "Failed to update user"
                                         isSubmitting = false
                                     }
                                 } catch (e: Exception) {
@@ -208,7 +207,7 @@ fun AddUserDialog(
                                 color = MaterialTheme.colors.onPrimary
                             )
                         } else {
-                            Text("Add User")
+                            Text("Save Changes")
                         }
                     }
                 }
