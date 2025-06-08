@@ -192,7 +192,7 @@ const trendDataForChart = async (req, res) => {
 const CATEGORY_POSITIONS = {
   tops: {left: 20, top: 20},
   bottoms: {left: 20, top: 360},
-  shoes: {left: 340, top: 360},
+  shoes: {left: 340, top: 660},
   outerwear: {left: 340, top: 20},
   accessories: {left: 340, top: 360},
   other: {left: 20, top: 20},
@@ -230,7 +230,7 @@ async function createOutfitImage(items) {
 
     try {
       const imageBuffer = await downloadImageBuffer(imageUrl);
-
+      
       const resizedImageBuffer = await sharp(imageBuffer)
         .resize(300, 300, { fit: 'contain', background: 'white' })
         .toBuffer();
@@ -251,7 +251,7 @@ async function createOutfitImage(items) {
   const outputImage = await sharp({
     create: {
       width: 700,
-      height: 850,
+      height: 1050,
       channels: 3,
       background: 'white',
     },

@@ -1,16 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import '../ClothingGrid.css';
+import { UserContext } from '../userContext';
 
 function OutfitList() {
   const [outfits, setOutfits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const userContext = useContext(UserContext);
 
   useEffect(() => {
     async function fetchOutfits() {
       const res = await fetch('/api/outfits', { credentials: 'include' });
       const data = await res.json();
-      setOutfits(data);
+      const userOutfits = data.filter(outfit => String(outfit.user) === String(userContext.user._id));
+      setOutfits(userOutfits);
       setLoading(false);
     }
     fetchOutfits();
@@ -30,23 +33,29 @@ function OutfitList() {
             className="outfit-card"
             style={{ textDecoration: 'none' }}
           >
-            <div className="outfit-card-img-frame">
-              {outfit.imageUrl && (
+           <div className="outfit-card-img-frame">
+              {outfit.imageUrl ? (
                 <img
                   className="outfit-card-img-single"
-                  src={`${outfit.imageUrl}`}
+                  src={
+                    outfit.imageUrl.startsWith('/images/')
+                      ? outfit.imageUrl
+                      : `/images/${outfit.imageUrl}`
+                  }
                   alt="Outfit"
                 />
-              )}
-              {outfit.images && outfit.images.length === 1 ? (
+              ) : outfit.images && outfit.images.length === 1 ? (
                 <img
                   className="outfit-card-img-single"
-                  src={outfit.images[0].startsWith('/images/') ? outfit.images[0] : `/images/${outfit.images[0]}`}
+                  src={
+                    outfit.images[0].startsWith('/images/')
+                      ? outfit.images[0]
+                      : `/images/${outfit.images[0]}`
+                  }
                   alt="Outfit"
                 />
               ) : (
                 <div className="outfit-card-img-grid">
-                  
                   {(outfit.images && outfit.images.length > 0
                     ? outfit.images.slice(0, 4)
                     : [null, null, null, null]

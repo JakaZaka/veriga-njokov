@@ -14,10 +14,17 @@ function AddOutfit() {
   const [season, setSeason] = useState([]);
   const [occasion, setOccasion] = useState('');
   const userContext = useContext(UserContext);
+  //console.log(userContext);
+  //console.log("b");
 
   useEffect(() => {
     async function fetchClothes() {
-      const res = await fetch('/api/clothing', { credentials: 'include' });
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/clothing?mine=true', { 
+          method: 'GET',
+          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+       });
       const data = await res.json();
       setClothes(data);
     }
@@ -111,7 +118,14 @@ function AddOutfit() {
           <div className="mb-3">
             <label className="form-label">Select clothing items for this outfit:</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {clothes.map(item => (
+              {clothes
+              .filter(item => {
+                const itemUserId = typeof item.user === 'object' && item.user !== null
+                  ? item.user._id
+                  : item.user;
+                return itemUserId && userContext.user._id && String(itemUserId) === String(userContext.user._id);
+              })
+              .map(item => (
                 <div
                   key={item._id}
                   style={{
