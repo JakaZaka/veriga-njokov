@@ -154,4 +154,51 @@ object ApiClient {
             ApiResponse(success = false, error = e.message)
         }
     }
+    
+    // Clothing item-related API calls
+    suspend fun createClothingItem(item: ClothingItem): ApiResponse<ClothingItem> {
+        return try {
+            println("Creating clothing item: ${item.name}")
+            
+            apiService.post("$BASE_URL/desktop-admin/clothingItems", item) { responseText ->
+                println("Raw create response: $responseText") 
+                val apiResponse = jsonConfig.decodeFromString<ApiResponse<ClothingItem>>(responseText)
+                apiResponse.data ?: throw Exception("No data in response")
+            }
+        } catch (e: Exception) {
+            println("Failed to create clothing item: ${e.message}")
+            ApiResponse(success = false, error = e.message)
+        }
+    }
+    
+    // Get all clothing items
+    suspend fun getClothingItems(): ApiResponse<List<ClothingItem>> {
+        var lastException: Exception? = null
+        for (attempt in 1..MAX_RETRIES) {
+            try {
+                println("Fetching clothing items, attempt $attempt")
+                
+                val response = apiService.get("$BASE_URL/desktop-admin/clothingItems") { responseText ->
+                    val apiResponse = jsonConfig.decodeFromString<ApiResponse<List<ClothingItem>>>(responseText)
+                    apiResponse.data ?: emptyList()
+                }
+                if (response.success && response.data != null) {
+                    return response
+                }
+                
+                throw Exception("API returned unsuccessful response: ${response.error}")
+            } catch (e: Exception) {
+                lastException = e
+                println("Attempt $attempt failed: ${e.message}")
+                
+                if (attempt < MAX_RETRIES) {
+                    delay(RETRY_DELAY_MS)
+                }
+            }
+        }
+        
+        // Return empty list if all attempts fail
+        println("All attempts to fetch clothing items failed")
+        return ApiResponse(success = false, error = lastException?.message)
+    }
 }
