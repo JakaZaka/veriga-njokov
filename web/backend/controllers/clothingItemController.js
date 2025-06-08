@@ -2,6 +2,7 @@ const { get } = require('mongoose');
 const mongoose = require('mongoose');
 const { notify } = require('../app');
 const ClothingItem = require('../models/ClothingItem');
+const User = require('../models/User');
 
 // @desc    Get all clothing items for a user
 // @route   GET /api/clothing
@@ -246,12 +247,15 @@ const transferItem = async (req, res) => {
     const io = req.app.get('io');
     const connectedUsers = req.app.get('connectedUsers');
 
+    const user = await User.findById(req.session.userId);
+
     const recipientSocketId = connectedUsers.get(req.params.newUserId);
     if (recipientSocketId) {
+      console.log(`Emitting 'clothingItemTransferred' to socket ${recipientSocketId}`);
       io.to(recipientSocketId).emit('clothingItemTransferred', {
         itemName: updateClothingItem.name,
         imageUrl: updateClothingItem.imageUrl,
-        message: `You have received ${updateClothingItem.name} from ${req.user.username}! 🎊`
+        message: `You have received ${updateClothingItem.name} from ${user.username}! 🎊`
       });
     }
 

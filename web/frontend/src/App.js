@@ -43,6 +43,7 @@ function App() {
   useEffect(() => {
       // Add event listener once when component mounts
       socket.on('clothingItemTransferred', (item) => {
+        console.log('🎁 Received item via socket:', item);
         showReceivedItemModal(item);
       });
 
@@ -51,6 +52,13 @@ function App() {
         socket.off('clothingItemTransferred');
       };
   }, []);
+
+  useEffect(() => {
+  if (user && user._id) {
+    socket.emit('login', user._id);
+    console.log(`🔌 Socket login emitted for user ${user._id}`);
+  }
+  }, [user]);
 
   const updateUserData = (userInfo) => {
     if (!userInfo) {
