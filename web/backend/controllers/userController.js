@@ -189,15 +189,23 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// @desc    Get all users (admin only)
+// @desc    Get all users
 // @route   GET /api/users
-// @access  Private/Admin
+// @access  Public
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}).select('-password');
-    res.json(users);
+    // Wrap response in the expected format
+    res.json({
+      success: true,
+      data: users,
+      message: 'Users retrieved successfully'
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
   }
 };
 

@@ -11,6 +11,9 @@ class AppViewModel {
     private val repository = DataRepository()
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
+    // Add current user id property
+    var currentUserId: String? = null
+    
     // Expose repository data
     val clothingItems = repository.clothingItems
     val clothingStores = repository.clothingStores
@@ -22,10 +25,10 @@ class AppViewModel {
     fun updateClothingItem(item: ClothingItem) = repository.updateClothingItem(item)
     fun deleteClothingItem(id: String) = repository.deleteClothingItem(id)
     fun filterClothingItems(
-        category: ClothingCategory? = null,
-        season: Season? = null,
-        liked: Boolean? = null
-    ) = repository.filterClothingItems(category, season, liked)
+        category: String? = null,
+        season: String? = null,
+        favorite: Boolean? = null
+    ) = repository.filterClothingItems(category, season, favorite)
     
     fun generateDummyData(itemCount: Int = 10, weatherCount: Int = 5) {
         repository.generateDummyClothingItems(itemCount)
