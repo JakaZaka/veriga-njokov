@@ -14,7 +14,7 @@ import viewmodels.AppViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ClothingItemsScreen() {
+fun ClothingItemsScreen(viewModel: AppViewModel = remember { AppViewModel() }) {
     var showAddDialog by remember { mutableStateOf(false) }
     
     Column(modifier = Modifier.fillMaxSize()) {
@@ -47,11 +47,12 @@ fun ClothingItemsScreen() {
     // Add Item Dialog
     if (showAddDialog) {
         AddClothingItemDialog(
-            onDismiss = { showAddDialog = false },
-            onSave = { 
-                // TODO: Save item
+            onDismissRequest = { showAddDialog = false },
+            onItemAdded = { 
+                viewModel.addClothingItem(it)
                 showAddDialog = false 
-            }
+            },
+            viewModel = viewModel
         )
     }
 }
@@ -104,8 +105,11 @@ private fun ClothingItemsList() {
                     id = "$index",
                     name = "Sample Item $index",
                     category = ClothingCategory.TOPS,
+                    subCategory = "T-shirt", // Add this
                     color = "Blue",
-                    size = "M"
+                    size = "M",
+                    season = listOf(Season.ALL), // Add this
+                    userId = "sample-user" // Add this
                 )
             )
         }

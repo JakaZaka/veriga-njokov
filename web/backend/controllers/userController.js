@@ -95,7 +95,8 @@ const getUserProfile = async (req, res) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
-        contactInfo: user.contactInfo, // <-- add this line
+        contactInfo: user.contactInfo,
+        location: user.location,
       });
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -130,7 +131,7 @@ const updateUserProfile = async (req, res) => {
       }
       // Handle location/address
       if (req.body.address) {
-        // Geocode the address to get coordinates
+        // Geocode the address to get city, country, lat, lng
         const geoRes = await geocoder.geocode(req.body.address);
         if (geoRes && geoRes.length > 0) {
           const geo = geoRes[0];
@@ -138,6 +139,8 @@ const updateUserProfile = async (req, res) => {
             address: req.body.address,
             city: geo.city || "",
             country: geo.country || "",
+            lat: geo.latitude || null,
+            lng: geo.longitude || null,
             coordinates: {
               type: "Point",
               coordinates: [geo.longitude, geo.latitude]
@@ -158,7 +161,7 @@ const updateUserProfile = async (req, res) => {
         role: updatedUser.role,
         avatar: updatedUser.avatar,
         contactInfo: updatedUser.contactInfo,
-        location: updatedUser.location, // <-- add this
+        location: updatedUser.location, // <-- always return location
       });
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -167,6 +170,7 @@ const updateUserProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // @desc    Delete user
 // @route   DELETE /api/users
@@ -185,15 +189,23 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// @desc    Get all users (admin only)
+// @desc    Get all users
 // @route   GET /api/users
-// @access  Private/Admin
+// @access  Public
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}).select('-password');
-    res.json(users);
+    // Wrap response in the expected format
+    res.json({
+      success: true,
+      data: users,
+      message: 'Users retrieved successfully'
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
   }
 };
 
@@ -269,12 +281,12 @@ const nearbyUsers = async (req, res) => {
       },
     });
     
-   const usersWithExtras = await Promise.all(
+    const usersWithExtras = await Promise.all(
       users.map(async user => {
-        const outfits = await Outfit.find({ user: user._id }).populate('items.item');
+        const outfits = await Outfit.find({ user: user._id })
+          .populate('items.item')
+          .select('user name items season occasion liked likedBy imageUrl images');
         const clothesForSale = await ClothingItem.find({ user: user._id, wantToGive: true });
-        console.log(clothesForSale);
-
         return {
           ...user.toObject(),
           outfits,
