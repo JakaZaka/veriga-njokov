@@ -2,6 +2,7 @@ const { get } = require('mongoose');
 const mongoose = require('mongoose');
 const { notify } = require('../app');
 const ClothingItem = require('../models/ClothingItem');
+const User = require('../models/User');
 
 // @desc    Get all clothing items for a user
 // @route   GET /api/clothing
@@ -180,7 +181,7 @@ const getClosetStats = async (req, res) => {
   try {
     const clothingItems = await ClothingItem.find({ user: req.session.userId });
 
-    const occasionTypes = ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories', 'other'];
+    const occasionTypes = ['tops', 'bottoms', 'dresses', 'outerwear', 'shoes', 'accessories', 'other'];
 
    
     const trendMap = Object.fromEntries(occasionTypes.map(type => [type, 0]));
@@ -242,6 +243,41 @@ const toggleWantToGet = async (req, res) => {
   }
 };
 
+const transferItem = async (req, res) => {
+   try {
+    const clothingItem = await ClothingItem.findById(req.params.clothingId);
+
+    if (!clothingItem) {
+      return res.status(404).json({ message: "Clothing item not found" });
+    }
+
+    clothingItem.user = req.params.newUserId;
+    clothingItem.wantToGive = false;
+    clothingItem.wantToGet = [];
+
+    const updateClothingItem = await clothingItem.save();
+
+    const io = req.app.get('io');
+    const connectedUsers = req.app.get('connectedUsers');
+
+    const user = await User.findById(req.session.userId);
+
+    const recipientSocketId = connectedUsers.get(req.params.newUserId);
+    if (recipientSocketId) {
+      console.log(`Emitting 'clothingItemTransferred' to socket ${recipientSocketId}`);
+      io.to(recipientSocketId).emit('clothingItemTransferred', {
+        itemName: updateClothingItem.name,
+        imageUrl: updateClothingItem.imageUrl,
+        message: `You have received ${updateClothingItem.name} from ${user.username}! 🎊`
+      });
+    }
+
+    res.json(updateClothingItem);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getClothingItems,
   getClothingItemById,
@@ -251,5 +287,6 @@ module.exports = {
   favoriteClothingItem,
   incrementWearCount,
   getClosetStats,
+  transferItem,
   toggleWantToGet,
 } ;

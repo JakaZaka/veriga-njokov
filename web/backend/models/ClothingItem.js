@@ -36,10 +36,12 @@ const clothingItemSchema = mongoose.Schema(
       type: [String],
       enum: ['spring', 'summer', 'fall', 'winter', 'all'],
     },
-    wantToGet: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }],
+    wantToGet: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
     liked: {
       type: Boolean,
       default: false,

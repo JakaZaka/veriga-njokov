@@ -27,9 +27,10 @@ function AddClothingItem(props) {
         bottoms: "👖",
         shoes: "👟",
         outerwear: "🧥",
-        accessories: "🧢"
+        accessories: "🧢",
+        dresses: "👗",
     };
-    const mainCategories = ["tops", "bottoms", "outerwear", "shoes", "accessories"];
+    const mainCategories = ["tops", "bottoms", "outerwear", "shoes", "accessories", "dresses"];
 
     const seasonIcons = {
         spring: "🌸",

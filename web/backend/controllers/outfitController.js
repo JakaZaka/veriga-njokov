@@ -1,5 +1,10 @@
 
 const Outfit = require('../models/Outfit');
+const sharp = require('sharp');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 // @desc    Get all outfits for a user
 // @route   GET /api/outfits
@@ -27,9 +32,21 @@ const createOutfit = async (req, res) => {
     const outfit = new Outfit({
       ...req.body,
       user: req.session.userId, // <-- always set user here
-      images: req.body.images || [],
+      images: [],
     });
     const createdOutfit = await outfit.save();
+
+    const populatedOutfit = await Outfit.findById(createdOutfit._id).populate('items.item');
+    
+    const imagePath = await createOutfitImage(populatedOutfit.items);
+
+    console.log('ok');
+
+    createdOutfit.imageUrl = imagePath;
+
+    console.log('ok');
+    await createdOutfit.save();
+
     res.status(201).json(createdOutfit);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -171,6 +188,88 @@ const trendDataForChart = async (req, res) => {
   }
 };
 
+
+const CATEGORY_POSITIONS = {
+  tops: {left: 20, top: 20},
+  bottoms: {left: 20, top: 360},
+  shoes: {left: 340, top: 360},
+  outerwear: {left: 340, top: 20},
+  accessories: {left: 340, top: 360},
+  other: {left: 20, top: 20},
+}
+
+const BASE_URL = 'http://localhost:3000'
+
+async function downloadImageBuffer(url) {
+  try {
+    
+    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+    console.log("Attempting to download image from:", fullUrl);
+    const response = await axios.get(fullUrl, { responseType: 'arraybuffer' });
+    return Buffer.from(response.data, 'binary');
+  } catch (error) {
+    console.error(`Error downloading image from ${url}:`, error);
+    throw new Error('Failed to download image');
+  }
+}
+
+async function createOutfitImage(items) {
+  const composites = [];
+
+  for (const itemEntry of items) {
+    const item = itemEntry.item;
+    const category = item.category.toLowerCase();
+    const imageUrl = item.imageUrl;
+
+    if (!CATEGORY_POSITIONS[category]) {
+      console.warn(`Unknown category: ${category}`);
+      continue;
+    }
+
+    const position = CATEGORY_POSITIONS[category];
+
+    try {
+      const imageBuffer = await downloadImageBuffer(imageUrl);
+
+      const resizedImageBuffer = await sharp(imageBuffer)
+        .resize(300, 300, { fit: 'contain', background: 'white' })
+        .toBuffer();
+
+      composites.push({
+        input: resizedImageBuffer,
+        left: position.left,
+        top: position.top,
+      });
+
+      console.log('ok');
+    } catch (err) {
+      console.warn(`Failed to process image for item ${item._id}: ${err.message}`);
+      
+    }
+  }
+
+  const outputImage = await sharp({
+    create: {
+      width: 700,
+      height: 850,
+      channels: 3,
+      background: 'white',
+    },
+  })
+    .composite(composites)
+    .png()
+    .toBuffer();
+
+    const filename = crypto.randomBytes(16).toString('hex');
+    const outputPath = path.join(__dirname, '../public/images/', filename)
+
+    console.log('ok');
+    console.log(outputPath);
+  await fs.promises.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.promises.writeFile(outputPath, outputImage);
+
+  return `/images/${filename}`; 
+}
 
 module.exports = {
   getOutfits,
