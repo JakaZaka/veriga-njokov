@@ -16,8 +16,6 @@ function ClothingStore(props){
     }*/
 
 
-    
-
     return (
         <div className="clothingStore-card" /*onClick={handleClick}*/ style={{ cursor: 'pointer' }}>
             <h4>{props.clothingStore.clothingStoreId.name}</h4>

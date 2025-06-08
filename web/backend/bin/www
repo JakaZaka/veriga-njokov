@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
   }, 5000);*/
 
   // Handle user disconnecting
-  socket.on('disconnect', () => {
+  socket.on('logout', () => {
     console.log('A user disconnected:', socket.id);
     // Remove the user from the connected users map
     for (let [userId, id] of connectedUsers.entries()) {

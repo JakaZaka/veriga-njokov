@@ -43,6 +43,7 @@ function App() {
   useEffect(() => {
       // Add event listener once when component mounts
       socket.on('clothingItemTransferred', (item) => {
+        console.log('🎁 Received item via socket:', item);
         showReceivedItemModal(item);
       });
 
@@ -51,6 +52,13 @@ function App() {
         socket.off('clothingItemTransferred');
       };
   }, []);
+
+  useEffect(() => {
+  if (user && user._id) {
+    socket.emit('login', user._id);
+    console.log(`🔌 Socket login emitted for user ${user._id}`);
+  }
+  }, [user]);
 
   const updateUserData = (userInfo) => {
     if (!userInfo) {
@@ -108,10 +116,16 @@ function App() {
                 <Link to="/logout">Logout</Link> |{' '}
                 <Link to="/profile">Profile</Link> |{' '}
                 <Link to="/addClothingItem">Add Item</Link> |{' '}
-                <Link to="/addClothingStore">Add Store</Link> |{' '}
-                <Link to="/addClothingStoreLocation">Add Store location</Link> |{' '}
+
                 <Link to="/stores">Stores</Link> |{' '}
                 <Link to="/addOutfit">Add Outfit</Link>
+                {user.role === 'admin' && (
+                  <>
+                    {' '}| <Link to="/admin">Admin Dashboard</Link>
+                    <Link to="/addClothingStore">Add Store</Link> |{' '}
+                    <Link to="/addClothingStoreLocation">Add Store location</Link> |{' '}
+                  </>
+                )}
               </>
             )}
           </nav>

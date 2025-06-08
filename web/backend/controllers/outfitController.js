@@ -26,12 +26,12 @@ const createOutfit = async (req, res) => {
     if (!req.body.name || !req.body.items || !Array.isArray(req.body.items) || req.body.items.length === 0) {
       return res.status(400).json({ message: "Name and at least one clothing item are required." });
     }
-
-    console.log("Creating outfit with data:", req.body);
-
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ message: "User not authenticated." });
+    }
     const outfit = new Outfit({
       ...req.body,
-      //images: req.body.images || [],
+      user: req.session.userId, // <-- always set user here
       images: [],
     });
     const createdOutfit = await outfit.save();
@@ -72,8 +72,11 @@ const updateOutfit = async (req, res) => {
     if (!outfit) {
       return res.status(404).json({ message: 'Outfit not found' });
     }
+    // Prevent changing the user field
     Object.keys(req.body).forEach((key) => {
-      outfit[key] = req.body[key];
+      if (key !== 'user') {
+        outfit[key] = req.body[key];
+      }
     });
     const updatedOutfit = await outfit.save();
     res.json(updatedOutfit);

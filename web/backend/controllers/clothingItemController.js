@@ -1,6 +1,8 @@
 const { get } = require('mongoose');
+const mongoose = require('mongoose');
 const { notify } = require('../app');
 const ClothingItem = require('../models/ClothingItem');
+const User = require('../models/User');
 
 // @desc    Get all clothing items for a user
 // @route   GET /api/clothing
@@ -55,9 +57,9 @@ const createClothingItem = async (req, res) => {
       season: req.body.season,
       color: req.body.color,
       size: req.body.size,
-      imageUrl: "/images/"+req.file.filename,
+      imageUrl: "/images/" + req.file.filename,
       notes: req.body.notes,
-      user: req.session.userId, // Assuming user ID is stored in session
+      user: req.user?._id || req.session.userId,
     });
 
     const createdClothingItem = await clothingItem.save();
@@ -72,18 +74,21 @@ const createClothingItem = async (req, res) => {
 // @access  Private
 const updateClothingItem = async (req, res) => {
   try {
+    const userId = req.user?._id || req.session.userId;
     const clothingItem = await ClothingItem.findOne({
       _id: req.params.id,
-      user: req.user._id,
+      user: userId,
     });
 
     if (!clothingItem) {
       return res.status(404).json({ message: 'Clothing item not found' });
     }
 
-    // Update fields
-    Object.keys(req.body).forEach((key) => {
-      clothingItem[key] = req.body[key];
+    const updatableFields = ['wantToGive', 'name', 'category', 'subCategory', 'color', 'size', 'season', 'notes', 'imageUrl'];
+    updatableFields.forEach((key) => {
+      if (key in req.body) {
+        clothingItem[key] = req.body[key];
+      }
     });
 
     const updatedClothingItem = await clothingItem.save();
@@ -191,6 +196,40 @@ const getClosetStats = async (req, res) => {
   }
 };
 
+// @desc    Toggle wantToGet for a clothing item
+// @route   POST /api/clothing/:id/wantToGet
+// @access  Private
+const toggleWantToGet = async (req, res) => {
+  try {
+    const userId = req.user?._id || req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+    const { want } = req.body;
+    const item = await ClothingItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Item not found" });
+
+    if (!Array.isArray(item.wantToGet)) item.wantToGet = [];
+
+    const userObjectId = mongoose.Types.ObjectId(userId);
+
+    // Normalize wantToGet to ObjectId array
+    item.wantToGet = item.wantToGet.map(id => mongoose.Types.ObjectId(id));
+
+    if (want) {
+      if (!item.wantToGet.some(id => id.equals(userObjectId))) {
+        item.wantToGet.push(userObjectId);
+      }
+    } else {
+      item.wantToGet = item.wantToGet.filter(id => !id.equals(userObjectId));
+    }
+    await item.save();
+    res.json(item);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 const transferItem = async (req, res) => {
    try {
     const clothingItem = await ClothingItem.findById(req.params.clothingId);
@@ -208,12 +247,15 @@ const transferItem = async (req, res) => {
     const io = req.app.get('io');
     const connectedUsers = req.app.get('connectedUsers');
 
+    const user = await User.findById(req.session.userId);
+
     const recipientSocketId = connectedUsers.get(req.params.newUserId);
     if (recipientSocketId) {
+      console.log(`Emitting 'clothingItemTransferred' to socket ${recipientSocketId}`);
       io.to(recipientSocketId).emit('clothingItemTransferred', {
         itemName: updateClothingItem.name,
         imageUrl: updateClothingItem.imageUrl,
-        message: `You have received ${updateClothingItem.name} from ${req.user.username}! 🎊`
+        message: `You have received ${updateClothingItem.name} from ${user.username}! 🎊`
       });
     }
 
@@ -233,4 +275,5 @@ module.exports = {
   incrementWearCount,
   getClosetStats,
   transferItem,
-};
+  toggleWantToGet,
+} ;

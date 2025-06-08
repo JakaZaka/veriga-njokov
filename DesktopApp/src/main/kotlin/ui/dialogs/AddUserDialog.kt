@@ -1,8 +1,11 @@
 package ui.dialogs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,97 +37,118 @@ fun AddUserDialog(
     
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            elevation = 8.dp
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 550.dp),  // Maximum height to prevent off-screen content
+            elevation = 8.dp,
+            shape = MaterialTheme.shapes.medium
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Add New User", style = MaterialTheme.typography.h6)
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Error display
-                if (error != null) {
-                    Text(
-                        text = error!!,
-                        color = MaterialTheme.colors.error,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Dialog title with fixed position
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colors.primary.copy(alpha = 0.1f))
+                        .padding(16.dp)
+                ) {
+                    Text("Add New User", style = MaterialTheme.typography.h6)
+                    
+                    // Error display
+                    if (error != null) {
+                        Text(
+                            text = error!!,
+                            color = MaterialTheme.colors.error,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
                 
-                // Required fields
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Username*") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
+                // Scrollable content
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        // Required fields
+                        OutlinedTextField(
+                            value = username,
+                            onValueChange = { username = it },
+                            label = { Text("Username*") },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = { Text("Email*") },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = { Text("Password*") },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        
+                        // Optional fields - Contact info
+                        Text(
+                            "Contact Information",
+                            style = MaterialTheme.typography.subtitle1,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = phoneNumber,
+                            onValueChange = { phoneNumber = it },
+                            label = { Text("Phone Number") },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = contactEmail,
+                            onValueChange = { contactEmail = it },
+                            label = { Text("Contact Email") },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        
+                        // Optional fields - Location
+                        Text(
+                            "Location",
+                            style = MaterialTheme.typography.subtitle1,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = address,
+                            onValueChange = { address = it },
+                            label = { Text("Address") },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = city,
+                            onValueChange = { city = it },
+                            label = { Text("City") },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = country,
+                            onValueChange = { country = it },
+                            label = { Text("Country") },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                    }
+                }
                 
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email*") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-                
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Password*") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-                
-                // Optional fields - Contact info
-                Text(
-                    "Contact Information",
-                    style = MaterialTheme.typography.subtitle1,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                )
-                
-                OutlinedTextField(
-                    value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
-                    label = { Text("Phone Number") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-                
-                OutlinedTextField(
-                    value = contactEmail,
-                    onValueChange = { contactEmail = it },
-                    label = { Text("Contact Email") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-                
-                // Optional fields - Location
-                Text(
-                    "Location",
-                    style = MaterialTheme.typography.subtitle1,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                )
-                
-                OutlinedTextField(
-                    value = address,
-                    onValueChange = { address = it },
-                    label = { Text("Address") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-                
-                OutlinedTextField(
-                    value = city,
-                    onValueChange = { city = it },
-                    label = { Text("City") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-                
-                OutlinedTextField(
-                    value = country,
-                    onValueChange = { country = it },
-                    label = { Text("Country") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-                
-                // Buttons
+                // Button row with fixed position at bottom
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(

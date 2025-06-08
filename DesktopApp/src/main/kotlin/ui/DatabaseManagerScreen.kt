@@ -1,5 +1,6 @@
 package ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +13,8 @@ import repositories.UserRepository
 import kotlinx.coroutines.launch
 import models.*
 import ui.dialogs.AddUserDialog
+import ui.dialogs.EditUserDialog  // Add this import
+import api.ApiClient  // Add this import
 
 @Composable
 fun DatabaseManagerScreen() {
@@ -27,9 +30,11 @@ fun DatabaseManagerScreen() {
         try {
             isLoading = true
             errorMessage = null
+            
+            // Remove the login code and just load data directly
             userRepository.getAllUsers()
         } catch (e: Exception) {
-            errorMessage = "Failed to load users: ${e.message}"
+            errorMessage = "Error: ${e.message}"
         } finally {
             isLoading = false
         }
@@ -37,23 +42,30 @@ fun DatabaseManagerScreen() {
     
     // UI implementation with improved layout
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .background(MaterialTheme.colors.background)
     ) {
         // Header with title and add user button
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "User Management", 
-                style = MaterialTheme.typography.h4
+                "User Management",
+                style = MaterialTheme.typography.h4,
+                color = MaterialTheme.colors.primary
             )
-            
             Button(
-                onClick = { showAddUserDialog = true }
+                onClick = { showAddUserDialog = true },
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text("Add User")
+                Text("Add User", color = MaterialTheme.colors.onPrimary)
             }
         }
         
@@ -88,21 +100,26 @@ fun DatabaseManagerScreen() {
                 // User list in a scrollable lazy column
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
                 ) {
                     items(users) { user ->
                         UserCard(
                             user = user,
                             onDelete = { 
-                                scope.launch {
-                                    userRepository.deleteUser(user.id ?: "")
+                                user.id?.takeIf { it.isNotEmpty() }?.let { id ->
+                                    scope.launch {
+                                        userRepository.deleteUser(id)
+                                    }
                                 }
                             },
                             onUpdate = { updatedUser ->
                                 scope.launch {
                                     userRepository.updateUser(updatedUser)
                                 }
-                            }
+                            },
+                            userRepository = userRepository
                         )
                     }
                 }
@@ -122,11 +139,17 @@ fun DatabaseManagerScreen() {
 fun UserCard(
     user: User,
     onDelete: () -> Unit,
-    onUpdate: (User) -> Unit
+    onUpdate: (User) -> Unit,
+    userRepository: UserRepository // Add this parameter
 ) {
+    var showEditDialog by remember { mutableStateOf(false) }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = 4.dp
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .background(MaterialTheme.colors.surface, shape = MaterialTheme.shapes.medium),
+        elevation = 6.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // User info section
@@ -154,7 +177,10 @@ fun UserCard(
                 )
             }
             
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            Divider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
+            )
             
             // Contact info section
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -194,23 +220,33 @@ fun UserCard(
                 horizontalArrangement = Arrangement.End
             ) {
                 OutlinedButton(
-                    onClick = { 
-                        onUpdate(user.copy(
-                            username = "${user.username}_updated"
-                        )) 
-                    },
-                    modifier = Modifier.padding(end = 8.dp)
+                    onClick = { showEditDialog = true },
+                    modifier = Modifier.padding(end = 8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colors.primary),
+                    shape = MaterialTheme.shapes.medium
                 ) {
-                    Text("Update")
+                    Text("Edit")
                 }
-                
                 Button(
-                    onClick = onDelete,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
+                    onClick = { 
+                        println("Delete button clicked for user: ${user.id}")
+                        onDelete()
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error),
+                    shape = MaterialTheme.shapes.medium
                 ) {
                     Text("Delete", color = MaterialTheme.colors.onError)
                 }
             }
         }
+    }
+    
+    // Show edit dialog when needed
+    if (showEditDialog) {
+        EditUserDialog(
+            user = user,
+            onDismiss = { showEditDialog = false },
+            userRepository = userRepository
+        )
     }
 }

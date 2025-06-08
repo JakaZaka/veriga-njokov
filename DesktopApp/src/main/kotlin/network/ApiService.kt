@@ -78,10 +78,15 @@ class ApiService(private val client: HttpClient) {
     }
     
     // Generic DELETE method
-    suspend fun delete(url: String): ApiResponse<Boolean> {
+    suspend fun delete(url: String, headers: Map<String, String> = emptyMap()): ApiResponse<Boolean> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = client.delete<HttpResponse>(url)
+                val response = client.delete<HttpResponse> {
+                    url(url)
+                    headers.forEach { (key, value) ->
+                        header(key, value)
+                    }
+                }
                 ApiResponse(success = response.status.isSuccess(), data = response.status.isSuccess())
             } catch (e: Exception) {
                 ApiResponse(success = false, error = e.message)

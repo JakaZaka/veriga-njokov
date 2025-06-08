@@ -386,84 +386,106 @@ const clothingIcons = {
       </button>
       <h1>{selectedUser.username}</h1>
 
-      <h2>Outfits:</h2>
-      <div>
-  {selectedUser.outfits?.length > 0 ? (
-    selectedUser.outfits.map((outfit, index) => (
-      <div
-        key={index}
-        style={{
-          border: '1px solid #ccc',
-          padding: '8px',
-          borderRadius: '8px',
-          width: '100%',  
-          marginBottom: '12px', 
-          boxSizing: 'border-box',
-          position: 'relative' 
-        }}
-      >
-        {/* Heart button */}
-        <button
-          onClick={() => handleLikeOutfit(outfit._id)}
+<h2>Outfits:</h2>
+<div>
+  {selectedUser.outfits?.filter(outfit => {
+    // Defensive: fallback to selectedUser._id if outfit.user is missing
+    let outfitUserId;
+    if (outfit.user) {
+      outfitUserId = typeof outfit.user === 'object' && outfit.user !== null
+        ? outfit.user._id
+        : outfit.user;
+    } else {
+      outfitUserId = selectedUser._id;
+    }
+    return outfitUserId && selectedUser._id && String(outfitUserId) === String(selectedUser._id);
+  }).length > 0 ? (
+    selectedUser.outfits
+      .filter(outfit => {
+        let outfitUserId;
+        if (outfit.user) {
+          outfitUserId = typeof outfit.user === 'object' && outfit.user !== null
+            ? outfit.user._id
+            : outfit.user;
+        } else {
+          outfitUserId = selectedUser._id;
+        }
+        return outfitUserId && selectedUser._id && String(outfitUserId) === String(selectedUser._id);
+      })
+      .map((outfit, index) => (
+        <div
+          key={index}
           style={{
-            position: 'absolute',
-            top: '8px',
-            right: '8px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '20px',
-            //color: outfit.likedBy?.includes(session.userId) ? 'red' : '#999'
+            border: '1px solid #ccc',
+            padding: '8px',
+            borderRadius: '8px',
+            width: '100%',
+            marginBottom: '12px',
+            boxSizing: 'border-box',
+            position: 'relative'
           }}
-          aria-label="Like outfit"
         >
-          {outfit.likedBy?.includes(userContext.user?._id) ? (
-    <Flame color="orangered" fill="orangered" />
-  ) : (
-    <Flame />
-  )}
-        </button>
-
-        <h3 style={{ marginBottom: '6px' }}>{outfit.name}</h3>
-        {outfit.images && outfit.images.length > 0 && (
-          <div
+          {/* Heart button */}
+          <button
+            onClick={() => handleLikeOutfit(outfit._id)}
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gridTemplateRows: 'repeat(2, 1fr)',
-              gap: '2px',
-              width: '100%',
-              borderRadius: '4px'
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '20px',
             }}
+            aria-label="Like outfit"
           >
-            {outfit.images.slice(0, 4).map((img, idx) => (
-              <img
-                key={idx}
-                src={img.startsWith('/images/') ? img : `/images/${img}`}
-                alt={`Outfit ${idx + 1}`}
-                style={{
-                  width: '100%',
-                  aspectRatio: '1 / 1',
-                  objectFit: 'cover',
-                  background: '#eee',
-                  borderRadius: '2px'
-                }}
-              />
-            ))}
-          </div>
-        )}
-        <p style={{ margin: '6px 0', fontSize: '0.85em', color: '#666' }}>
-          {outfit.liked} 🔥
-        </p>
-      </div>
-    ))
+            {outfit.likedBy?.includes(userContext.user?._id) ? (
+              <Flame color="orangered" fill="orangered" />
+            ) : (
+              <Flame />
+            )}
+          </button>
+
+          <h3 style={{ marginBottom: '6px' }}>{outfit.name}</h3>
+          {outfit.images && outfit.images.length > 0 && (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gridTemplateRows: 'repeat(2, 1fr)',
+                gap: '2px',
+                width: '100%',
+                borderRadius: '4px'
+              }}
+            >
+              {outfit.images.slice(0, 4).map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img.startsWith('/images/') ? img : `/images/${img}`}
+                  alt={`Outfit ${idx + 1}`}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1 / 1',
+                    objectFit: 'cover',
+                    background: '#eee',
+                    borderRadius: '2px'
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          <p style={{ margin: '6px 0', fontSize: '0.85em', color: '#666' }}>
+            {outfit.liked} 🔥
+          </p>
+        </div>
+      ))
   ) : (
     <div>No outfits found.</div>
   )}
 </div>
 
-      <h4>Clothes for Sale:</h4>
-      <div>
+<h4>Clothes for Sale:</h4>
+<div>
   {selectedUser.clothesForSale?.length > 0 ? (
     selectedUser.clothesForSale.map((item, index) => (
       <div
@@ -472,14 +494,14 @@ const clothingIcons = {
           border: '1px solid #ccc',
           borderRadius: '8px',
           padding: '8px',
-          width: '100%',  // full width
+          width: '100%',
           marginBottom: '12px',
           boxSizing: 'border-box'
         }}
       >
-        {item.image && (
+        {item.imageUrl && (
           <img
-            src={item.image.startsWith('/images/') ? item.image : `/images/${item.image}`}
+            src={item.imageUrl.startsWith('/images/') ? item.imageUrl : `/images/${item.imageUrl}`}
             alt={item.name}
             style={{
               width: '100%',
