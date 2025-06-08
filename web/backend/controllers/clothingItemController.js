@@ -123,19 +123,31 @@ const deleteClothingItem = async (req, res) => {
 // @access  Private
 const favoriteClothingItem = async (req, res) => {
   try {
-    const clothingItem = await ClothingItem.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
-
-    if (!clothingItem) {
-      return res.status(404).json({ message: 'Clothing item not found' });
+    const userId = req.user?._id || req.session.userId;
+    //console.log(userId);
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
     }
+    const { want } = req.body;
+    //console.log(want);
+    const item = await ClothingItem.findById(req.params.id);
+    //console.log(item);
+    if (!item) return res.status(404).json({ message: "Item not found" });
 
-    clothingItem.favorite = !clothingItem.favorite;
-    const updatedClothingItem = await clothingItem.save();
-    
-    res.json(updatedClothingItem);
+    if (!Array.isArray(item.likedBy)) item.likedBy = [];
+    //console.log(item.wantToGet);
+   
+
+    if (want) {
+      if (!item.likedBy.some(User => User.equals(userId))) {
+        item.likedBy.push(userId);
+        //console.log(item.wantToGet);
+      }
+    } else {
+      item.likedBy = item.likedBy.filter(User => !User.equals(userId));
+    }
+    await item.save();
+    res.json(item);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -201,26 +213,27 @@ const getClosetStats = async (req, res) => {
 const toggleWantToGet = async (req, res) => {
   try {
     const userId = req.user?._id || req.session.userId;
+    //console.log(userId);
     if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
     const { want } = req.body;
+    //console.log(want);
     const item = await ClothingItem.findById(req.params.id);
+    //console.log(item);
     if (!item) return res.status(404).json({ message: "Item not found" });
 
     if (!Array.isArray(item.wantToGet)) item.wantToGet = [];
-
-    const userObjectId = mongoose.Types.ObjectId(userId);
-
-    // Normalize wantToGet to ObjectId array
-    item.wantToGet = item.wantToGet.map(id => mongoose.Types.ObjectId(id));
+    //console.log(item.wantToGet);
+   
 
     if (want) {
-      if (!item.wantToGet.some(id => id.equals(userObjectId))) {
-        item.wantToGet.push(userObjectId);
+      if (!item.wantToGet.some(User => User.equals(userId))) {
+        item.wantToGet.push(userId);
+        //console.log(item.wantToGet);
       }
     } else {
-      item.wantToGet = item.wantToGet.filter(id => !id.equals(userObjectId));
+      item.wantToGet = item.wantToGet.filter(User => !User.equals(userId));
     }
     await item.save();
     res.json(item);

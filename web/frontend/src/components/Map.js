@@ -94,6 +94,7 @@ export default function SimpleMap() {
   shoes: false,
   outerwear: false,
   accessories: false,
+  dresses: false,
 });
 
 const clothingIcons = {
@@ -101,7 +102,8 @@ const clothingIcons = {
   bottoms: "👖",
   shoes: "👟",
   outerwear: "🧥",
-  accessories: "🧢"
+  accessories: "🧢",
+  dresses:"👗",
 };
 
 
