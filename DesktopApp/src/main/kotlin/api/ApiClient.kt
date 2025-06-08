@@ -37,24 +37,21 @@ object ApiClient {
     private val apiService = ApiService(client)
     
     // User-related API calls with retry mechanism
+    // Update the getUsers method to use the desktop admin endpoint
     suspend fun getUsers(): ApiResponse<List<User>> {
         var lastException: Exception? = null
         for (attempt in 1..MAX_RETRIES) {
             try {
                 println("Fetching users, attempt $attempt")
                 
-                // Try real API for all attempts
-                val response = apiService.get("$BASE_URL/users") { responseText ->
-                    // The controller wraps the response in a success/data format
+                val response = apiService.get("$BASE_URL/desktop-admin/users") { responseText ->
                     val apiResponse = jsonConfig.decodeFromString<ApiResponse<List<User>>>(responseText)
-                    // Extract and return the data part
                     apiResponse.data ?: emptyList()
                 }
                 if (response.success && response.data != null) {
                     return response
                 }
                 
-                // If we get here, the API returned success=false or null data
                 throw Exception("API returned unsuccessful response: ${response.error}")
             } catch (e: Exception) {
                 lastException = e
@@ -112,11 +109,43 @@ object ApiClient {
         }
     }
     
-    suspend fun deleteUser(userId: String): ApiResponse<Boolean> {
+    // Add token storage
+    private var authToken: String? = null
+    
+    // Update the login method
+    suspend fun login(username: String, password: String): ApiResponse<User> {
         return try {
-            apiService.delete("$BASE_URL/users/$userId")
+            // Simplify the login call to avoid nested ApiResponse types
+            apiService.post("$BASE_URL/users/login", 
+                mapOf("username" to username, "password" to password)) { responseText ->
+                try {
+                    // Parse user directly from response
+                    val user = jsonConfig.decodeFromString<User>(responseText)
+                    // Store token for future requests
+                    authToken = user.token
+                    user
+                } catch (e: Exception) {
+                    println("Failed to parse login response: ${e.message}")
+                    throw e  // Rethrow to be caught by the outer try/catch
+                }
+            }
         } catch (e: Exception) {
-            println("Exception when deleting user: ${e.message}")
+            println("Login failed: ${e.message}")
+            ApiResponse(success = false, error = e.message)
+        }
+    }
+    
+    // Update the deleteUser method to be simpler now that it works
+    suspend fun deleteUser(userId: String): ApiResponse<Boolean> {
+        if (userId.isBlank()) {
+            return ApiResponse(success = false, error = "User ID cannot be empty")
+        }
+        
+        return try {
+            val url = "$BASE_URL/desktop-admin/users/$userId"
+            apiService.delete(url)
+        } catch (e: Exception) {
+            println("Failed to delete user: ${e.message}")
             ApiResponse(success = false, error = e.message)
         }
     }

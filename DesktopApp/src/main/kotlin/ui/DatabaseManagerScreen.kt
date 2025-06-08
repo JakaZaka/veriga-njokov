@@ -12,6 +12,7 @@ import repositories.UserRepository
 import kotlinx.coroutines.launch
 import models.*
 import ui.dialogs.AddUserDialog
+import api.ApiClient  // Add this import
 
 @Composable
 fun DatabaseManagerScreen() {
@@ -25,11 +26,22 @@ fun DatabaseManagerScreen() {
     // Load users when screen initializes
     LaunchedEffect(Unit) {
         try {
+            // First try to login silently with admin credentials
             isLoading = true
             errorMessage = null
+            
+            // Auto-login with admin credentials
+            val loginResult = ApiClient.login("admin", "admin123")
+            if (loginResult.success) {
+                println("Admin auto-login successful")
+            } else {
+                println("Admin auto-login failed: ${loginResult.error}")
+            }
+            
+            // Now load the data
             userRepository.getAllUsers()
         } catch (e: Exception) {
-            errorMessage = "Failed to load users: ${e.message}"
+            errorMessage = "Error: ${e.message}"
         } finally {
             isLoading = false
         }
@@ -94,8 +106,11 @@ fun DatabaseManagerScreen() {
                         UserCard(
                             user = user,
                             onDelete = { 
-                                scope.launch {
-                                    userRepository.deleteUser(user.id ?: "")
+                                // Make sure user.id is not null or empty
+                                user.id?.takeIf { it.isNotEmpty() }?.let { id ->
+                                    scope.launch {
+                                        userRepository.deleteUser(id)
+                                    }
                                 }
                             },
                             onUpdate = { updatedUser ->
@@ -205,7 +220,10 @@ fun UserCard(
                 }
                 
                 Button(
-                    onClick = onDelete,
+                    onClick = { 
+                        println("Delete button clicked for user: ${user.id}")
+                        onDelete()
+                    },
                     colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
                 ) {
                     Text("Delete", color = MaterialTheme.colors.onError)
