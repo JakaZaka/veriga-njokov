@@ -199,8 +199,6 @@ function Profile() {
         }
     };
 
-   
-
 
     return (
         <>
@@ -304,7 +302,15 @@ function Profile() {
                         </li>
                         <li className="list-group-item d-flex justify-content-between align-items-center">
                             <strong>Address:</strong>
-                            <span>{profile.location?.address || "-"}</span>
+                                <span>
+                                {profile.location
+                                    ? [
+                                        profile.location.address,
+                                        profile.location.city,
+                                        profile.location.country
+                                    ].filter(Boolean).join(', ')
+                                    : "-"}
+                            </span>
                         </li>
                     </ul>
                 )}

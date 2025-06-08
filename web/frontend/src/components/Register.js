@@ -6,8 +6,9 @@ function Register() {
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [emailAdress, setEmailAdress] = useState("");
+    const [emailAddress, setEmailAddress] = useState("");
     const [error, setError] = useState("");
+    const [location, setLocation] = useState("");
 
     async function handleRegister(e) {
         e.preventDefault();
@@ -24,8 +25,9 @@ function Register() {
                 password: password,
                 contactInfo: {
                     phoneNumber: phoneNumber,
-                    emailAdress: emailAdress
-                }
+                    emailAddress: emailAddress
+                },
+                location: location
             })
         });
         
@@ -38,7 +40,7 @@ function Register() {
             setPassword("");
             setEmail("");
             setPhoneNumber("");
-            setEmailAdress("");
+            setEmailAddress("");
             setError(data.message || "Registration failed. Please try again.");
         }
     }
@@ -105,10 +107,21 @@ function Register() {
                         <input 
                             type="email"
                             className="form-control"
-                            id="emailAdress"
+                            id="emailAddress"
                             placeholder="Enter your contact email"
-                            value={emailAdress}
-                            onChange={(e) => setEmailAdress(e.target.value)}
+                            value={emailAddress}
+                            onChange={(e) => setEmailAddress(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="location" className="form-label">Location</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="location"
+                            placeholder="Enter your location"
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
                         />
                     </div>
                     <button type="submit" className="btn btn-primary w-100">Register</button>

@@ -9,7 +9,8 @@ const {
   deleteClothingItem,
   favoriteClothingItem,
   incrementWearCount,
-  getClosetStats
+  getClosetStats,
+  toggleWantToGet
 } = require('../controllers/clothingItemController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -30,5 +31,6 @@ router.route('/:id')
 
 router.put('/:id/favorite', favoriteClothingItem);
 router.put('/:id/wear', incrementWearCount);
+router.post('/:id/wantToGet', protect, toggleWantToGet);
 
 module.exports = router;
