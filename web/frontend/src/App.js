@@ -108,10 +108,16 @@ function App() {
                 <Link to="/logout">Logout</Link> |{' '}
                 <Link to="/profile">Profile</Link> |{' '}
                 <Link to="/addClothingItem">Add Item</Link> |{' '}
-                <Link to="/addClothingStore">Add Store</Link> |{' '}
-                <Link to="/addClothingStoreLocation">Add Store location</Link> |{' '}
+
                 <Link to="/stores">Stores</Link> |{' '}
                 <Link to="/addOutfit">Add Outfit</Link>
+                {user.role === 'admin' && (
+                  <>
+                    {' '}| <Link to="/admin">Admin Dashboard</Link>
+                    <Link to="/addClothingStore">Add Store</Link> |{' '}
+                    <Link to="/addClothingStoreLocation">Add Store location</Link> |{' '}
+                  </>
+                )}
               </>
             )}
           </nav>

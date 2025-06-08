@@ -34,6 +34,7 @@ const clothingStoreRoutes = require('./routes/clothingStoreRoutes'); // Add this
 const enumRoutes = require('./routes/enumRoutes'); // Add this line
 const locationRoutes = require('./routes/locationRoutes'); 
 const adminRoutes = require('./routes/adminRoutes');
+const desktopAdminRoutes = require('./routes/desktopAdminRoutes'); // Add this line
 
 
 var session = require('express-session');
@@ -53,6 +54,7 @@ app.use(function (req, res, next) {
 
 // Register routes
 app.use('/api/admin', adminRoutes);
+app.use('/api/desktop-admin', desktopAdminRoutes); // Add this line
 
 // API routes
 app.use('/api/users', userRoutes);
