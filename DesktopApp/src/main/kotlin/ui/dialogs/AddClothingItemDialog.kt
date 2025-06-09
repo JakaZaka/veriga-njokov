@@ -1,16 +1,25 @@
 package ui.dialogs
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.IconButton
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import models.ClothingItem
 import models.ClothingCategory
-import models.Season // Import Season enum
+import models.Season
 import viewmodels.AppViewModel
+import androidx.compose.foundation.clickable
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddClothingItemDialog(
     onDismissRequest: () -> Unit,
@@ -21,16 +30,32 @@ fun AddClothingItemDialog(
     var category by remember { mutableStateOf(ClothingCategory.TOPS) }
     var subCategory by remember { mutableStateOf("") }
     var color by remember { mutableStateOf("") }
-    var size by remember { mutableStateOf("") }
-    var season by remember { mutableStateOf("") }
+    var size by remember { mutableStateOf("M") }
     var notes by remember { mutableStateOf("") }
+    
+    // Track selected seasons with a mutable set
+    val selectedSeasons = remember { mutableStateListOf<Season>() }
+    
+    // Initialize with SUMMER selected by default
+    LaunchedEffect(Unit) {
+        if (selectedSeasons.isEmpty()) {
+            selectedSeasons.add(Season.SUMMER)
+        }
+    }
+    
+    // Available sizes
+    val availableSizes = listOf("XS", "S", "M", "L", "XL", "XXL")
 
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             elevation = 8.dp
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()) // Add scrolling
+            ) {
                 Text("Add New Clothing Item", style = MaterialTheme.typography.h6)
                 Spacer(modifier = Modifier.height(16.dp))
                 
@@ -44,26 +69,34 @@ fun AddClothingItemDialog(
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // Category dropdown
-                // Convert enum to string for display and convert back when needed
+                // Category dropdown with all options
                 val categories = ClothingCategory.values()
                 var expandedCategory by remember { mutableStateOf(false) }
-                
-                ExposedDropdownMenuBox(
-                    expanded = expandedCategory,
-                    onExpandedChange = { expandedCategory = !expandedCategory }
-                ) {
+
+                Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        value = category.displayName, // Use displayName
+                        value = category.displayName,
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Category") },
+                        trailingIcon = { 
+                            IconButton(onClick = { expandedCategory = !expandedCategory }) {
+                                Icon(
+                                    imageVector = if (expandedCategory) 
+                                        Icons.Filled.ArrowDropUp 
+                                    else 
+                                        Icons.Filled.ArrowDropDown,
+                                    contentDescription = "Toggle dropdown"
+                                )
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                     
-                    ExposedDropdownMenu(
+                    DropdownMenu(
                         expanded = expandedCategory,
-                        onDismissRequest = { expandedCategory = false }
+                        onDismissRequest = { expandedCategory = false },
+                        modifier = Modifier.fillMaxWidth(0.9f)
                     ) {
                         categories.forEach { option ->
                             DropdownMenuItem(
@@ -72,7 +105,7 @@ fun AddClothingItemDialog(
                                     expandedCategory = false
                                 }
                             ) {
-                                Text(text = option.displayName) // Use displayName
+                                Text(text = option.displayName)
                             }
                         }
                     }
@@ -100,23 +133,85 @@ fun AddClothingItemDialog(
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // Size field
-                OutlinedTextField(
-                    value = size,
-                    onValueChange = { size = it },
-                    label = { Text("Size") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // Size dropdown with standard sizes
+                var sizeExpanded by remember { mutableStateOf(false) }
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = size,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Size") },
+                        trailingIcon = { 
+                            IconButton(onClick = { sizeExpanded = !sizeExpanded }) {
+                                Icon(
+                                    imageVector = if (sizeExpanded) 
+                                        Icons.Filled.ArrowDropUp 
+                                    else 
+                                        Icons.Filled.ArrowDropDown,
+                                    contentDescription = "Toggle dropdown"
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    DropdownMenu(
+                        expanded = sizeExpanded,
+                        onDismissRequest = { sizeExpanded = false },
+                        modifier = Modifier.fillMaxWidth(0.9f)
+                    ) {
+                        availableSizes.forEach { sizeOption ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    size = sizeOption
+                                    sizeExpanded = false
+                                }
+                            ) {
+                                Text(sizeOption)
+                            }
+                        }
+                    }
+                }
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // Season field
-                OutlinedTextField(
-                    value = season,
-                    onValueChange = { season = it },
-                    label = { Text("Season") },
-                    modifier = Modifier.fillMaxWidth()
+                // Season toggle buttons
+                Text(
+                    "Seasons",
+                    style = MaterialTheme.typography.subtitle1,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                 )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Create a button for each season
+                    Season.values().filter { it != Season.ALL }.forEach { season ->
+                        val isSelected = selectedSeasons.contains(season)
+                        OutlinedButton(
+                            onClick = {
+                                if (isSelected) {
+                                    selectedSeasons.remove(season)
+                                } else {
+                                    selectedSeasons.add(season)
+                                }
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                backgroundColor = if (isSelected) 
+                                    MaterialTheme.colors.primary.copy(alpha = 0.1f) 
+                                else 
+                                    MaterialTheme.colors.surface
+                            ),
+                            border = ButtonDefaults.outlinedBorder.copy(
+                                width = if (isSelected) 2.dp else 1.dp
+                            ),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(season.displayName)
+                        }
+                    }
+                }
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
@@ -130,6 +225,7 @@ fun AddClothingItemDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
+                // Buttons row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -145,56 +241,28 @@ fun AddClothingItemDialog(
                     Button(
                         onClick = {
                             // Create new ClothingItem with all required parameters
-                            val seasonEnumList = Season.values().find { it.displayName.equals(season, ignoreCase = true) || it.name.equals(season, ignoreCase = true) }
-                                ?.let { listOf(it) } ?: emptyList()
-
                             val newItem = ClothingItem(
                                 name = name,
-                                category = category, // Pass enum object directly
-                                subCategory = subCategory.ifBlank { null }, // Pass null if blank, or keep as is if blank string is intended
+                                category = category,
+                                subCategory = subCategory.ifBlank { null },
                                 color = color,
                                 size = size,
-                                season = seasonEnumList, // Convert string to List<Season>
+                                season = if (selectedSeasons.isEmpty()) 
+                                           listOf(Season.SUMMER) 
+                                         else 
+                                           selectedSeasons.toList(),
                                 notes = notes,
-                                userId = viewModel.currentUserId // Use userId, and pass null if currentUserId is null
+                                userId = viewModel.currentUserId
                             )
                             onItemAdded(newItem)
                             onDismissRequest()
                         },
-                        enabled = name.isNotBlank() && subCategory.isNotBlank() && season.isNotBlank()
+                        enabled = name.isNotBlank() && color.isNotBlank() && selectedSeasons.isNotEmpty()
                     ) {
                         Text("Add Item")
                     }
                 }
             }
         }
-    }
-}
-
-// Helper function to create ExposedDropdownMenuBox if not available
-@Composable
-fun ExposedDropdownMenuBox(
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    content: @Composable BoxScope.() -> Unit
-) {
-    Box {
-        content()
-    }
-}
-
-// Helper function to create ExposedDropdownMenu if not available
-@Composable
-fun ExposedDropdownMenu(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    if (expanded) {
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = onDismissRequest,
-            content = content
-        )
     }
 }

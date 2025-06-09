@@ -11,7 +11,7 @@ import models.ApiResponse
 /**
  * Service for making API requests to the backend
  */
-class ApiService(private val client: HttpClient) {
+class ApiService(val client: HttpClient) {
     
     // Generic GET method
     suspend fun <T> get(url: String, responseParser: suspend (String) -> T): ApiResponse<T> {
@@ -86,6 +86,41 @@ class ApiService(private val client: HttpClient) {
                     headers.forEach { (key, value) ->
                         header(key, value)
                     }
+                }
+                ApiResponse(success = response.status.isSuccess(), data = response.status.isSuccess())
+            } catch (e: Exception) {
+                ApiResponse(success = false, error = e.message)
+            }
+        }
+    }
+
+    // Inline reified DELETE method - add suspend modifier
+    inline suspend fun <reified T> delete(url: String, crossinline responseHandler: (String) -> Any): T {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = client.delete<HttpResponse> {
+                    url(url)
+                }
+                
+                if (response.status.isSuccess()) {
+                    val text = response.readText()
+                    val result = responseHandler(text)
+                    result as T
+                } else {
+                    throw Exception("Error: ${response.status}")
+                }
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+    }
+
+    // Non-reified version for simple delete operations
+    suspend fun deleteWithoutResponse(url: String): ApiResponse<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = client.delete<HttpResponse> {
+                    url(url)
                 }
                 ApiResponse(success = response.status.isSuccess(), data = response.status.isSuccess())
             } catch (e: Exception) {
