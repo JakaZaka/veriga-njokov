@@ -49,6 +49,7 @@ class ScraperViewModel(private val repository: ClothingItemRepository) {
         }
     }
     
+    // Update the saveSelectedItems method
     fun saveSelectedItems() {
         isLoading = true
         errorMessage = null
@@ -59,14 +60,19 @@ class ScraperViewModel(private val repository: ClothingItemRepository) {
                 selectedItems.forEach { item ->
                     val clothingItem = ClothingItem(
                         name = item.name,
-                        category = mapCategoryToEnum(item.category),  // Convert string to enum
+                        category = mapCategoryToEnum(item.category),
                         color = item.color,
-                        size = "M", // Default size
-                        season = listOf(models.Season.ALL),  // Add missing season parameter
+                        size = item.size,
+                        season = item.seasons.map { seasonString -> mapStringToSeason(seasonString) }, // Convert String to Season
                         imageUrl = item.imageUrl,
-                        notes = "Scraped from H&M: ${item.link}"
+                        notes = item.notes
                     )
                     repository.createClothingItem(clothingItem)
+                }
+                
+                // After successful save, clear selection
+                scrapedItems = scrapedItems.map { 
+                    if (it.selected) it.copy(selected = false) else it 
                 }
             } catch (e: Exception) {
                 errorMessage = "Failed to save items: ${e.message}"
@@ -85,6 +91,24 @@ class ScraperViewModel(private val repository: ClothingItemRepository) {
             category.contains("shoes", ignoreCase = true) -> models.ClothingCategory.SHOES
             category.contains("accessories", ignoreCase = true) -> models.ClothingCategory.ACCESSORIES
             else -> models.ClothingCategory.OTHER
+        }
+    }
+
+    // Add this method:
+    fun editItem(original: ScrapedClothingItem, edited: ScrapedClothingItem) {
+        scrapedItems = scrapedItems.map {
+            if (it == original) edited else it
+        }
+    }
+
+    // Add this helper method to convert String to Season enum
+    private fun mapStringToSeason(season: String): models.Season {
+        return when (season.lowercase()) {
+            "spring" -> models.Season.SPRING
+            "summer" -> models.Season.SUMMER
+            "fall" -> models.Season.FALL
+            "winter" -> models.Season.WINTER
+            else -> models.Season.ALL // Default fallback
         }
     }
 }

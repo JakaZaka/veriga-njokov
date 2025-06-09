@@ -17,12 +17,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import models.ScrapedClothingItem
 import repositories.ClothingItemRepository
+import ui.dialogs.EditScrapedItemDialog
 import viewmodels.ScraperViewModel
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ScraperScreen() {
     val clothingItemRepository = remember { ClothingItemRepository() }
     val viewModel = remember { ScraperViewModel(clothingItemRepository) }
+    
+    // State for the currently edited item
+    var itemToEdit by remember { mutableStateOf<ScrapedClothingItem?>(null) }
     
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -95,18 +100,32 @@ fun ScraperScreen() {
                 items(viewModel.scrapedItems) { item ->
                     ScrapedItemCard(
                         item = item,
-                        onToggleSelection = { viewModel.toggleItemSelection(item) }
+                        onToggleSelection = { viewModel.toggleItemSelection(item) },
+                        onEdit = { itemToEdit = item }
                     )
                 }
             }
         }
+    }
+    
+    // Show edit dialog when needed
+    itemToEdit?.let { item ->
+        EditScrapedItemDialog(
+            item = item,
+            onDismiss = { itemToEdit = null },
+            onSave = { editedItem ->
+                viewModel.editItem(item, editedItem)
+                itemToEdit = null
+            }
+        )
     }
 }
 
 @Composable
 fun ScrapedItemCard(
     item: ScrapedClothingItem,
-    onToggleSelection: () -> Unit
+    onToggleSelection: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -141,8 +160,26 @@ fun ScrapedItemCard(
                 style = MaterialTheme.typography.body2
             )
             
-            // We could add image loading here with a library like Coil
-            // For simplicity, we'll just show a placeholder
+            // Additional info if edited
+            if (item.size != "M" || item.seasons.size > 1 || item.notes != null) {
+                Divider(modifier = Modifier.padding(vertical = 4.dp))
+                
+                if (item.size != "M") {
+                    Text(
+                        text = "Size: ${item.size}",
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+                
+                if (item.seasons.size > 1) {
+                    Text(
+                        text = "Seasons: ${item.seasons.joinToString { it.capitalize() }}",
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+            }
+            
+            // Image placeholder
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -155,16 +192,28 @@ fun ScrapedItemCard(
                 Text("Image: ${item.imageUrl.takeLast(20)}...")
             }
             
-            // Selection checkbox
+            // Selection and edit buttons
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Checkbox(
-                    checked = item.selected,
-                    onCheckedChange = { onToggleSelection() }
-                )
-                Text("Select for import")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = item.selected,
+                        onCheckedChange = { onToggleSelection() }
+                    )
+                    Text("Select")
+                }
+                
+                Button(
+                    onClick = onEdit,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = MaterialTheme.colors.secondary
+                    )
+                ) {
+                    Text("Edit")
+                }
             }
         }
     }
