@@ -45,7 +45,7 @@ fun MainScreen() {
             when (selectedTab) {
                 AppTab.USERS -> DatabaseManagerScreen()
                 AppTab.CLOTHING_ITEMS -> ClothingItemsScreen()
-                AppTab.STORES -> StoresScreen()
+                AppTab.STORES -> StoreLocationsScreen() // Change this line
                 AppTab.OUTFITS -> OutfitsScreen()
                 AppTab.WEATHER -> WeatherScreen()
                 AppTab.SCRAPER -> ScraperScreen()

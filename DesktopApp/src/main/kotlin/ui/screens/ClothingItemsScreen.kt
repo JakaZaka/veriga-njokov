@@ -220,17 +220,10 @@ private fun FilterRow(viewModel: AppViewModel) {
     }
 }
 
-// Update the ClothingItemsList to pass a delete function
+// Update the ClothingItemsList function to remove debugging logs
+
 @Composable
 private fun ClothingItemsList(clothingItems: List<ClothingItem>, viewModel: AppViewModel) {
-    // Debug logging
-    LaunchedEffect(clothingItems) {
-        println("Debugging clothingItems:")
-        clothingItems.forEach { item ->
-            println("Item: ${item.name}, ID: ${item.id}, Raw ID type: ${item.id?.javaClass?.name}")
-        }
-    }
-    
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
@@ -242,13 +235,6 @@ private fun ClothingItemsList(clothingItems: List<ClothingItem>, viewModel: AppV
                     // Check both for null and empty ID
                     if (!item.id.isNullOrBlank()) {
                         viewModel.deleteClothingItem(item.id)
-                    } else {
-                        // Alternative approach: If you have a custom API endpoint for deletion by name
-                        // Call that method instead
-                        println("Cannot delete item with missing ID: ${item.name}")
-                        
-                        // For example, if you had a method like:
-                        // viewModel.deleteClothingItemByName(item.name)
                     }
                 }
             )

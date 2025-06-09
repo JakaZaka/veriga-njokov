@@ -206,17 +206,102 @@ object ApiClient {
     suspend fun deleteClothingItem(id: String): ApiResponse<Boolean> {
         // Check for empty ID to prevent 404 errors
         if (id.isBlank()) {
-            println("Cannot delete item with empty ID")
             return ApiResponse(success = false, error = "Item ID cannot be empty", data = false)
         }
         
         return try {
-            // Match the pattern used by getClothingItems() and deleteUser()
             val url = "$BASE_URL/desktop-admin/clothingItems/$id"
-            println("Attempting to delete item at URL: $url")
             apiService.delete(url)
         } catch (e: Exception) {
-            println("Failed to delete clothing item: ${e.message}")
+            ApiResponse(success = false, error = e.message, data = false)
+        }
+    }
+    
+    // Get clothing stores
+    suspend fun getClothingStores(): ApiResponse<List<ClothingStore>> {
+        var lastException: Exception? = null
+        for (attempt in 1..MAX_RETRIES) {
+            try {
+                println("Fetching clothing stores, attempt $attempt")
+                
+                val response = apiService.get("$BASE_URL/desktop-admin/stores") { responseText ->
+                    println("Raw response: $responseText")
+                    val apiResponse = jsonConfig.decodeFromString<ApiResponse<List<ClothingStore>>>(responseText)
+                    apiResponse.data ?: emptyList()
+                }
+                
+                if (response.success && response.data != null) {
+                    return response
+                }
+                
+                throw Exception("API returned unsuccessful response: ${response.error}")
+            } catch (e: Exception) {
+                lastException = e
+                println("Attempt $attempt failed: ${e.message}")
+                
+                if (attempt < MAX_RETRIES) {
+                    delay(RETRY_DELAY_MS)
+                }
+            }
+        }
+        
+        return ApiResponse(success = false, error = lastException?.message, data = emptyList())
+    }
+    
+    // Delete clothing store
+    suspend fun deleteClothingStore(id: String): ApiResponse<Boolean> {
+        // Check for empty ID to prevent 404 errors
+        if (id.isBlank()) {
+            return ApiResponse(success = false, error = "Store ID cannot be empty", data = false)
+        }
+        
+        return try {
+            val url = "$BASE_URL/desktop-admin/stores/$id"
+            apiService.delete(url)
+        } catch (e: Exception) {
+            ApiResponse(success = false, error = e.message, data = false)
+        }
+    }
+    
+    // Get store locations - revised to match working patterns from users and clothing items
+    suspend fun getStoreLocations(): ApiResponse<List<Location>> {
+        var lastException: Exception? = null
+        for (attempt in 1..MAX_RETRIES) {
+            try {
+                println("Fetching store locations, attempt $attempt")
+                
+                // Use the same pattern as getUsers() and getClothingItems()
+                val response = apiService.get("$BASE_URL/locations") { responseText ->
+                    println("Raw response: $responseText")
+                    // Parse directly as List<Location>, not wrapped in ApiResponse
+                    jsonConfig.decodeFromString<List<Location>>(responseText)
+                }
+                
+                // apiService.get() already returns an ApiResponse<List<Location>>
+                return response
+            } catch (e: Exception) {
+                lastException = e
+                println("Attempt $attempt failed: ${e.message}")
+                
+                if (attempt < MAX_RETRIES) {
+                    delay(RETRY_DELAY_MS)
+                }
+            }
+        }
+        
+        return ApiResponse(success = false, error = lastException?.message, data = emptyList())
+    }
+    
+    // Delete store location
+    suspend fun deleteStoreLocation(id: String): ApiResponse<Boolean> {
+        if (id.isBlank()) {
+            return ApiResponse(success = false, error = "Location ID cannot be empty", data = false)
+        }
+        
+        return try {
+            val url = "$BASE_URL/stores/$id"
+            apiService.delete(url)
+        } catch (e: Exception) {
             ApiResponse(success = false, error = e.message, data = false)
         }
     }

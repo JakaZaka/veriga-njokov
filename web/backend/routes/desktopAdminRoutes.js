@@ -118,4 +118,22 @@ router.delete('/clothingItems/:id', async (req, res) => {
   }
 });
 
+// Get store locations for desktop app
+router.get('/locations', async (req, res) => {
+  try {
+    const Location = require('../models/Location');
+    const locations = await Location.find().populate('clothingStoreId');
+    
+    res.json({
+      success: true,
+      data: locations
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;

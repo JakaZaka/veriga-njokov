@@ -7,6 +7,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import repositories.DataRepository
 import repositories.ClothingItemRepository
+import repositories.ClothingStoreRepository
+import repositories.StoreLocationRepository
 import models.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 class AppViewModel {
     private val repository = DataRepository()
     private val clothingItemRepository = ClothingItemRepository()
+    private val clothingStoreRepository = ClothingStoreRepository()
+    private val storeLocationRepository = StoreLocationRepository()
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     // Add current user id property
@@ -23,6 +27,16 @@ class AppViewModel {
     val clothingItems = clothingItemRepository.clothingItems
     val clothingItemsLoading = clothingItemRepository.isLoading
     val clothingItemsError = clothingItemRepository.errorMessage
+    
+    // Clothing stores
+    val clothingStores = clothingStoreRepository.clothingStores
+    val clothingStoresLoading = clothingStoreRepository.isLoading
+    val clothingStoresError = clothingStoreRepository.errorMessage
+    
+    // Store locations
+    val storeLocations = storeLocationRepository.locations
+    val storeLocationsLoading = storeLocationRepository.isLoading
+    val storeLocationsError = storeLocationRepository.errorMessage
     
     // Filter state
     var selectedCategory by mutableStateOf<ClothingCategory?>(null)
@@ -45,11 +59,64 @@ class AppViewModel {
         }
     }
     
+    // Load clothing stores
+    fun loadClothingStores() {
+        viewModelScope.launch {
+            clothingStoreRepository.getAllClothingStores()
+        }
+    }
+    
+    // Load store locations
+    fun loadStoreLocations() {
+        viewModelScope.launch {
+            storeLocationRepository.getAllLocations()
+        }
+    }
+    
     // Add clothing item
     fun addClothingItem(item: ClothingItem) {
         viewModelScope.launch {
             clothingItemRepository.createClothingItem(item)
             applyClothingFilters()
+        }
+    }
+    
+    // Delete clothing item
+    fun deleteClothingItem(id: String) {
+        if (id.isBlank()) {
+            return
+        }
+        
+        viewModelScope.launch {
+            clothingItemRepository.deleteClothingItem(id)
+            // Refresh the list after deletion
+            loadClothingItems()
+        }
+    }
+    
+    // Delete clothing store
+    fun deleteClothingStore(id: String) {
+        if (id.isBlank()) {
+            return
+        }
+        
+        viewModelScope.launch {
+            clothingStoreRepository.deleteClothingStore(id)
+            // Refresh the list after deletion
+            loadClothingStores()
+        }
+    }
+    
+    // Delete store location
+    fun deleteStoreLocation(id: String) {
+        if (id.isBlank()) {
+            return
+        }
+        
+        viewModelScope.launch {
+            storeLocationRepository.deleteLocation(id)
+            // Refresh the list after deletion
+            loadStoreLocations()
         }
     }
     
@@ -74,27 +141,6 @@ class AppViewModel {
     
     // Also keep the original methods from DataRepository for backwards compatibility
     fun updateClothingItem(item: ClothingItem) = repository.updateClothingItem(item)
-    
-    // Delete clothing item
-    fun deleteClothingItem(id: String) {
-        if (id.isBlank()) {
-            println("Cannot delete item with empty ID")
-            return
-        }
-        
-        viewModelScope.launch {
-            println("Deleting clothing item with ID: $id")
-            clothingItemRepository.deleteClothingItem(id)
-            // Refresh the list after deletion
-            loadClothingItems()
-        }
-    }
-    
-    fun filterClothingItems(
-        category: String? = null,
-        season: String? = null,
-        favorite: Boolean? = null
-    ) = repository.filterClothingItems(category, season, favorite)
     
     // Dummy data generation (might be useful for testing)
     fun generateDummyData(itemCount: Int = 10, weatherCount: Int = 5) {
