@@ -11,6 +11,12 @@ import models.ClothingItem
 import models.ScrapedClothingItem
 import repositories.ClothingItemRepository
 import scraperUtil.HMScraper
+import scraperUtil.ZaraScraper
+
+// Enum for scraper types
+enum class ScraperType {
+    HM, ZARA
+}
 
 class ScraperViewModel(private val repository: ClothingItemRepository) {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -33,18 +39,37 @@ class ScraperViewModel(private val repository: ClothingItemRepository) {
     var availableCategories by mutableStateOf<Set<String>>(emptySet())
     var availableColors by mutableStateOf<Set<String>>(emptySet())
     
+    // Add scraper type state
+    var selectedScraper by mutableStateOf(ScraperType.HM)
+    
+    // Track whether scraping has been performed at all
+    var hasScrapedItems by mutableStateOf(false)
+    
+    // Update startScraping to handle different scrapers
     fun startScraping(limit: Int = 30) {
         isLoading = true
         errorMessage = null
         
         coroutineScope.launch {
             try {
-                val hmScraper = HMScraper()
                 val items = withContext(Dispatchers.IO) {
-                    println("Starting scraping with limit: $limit")
-                    hmScraper.getWomenClothes(limit)
+                    println("Starting scraping with ${selectedScraper.name} scraper, limit: $limit")
+                    
+                    when (selectedScraper) {
+                        ScraperType.HM -> {
+                            val hmScraper = HMScraper()
+                            hmScraper.getWomenClothes(limit)
+                        }
+                        ScraperType.ZARA -> {
+                            val zaraScraper = ZaraScraper()
+                            zaraScraper.getClothes(limit)
+                        }
+                    }
                 }
                 allScrapedItems = items
+                
+                // Set hasScrapedItems to true when successful
+                hasScrapedItems = items.isNotEmpty()
                 
                 // Extract available filter options
                 availableCategories = items.mapNotNull { it.category }.toSet()

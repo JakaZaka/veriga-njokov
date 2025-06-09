@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import models.ScrapedClothingItem
 import repositories.ClothingItemRepository
 import ui.dialogs.EditScrapedItemDialog
+import viewmodels.ScraperType
 import viewmodels.ScraperViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -50,6 +51,53 @@ fun ScraperScreen() {
             modifier = Modifier.padding(bottom = 16.dp)  // Reduced padding
         )
         
+        // Scraper type selection
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            elevation = 2.dp
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    "Select Scraper",
+                    style = MaterialTheme.typography.subtitle1,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // H&M Radio button
+                    Row(
+                        modifier = Modifier
+                            .clickable { 
+                                viewModel.selectedScraper = ScraperType.HM 
+                            }
+                            .padding(end = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = viewModel.selectedScraper == ScraperType.HM,
+                            onClick = { viewModel.selectedScraper = ScraperType.HM }
+                        )
+                        Text("H&M", Modifier.padding(start = 4.dp))
+                    }
+                    
+                    // Zara Radio button
+                    Row(
+                        modifier = Modifier
+                            .clickable { 
+                                viewModel.selectedScraper = ScraperType.ZARA 
+                            },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = viewModel.selectedScraper == ScraperType.ZARA,
+                            onClick = { viewModel.selectedScraper = ScraperType.ZARA }
+                        )
+                        Text("Zara", Modifier.padding(start = 4.dp))
+                    }
+                }
+            }
+        }
+        
         // Scraping buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -61,7 +109,7 @@ fun ScraperScreen() {
                 modifier = Modifier.padding(end = 16.dp),
                 enabled = !viewModel.isLoading
             ) {
-                Text("Scrape H&M Data")
+                Text("Scrape ${viewModel.selectedScraper.name} Data")
             }
             
             if (viewModel.scrapedItems.isNotEmpty()) {
@@ -75,7 +123,7 @@ fun ScraperScreen() {
         }
         
         // More compact filter section
-        if (viewModel.scrapedItems.isNotEmpty()) {
+        if (viewModel.hasScrapedItems) {
             Card(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 elevation = 2.dp
@@ -223,45 +271,54 @@ fun ScraperScreen() {
                     // Removed "Show only selected" checkbox
                 }
             }
-        }
-        
-        // Error message and loading indicator
-        viewModel.errorMessage?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colors.error,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-        
-        if (viewModel.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-        
-        // Scraped items grid - now part of the scroll container
-        if (viewModel.scrapedItems.isNotEmpty()) {
-            Text(
-                "Scraped Items (${viewModel.scrapedItems.count { it.selected }} selected)",
-                style = MaterialTheme.typography.h6,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
             
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 250.dp),
-                contentPadding = PaddingValues(4.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                // Remove the weight modifier as we're in a scroll container
-                modifier = Modifier.fillMaxWidth().height(800.dp)  // Fixed height
-            ) {
-                items(viewModel.scrapedItems) { item ->
-                    ScrapedItemCard(
-                        item = item,
-                        onToggleSelection = { viewModel.toggleItemSelection(item) },
-                        onEdit = { itemToEdit = item }
-                    )
+            // Show message when filters result in no items
+            if (viewModel.scrapedItems.isEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    elevation = 2.dp
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "No items match your filter criteria",
+                            style = MaterialTheme.typography.h6
+                        )
+                        Button(
+                            onClick = { viewModel.clearFilters() },
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text("Clear Filters")
+                        }
+                    }
+                }
+            } else {
+                // Scraped items grid - now part of the scroll container
+                Text(
+                    "Scraped Items (${viewModel.scrapedItems.count { it.selected }} selected)",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                )
+                
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 250.dp),
+                    contentPadding = PaddingValues(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    // Remove the weight modifier as we're in a scroll container
+                    modifier = Modifier.fillMaxWidth().height(800.dp)  // Fixed height
+                ) {
+                    items(viewModel.scrapedItems) { item ->
+                        ScrapedItemCard(
+                            item = item,
+                            onToggleSelection = { viewModel.toggleItemSelection(item) },
+                            onEdit = { itemToEdit = item }
+                        )
+                    }
                 }
             }
         }
