@@ -16,6 +16,14 @@ import viewmodels.AppViewModel
 @Composable
 fun ClothingItemsScreen(viewModel: AppViewModel = remember { AppViewModel() }) {
     var showAddDialog by remember { mutableStateOf(false) }
+    val clothingItems by viewModel.clothingItems.collectAsState()
+    val isLoading by viewModel.clothingItemsLoading.collectAsState()
+    val errorMessage by viewModel.clothingItemsError.collectAsState()
+    
+    // Load clothing items when the screen is first displayed
+    LaunchedEffect(Unit) {
+        viewModel.loadClothingItems()
+    }
     
     Column(modifier = Modifier.fillMaxSize()) {
         // Header with Add Button
@@ -35,13 +43,60 @@ fun ClothingItemsScreen(viewModel: AppViewModel = remember { AppViewModel() }) {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Filter Row (podobno kot v web verziji)
-        FilterRow()
+        // Filter Row
+        FilterRow(viewModel)
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Items List
-        ClothingItemsList()
+        // Status area (loading, error, etc)
+        when {
+            isLoading -> {
+                Box(modifier = Modifier.fillMaxWidth().height(64.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            errorMessage != null -> {
+                Card(
+                    backgroundColor = MaterialTheme.colors.error.copy(alpha = 0.1f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Error loading clothing items",
+                            style = MaterialTheme.typography.h6
+                        )
+                        Text(
+                            text = errorMessage ?: "Unknown error",
+                            style = MaterialTheme.typography.body2
+                        )
+                        Button(
+                            onClick = { viewModel.loadClothingItems() },
+                            modifier = Modifier.align(Alignment.End).padding(top = 8.dp)
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
+            }
+            clothingItems.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No clothing items found. Add some or check your filters.",
+                        style = MaterialTheme.typography.h6
+                    )
+                }
+            }
+            else -> {
+                // Items List with actual data
+                ClothingItemsList(
+                    clothingItems = viewModel.filteredClothingItems.value,
+                    viewModel = viewModel
+                )
+            }
+        }
     }
     
     // Add Item Dialog
@@ -59,65 +114,151 @@ fun ClothingItemsScreen(viewModel: AppViewModel = remember { AppViewModel() }) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun FilterRow() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Category Filter
-        var selectedCategory by remember { mutableStateOf<ClothingCategory?>(null) }
+private fun FilterRow(viewModel: AppViewModel) {
+    Column {
+        // Search field
+        OutlinedTextField(
+            value = viewModel.clothingSearchText,
+            onValueChange = { 
+                viewModel.clothingSearchText = it
+                viewModel.applyClothingFilters() 
+            },
+            label = { Text("Search by name") },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+        )
         
-        OutlinedButton(onClick = { /* TODO: Show category selector */ }) {
-            Text(selectedCategory?.displayName ?: "All Categories")
-        }
-        
-        // Season Filter
-        var selectedSeason by remember { mutableStateOf<Season?>(null) }
-        
-        OutlinedButton(onClick = { /* TODO: Show season selector */ }) {
-            Text(selectedSeason?.displayName ?: "All Seasons")
-        }
-        
-        // Liked Filter - uporabi Button
-        var showLikedOnly by remember { mutableStateOf(false) }
-        
-        Button(
-            onClick = { showLikedOnly = !showLikedOnly },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = if (showLikedOnly) MaterialTheme.colors.primary else MaterialTheme.colors.surface
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("❤️ Liked Only")
+            // Category Filter
+            var categoryExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = categoryExpanded,
+                onExpandedChange = { categoryExpanded = it },
+                modifier = Modifier.weight(1f)
+            ) {
+                OutlinedTextField(
+                    readOnly = true,
+                    value = viewModel.selectedCategory?.displayName ?: "All Categories",
+                    onValueChange = {},
+                    label = { Text("Category") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = categoryExpanded,
+                    onDismissRequest = { categoryExpanded = false }
+                ) {
+                    // Add "All Categories" option
+                    DropdownMenuItem(onClick = {
+                        viewModel.selectedCategory = null
+                        viewModel.applyClothingFilters()
+                        categoryExpanded = false
+                    }) {
+                        Text("All Categories")
+                    }
+                    
+                    // Add all category options
+                    for (category in ClothingCategory.values()) {
+                        DropdownMenuItem(onClick = {
+                            viewModel.selectedCategory = category
+                            viewModel.applyClothingFilters()
+                            categoryExpanded = false
+                        }) {
+                            Text(category.displayName)
+                        }
+                    }
+                }
+            }
+            
+            // Season Filter
+            var seasonExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = seasonExpanded,
+                onExpandedChange = { seasonExpanded = it },
+                modifier = Modifier.weight(1f)
+            ) {
+                OutlinedTextField(
+                    readOnly = true,
+                    value = viewModel.selectedSeason?.displayName ?: "All Seasons",
+                    onValueChange = {},
+                    label = { Text("Season") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = seasonExpanded) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = seasonExpanded,
+                    onDismissRequest = { seasonExpanded = false }
+                ) {
+                    // Add "All Seasons" option
+                    DropdownMenuItem(onClick = {
+                        viewModel.selectedSeason = null
+                        viewModel.applyClothingFilters()
+                        seasonExpanded = false
+                    }) {
+                        Text("All Seasons")
+                    }
+                    
+                    // Add all season options
+                    for (season in Season.values()) {
+                        DropdownMenuItem(onClick = {
+                            viewModel.selectedSeason = season
+                            viewModel.applyClothingFilters()
+                            seasonExpanded = false
+                        }) {
+                            Text(season.displayName)
+                        }
+                    }
+                }
+            }
+            
+            // Liked filter button removed
         }
     }
 }
 
+// Update the ClothingItemsList to pass a delete function
 @Composable
-private fun ClothingItemsList() {
-    // TODO: Connect to DataRepository
+private fun ClothingItemsList(clothingItems: List<ClothingItem>, viewModel: AppViewModel) {
+    // Debug logging
+    LaunchedEffect(clothingItems) {
+        println("Debugging clothingItems:")
+        clothingItems.forEach { item ->
+            println("Item: ${item.name}, ID: ${item.id}, Raw ID type: ${item.id?.javaClass?.name}")
+        }
+    }
+    
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        // Placeholder items
-        items(5) { index ->
+        items(clothingItems) { item ->
             ClothingItemCard(
-                item = ClothingItem(
-                    id = "$index",
-                    name = "Sample Item $index",
-                    category = ClothingCategory.TOPS,
-                    subCategory = "T-shirt", // Add this
-                    color = "Blue",
-                    size = "M",
-                    season = listOf(Season.ALL), // Add this
-                    userId = "sample-user" // Add this
-                )
+                item = item,
+                onDelete = { 
+                    // Check both for null and empty ID
+                    if (!item.id.isNullOrBlank()) {
+                        viewModel.deleteClothingItem(item.id)
+                    } else {
+                        // Alternative approach: If you have a custom API endpoint for deletion by name
+                        // Call that method instead
+                        println("Cannot delete item with missing ID: ${item.name}")
+                        
+                        // For example, if you had a method like:
+                        // viewModel.deleteClothingItemByName(item.name)
+                    }
+                }
             )
         }
     }
 }
 
+// Update the ClothingItemCard to include a delete button
 @Composable
-private fun ClothingItemCard(item: ClothingItem) {
+private fun ClothingItemCard(item: ClothingItem, onDelete: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = 4.dp
@@ -144,6 +285,27 @@ private fun ClothingItemCard(item: ClothingItem) {
                     text = "Size: ${item.size}",
                     style = MaterialTheme.typography.body2
                 )
+            }
+            if (item.season.isNotEmpty()) {
+                Text(
+                    text = "Season: ${item.season.joinToString { it.displayName }}",
+                    style = MaterialTheme.typography.body2
+                )
+            }
+            if (item.imageUrl != null) {
+                Text(
+                    text = "Has image: ${item.imageUrl?.isNotEmpty() == true}",
+                    style = MaterialTheme.typography.caption
+                )
+            }
+            
+            // Add Delete button
+            Button(
+                onClick = onDelete,
+                modifier = Modifier.align(Alignment.End).padding(top = 8.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
+            ) {
+                Text("Delete")
             }
         }
     }

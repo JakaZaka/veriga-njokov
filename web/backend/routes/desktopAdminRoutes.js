@@ -92,4 +92,30 @@ router.post('/clothingItems', createClothingItemFromDesktop);
 // Route for fetching clothing items for desktop app
 router.get('/clothingItems', getClothingItemsForDesktop);
 
+// Delete clothing item (desktop admin only)
+router.delete('/clothingItems/:id', async (req, res) => {
+  try {
+    const ClothingItem = require('../models/ClothingItem');
+    const clothingItem = await ClothingItem.findById(req.params.id);
+    
+    if (!clothingItem) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Clothing item not found' 
+      });
+    }
+    
+    await ClothingItem.findByIdAndDelete(req.params.id);
+    res.json({ 
+      success: true,
+      message: 'Clothing item deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 module.exports = router;

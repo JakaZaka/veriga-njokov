@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat
 fun WeatherScreen(viewModel: AppViewModel = remember { AppViewModel() }) {
     var selectedLocation by remember { mutableStateOf("Ljubljana") }
     
-    val weatherData by viewModel.weatherData.collectAsState()
+    val weatherData by viewModel.weatherData.collectAsState(initial = emptyList())
     val currentWeather = weatherData
         .filter { it.location.equals(selectedLocation, ignoreCase = true) }
         .maxByOrNull { it.fetchedAt ?: Long.MIN_VALUE } // Provide a default for null fetchedAt
@@ -136,7 +136,7 @@ fun WeatherScreen(viewModel: AppViewModel = remember { AppViewModel() }) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             // Popravi to vrstico
-                            text = "Recommended items: 0", // Hardcoded rešitev za začetek
+                            text = "Recommended items: ${recommendations.recommendedItems.size}",
                             style = MaterialTheme.typography.body2
                         )
                     } else {

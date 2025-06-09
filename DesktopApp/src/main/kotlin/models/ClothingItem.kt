@@ -2,6 +2,7 @@ package models
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
@@ -9,6 +10,7 @@ import kotlinx.serialization.encoding.Encoder
 
 @Serializable
 data class ClothingItem(
+    @SerialName("_id") // Map MongoDB's _id to Kotlin's id
     val id: String? = null,
     val name: String,
     val category: ClothingCategory,

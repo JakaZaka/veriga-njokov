@@ -179,9 +179,11 @@ object ApiClient {
                 println("Fetching clothing items, attempt $attempt")
                 
                 val response = apiService.get("$BASE_URL/desktop-admin/clothingItems") { responseText ->
+                    println("Raw response: $responseText")
                     val apiResponse = jsonConfig.decodeFromString<ApiResponse<List<ClothingItem>>>(responseText)
                     apiResponse.data ?: emptyList()
                 }
+                
                 if (response.success && response.data != null) {
                     return response
                 }
@@ -197,8 +199,25 @@ object ApiClient {
             }
         }
         
-        // Return empty list if all attempts fail
-        println("All attempts to fetch clothing items failed")
-        return ApiResponse(success = false, error = lastException?.message)
+        return ApiResponse(success = false, error = lastException?.message, data = emptyList())
+    }
+    
+    // Delete a clothing item
+    suspend fun deleteClothingItem(id: String): ApiResponse<Boolean> {
+        // Check for empty ID to prevent 404 errors
+        if (id.isBlank()) {
+            println("Cannot delete item with empty ID")
+            return ApiResponse(success = false, error = "Item ID cannot be empty", data = false)
+        }
+        
+        return try {
+            // Match the pattern used by getClothingItems() and deleteUser()
+            val url = "$BASE_URL/desktop-admin/clothingItems/$id"
+            println("Attempting to delete item at URL: $url")
+            apiService.delete(url)
+        } catch (e: Exception) {
+            println("Failed to delete clothing item: ${e.message}")
+            ApiResponse(success = false, error = e.message, data = false)
+        }
     }
 }
