@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import ui.screens.*
 
 enum class AppTab(val title: String) {
+    USERS("Users"),               // Add this tab
     CLOTHING_ITEMS("Clothing Items"),
     STORES("Stores"),
     OUTFITS("Outfits"),
@@ -18,11 +19,11 @@ enum class AppTab(val title: String) {
 
 @Composable
 fun MainScreen() {
-    var selectedTab by remember { mutableStateOf(AppTab.CLOTHING_ITEMS) }
+    var selectedTab by remember { mutableStateOf(AppTab.USERS) } // Default to Users tab
     
     Column(modifier = Modifier.fillMaxSize()) {
         // Navigation Tabs
-        TabRow(
+        ScrollableTabRow(
             selectedTabIndex = selectedTab.ordinal,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -35,13 +36,14 @@ fun MainScreen() {
             }
         }
         
-        // Content Area
+        // Content area
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
             when (selectedTab) {
+                AppTab.USERS -> DatabaseManagerScreen()
                 AppTab.CLOTHING_ITEMS -> ClothingItemsScreen()
                 AppTab.STORES -> StoresScreen()
                 AppTab.OUTFITS -> OutfitsScreen()

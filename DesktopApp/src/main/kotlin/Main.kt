@@ -3,13 +3,13 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import ui.DatabaseManagerScreen
+import ui.MainScreen  // Change the import
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        DatabaseManagerScreen()
+        MainScreen()  // Change this line to use MainScreen instead
     }
 }
 
