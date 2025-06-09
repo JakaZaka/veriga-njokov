@@ -31,7 +31,7 @@ router.route('/:id')
   .put(updateClothingItem)
   .delete(deleteClothingItem);
 
-router.put('/:id/favorite', favoriteClothingItem);
+router.post('/:id/favorite', favoriteClothingItem);
 router.put('/:id/wear', incrementWearCount);
 router.post('/:id/wantToGet', protect, toggleWantToGet);
 

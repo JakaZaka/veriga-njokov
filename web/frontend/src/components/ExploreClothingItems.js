@@ -9,10 +9,11 @@ const clothingIcons = {
     bottoms: "👖",
     shoes: "👟",
     outerwear: "🧥",
-    accessories: "🧢"
+    accessories: "🧢",
+    dresses: "👗"
 };
 
-const categories = ["tops", "bottoms", "outerwear", "shoes", "accessories"];
+const categories = ["tops", "bottoms", "outerwear", "shoes", "accessories", "dresses"];
 
 function ExploreClothingItems() {
     const location = useLocation();
@@ -23,6 +24,7 @@ function ExploreClothingItems() {
         shoes: false,
         outerwear: false,
         accessories: false,
+        dresses: false,
     });
     const { user } = useContext(UserContext);
 
@@ -36,10 +38,11 @@ function ExploreClothingItems() {
                 if (item._id !== itemId) return item;
                 let wantToGet = Array.isArray(item.wantToGet) ? [...item.wantToGet] : [];
                 if (alreadyWants) {
-                    wantToGet = wantToGet.filter(id => String(id) !== String(user._id));
+                    wantToGet = wantToGet.filter(User => String(User) !== String(user._id));
                 } else {
                     wantToGet.push(user._id);
                 }
+                console.log(wantToGet);
                 return { ...item, wantToGet };
             })
         );
@@ -64,26 +67,32 @@ function ExploreClothingItems() {
 
     useEffect(() => {
         async function getClothes() {
-            const res = await fetch('/api/clothing', {
+                const res = await fetch('/api/clothing', {
                 method: 'GET',
                 credentials: 'include'
             });
             const data = await res.json();
-            // Filter out current user's clothes and only show items with wantToGive === true
-            const filtered = user
-                ? data.filter(item => {
-                    const itemUserId = typeof item.user === 'object' && item.user !== null
-                        ? item.user._id
-                        : item.user;
-                    return (
-                        itemUserId &&
-                        user._id &&
-                        String(itemUserId) !== String(user._id) &&
-                        item.wantToGive === true
-                    );
-                })
-                : data.filter(item => item.wantToGive === true);
+
+            const filtered = data.filter(item => {
+                const itemUserId = typeof item.user === 'object' && item.user !== null
+                    ? item.user._id
+                    : item.user;
+
+                const isFromAnotherUser =
+                    user &&
+                    itemUserId &&
+                    user._id &&
+                    String(itemUserId) !== String(user._id) &&
+                    item.wantToGive === true;
+
+                const isFromShop = item.fromShop === true;
+
+                // show if from another user wanting to give OR from shop
+                return isFromAnotherUser || isFromShop;
+            });
+
             setClothes(filtered);
+
         }
         getClothes();
 
@@ -104,11 +113,39 @@ function ExploreClothingItems() {
 
     return (
         <div>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap' }}>
+            {categories.map(category => (
+                 <button
+                    key={category}
+                    onClick={() =>
+                        setCategoryFilters(prev => ({
+                        ...prev,
+                        [category]: !prev[category]
+                        }))
+                    }
+                    style={{
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        border: categoryFilters[category] ? '2px solid #333' : '1px solid #ccc',
+                        backgroundColor: categoryFilters[category] ? '#eee' : '#fff',
+                        cursor: 'pointer',
+                        fontSize: '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}
+                    aria-pressed={categoryFilters[category]}
+                    >
+                    <span>{clothingIcons[category]}</span>
+                    <span>{category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                    </button>
+            ))}
+            </div>
             <h3>Explore Clothes:</h3>
             <div className='clothes-grid'>
                 {filteredClothes.map(clothingItem => {
-                    const wantToGetUsers = clothingItem.wantToGet || [];
-                    const alreadyWants = user && wantToGetUsers.map(String).includes(String(user._id));
+                    const wantToGet = clothingItem.wantToGet || [];
+                    const alreadyWants = user && wantToGet.map(String).includes(String(user._id));
                     return (
                         <div key={clothingItem._id} style={{ position: 'relative' }}>
                             <ClothingItem clothingItem={clothingItem} />

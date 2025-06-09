@@ -94,6 +94,7 @@ export default function SimpleMap() {
   shoes: false,
   outerwear: false,
   accessories: false,
+  dresses: false,
 });
 
 const clothingIcons = {
@@ -101,7 +102,8 @@ const clothingIcons = {
   bottoms: "👖",
   shoes: "👟",
   outerwear: "🧥",
-  accessories: "🧢"
+  accessories: "🧢",
+  dresses:"👗",
 };
 
 
@@ -447,32 +449,47 @@ const clothingIcons = {
           </button>
 
           <h3 style={{ marginBottom: '6px' }}>{outfit.name}</h3>
-          {outfit.images && outfit.images.length > 0 && (
-            <div
+         {outfit.imageUrl ? (
+            <img
+              src={outfit.imageUrl.startsWith('/images/') ? outfit.imageUrl : `/images/${outfit.imageUrl}`}
+              alt={outfit.name}
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gridTemplateRows: 'repeat(2, 1fr)',
-                gap: '2px',
                 width: '100%',
-                borderRadius: '4px'
+                height: '700px',
+                objectFit: 'scale-down',
+                borderRadius: '4px',
+                marginBottom: '12px',
+                background: '#eee',
               }}
-            >
-              {outfit.images.slice(0, 4).map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img.startsWith('/images/') ? img : `/images/${img}`}
-                  alt={`Outfit ${idx + 1}`}
-                  style={{
-                    width: '100%',
-                    aspectRatio: '1 / 1',
-                    objectFit: 'cover',
-                    background: '#eee',
-                    borderRadius: '2px'
-                  }}
-                />
-              ))}
-            </div>
+            />
+          ) : (
+            outfit.images && outfit.images.length > 0 && (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gridTemplateRows: 'repeat(2, 1fr)',
+                  gap: '2px',
+                  width: '100%',
+                  borderRadius: '4px'
+                }}
+              >
+                {outfit.images.slice(0, 4).map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img.startsWith('/images/') ? img : `/images/${img}`}
+                    alt={`Outfit ${idx + 1}`}
+                    style={{
+                      width: '100%',
+                      aspectRatio: '1 / 1',
+                      objectFit: 'cover',
+                      background: '#eee',
+                      borderRadius: '2px'
+                    }}
+                  />
+                ))}
+              </div>
+            )
           )}
           <p style={{ margin: '6px 0', fontSize: '0.85em', color: '#666' }}>
             {outfit.liked} 🔥

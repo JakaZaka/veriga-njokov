@@ -25,19 +25,26 @@ function OutfitInfo() {
       <div className="details-title">{outfit.name}</div>
       <div className="details-section">
         <h4>Outfit Images:</h4>
-        <div className="details-img-list">
-          {outfit.images && outfit.images.length > 0 ? (
-            outfit.images.map((img, idx) => (
-              <img
-                key={idx}
-                src={img.startsWith('/images/') ? img : `/images/${img}`}
-                alt={`Outfit item ${idx + 1}`}
-              />
-            ))
-          ) : (
-            <span>No images</span>
-          )}
-        </div>
+       <div className="details-img-list">
+        {outfit.imageUrl ? (
+          <img
+            src={
+              outfit.imageUrl.startsWith('/images/')
+                ? outfit.imageUrl
+                : `/images/${outfit.imageUrl}`
+            }
+            alt="Outfit"
+          />
+        ) : (
+          outfit.images.map((img, idx) => (
+            <img
+              key={idx}
+              src={img.startsWith('/images/') ? img : `/images/${img}`}
+              alt={`Outfit item ${idx + 1}`}
+            />
+          ))
+        )}
+    </div>
       </div>
       <div className="details-section">
         <h4>Clothing Items in this Outfit:</h4>
