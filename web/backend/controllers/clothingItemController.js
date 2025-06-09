@@ -4,21 +4,19 @@ const { notify } = require('../app');
 const ClothingItem = require('../models/ClothingItem');
 const User = require('../models/User');
 
-// @desc    Get all clothing items for a user
+// @desc    Get all clothing items or only user's items if ?mine=true
 // @route   GET /api/clothing
-// @access  Private
+// @access  Public (optionally filtered by user if authenticated)
 const getClothingItems = async (req, res) => {
   try {
-    //const filter = { user: req.user._id };
-    
-    // Handle query parameters for filtering
-    //if (req.query.category) filter.category = req.query.category;
-    //if (req.query.favorite === 'true') filter.favorite = true;
-    //if (req.query.status) filter.status = req.query.status;
-    
-    const clothingItems = await ClothingItem.find(/*filter*/).populate('user', 'username')
-    var data = [];
-    data.clothingItems = clothingItems;
+    let filter = {};
+    // If ?mine=true and user is authenticated, filter by user
+    if (req.query.mine === 'true' && req.user && req.user._id) {
+      filter.user = req.user._id;
+    }
+    // Optionally add more filters here (category, etc.)
+
+    const clothingItems = await ClothingItem.find(filter).populate('user', 'username');
     res.json(clothingItems);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -103,16 +101,17 @@ const updateClothingItem = async (req, res) => {
 // @access  Private
 const deleteClothingItem = async (req, res) => {
   try {
-    const clothingItem = await ClothingItem.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
-
-    if (!clothingItem) {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    const item = await ClothingItem.findById(req.params.id);
+    if (!item) {
       return res.status(404).json({ message: 'Clothing item not found' });
     }
-
-    await clothingItem.remove();
+    if (String(item.user) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'Not authorized to delete this item' });
+    }
+    await item.deleteOne();
     res.json({ message: 'Clothing item removed' });
   } catch (error) {
     res.status(500).json({ message: error.message });

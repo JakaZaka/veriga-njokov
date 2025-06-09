@@ -21,15 +21,15 @@ const router = express.Router();
 
 router.route('/')
   .get(getClothingItems)
-  .post(upload.single('image'), createClothingItem);
+  .post(protect, upload.single('image'), createClothingItem);
 
 router.get('/closetStats', getClosetStats); 
 router.put('/transfer/:clothingId/:newUserId', transferItem);
 
 router.route('/:id')
   .get(getClothingItemById)
-  .put(updateClothingItem)
-  .delete(deleteClothingItem);
+  .put(protect, updateClothingItem)
+  .delete(protect, deleteClothingItem);
 
 router.post('/:id/favorite', favoriteClothingItem);
 router.put('/:id/wear', incrementWearCount);

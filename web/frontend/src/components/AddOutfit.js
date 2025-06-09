@@ -14,8 +14,6 @@ function AddOutfit() {
   const [season, setSeason] = useState([]);
   const [occasion, setOccasion] = useState('');
   const userContext = useContext(UserContext);
-  //console.log(userContext);
-  //console.log("b");
 
   useEffect(() => {
     async function fetchClothes() {
@@ -61,12 +59,16 @@ function AddOutfit() {
     if (season.length > 0) body.season = season;
     if (occasion) body.occasion = occasion;
 
-    const res = await fetch('/api/outfits', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+  const token = localStorage.getItem('token');
+  const res = await fetch('/api/outfits', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(body),
+  });
     if (res.ok) setUploaded(true);
   }
 

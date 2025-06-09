@@ -17,8 +17,8 @@ const router = express.Router();
 //router.use(protect);
 
 router.route('/')
-  .get(getOutfits)
-  .post(createOutfit);
+  .get(protect, getOutfits)
+  .post(protect, createOutfit);
 
   router.get('/trends', trendDataForChart);
 

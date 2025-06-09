@@ -103,9 +103,11 @@ function AddClothingItem(props) {
         formData.append('notes', notes);
         formData.append('color', finalColor);
 
+        const token = localStorage.getItem('token')
         const res = await fetch('/api/clothing', {
             method: 'POST',
             credentials: 'include',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
             body: formData
         });
         await res.json();

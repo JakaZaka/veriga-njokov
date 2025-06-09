@@ -15,15 +15,16 @@ function Header(props) {
         <nav>
           <ul className="tab-nav">
             <li><Link to="/">Home</Link></li>
-            <li><Link to="/explore">Explore</Link></li>
-            <li><Link to="/outfits">Outfits</Link></li>
             <li><Link to="/weather">Weather</Link></li>
             <li><Link to="/stores">Stores</Link></li>
             
             {user ? (
               <>
+                <li><Link to="/explore">Explore</Link></li>
                 <li><Link to="/profile">Profile</Link></li>
                 <li><Link to="/logout">Logout</Link></li>
+                <li><Link to="/map">Map</Link></li>
+                <li><Link to="/outfits">Outfits</Link></li>
                 {userContext.user.role === 'admin' && (
                   <>
                       <li><Link to="/admin">Admin</Link></li>
@@ -33,18 +34,11 @@ function Header(props) {
                 )}
                 <li><Link to="/addClothingItem">Add Item</Link></li>
                 <li><Link to="/addOutfit">Add Outfit</Link></li>
-                
-                <li><Link to="/stores">Stores</Link></li>
-                <li><Link to="/map">Map</Link></li>
-                <li><Link to="/outfits">Outfits</Link></li>
-               
-                
               </>
             ) : (
               <>
                 <li><Link to="/register">Register</Link></li>
                 <li><Link to="/login">Login</Link></li>
-                <li><Link to="/map">Publish</Link></li>
               </>
             )}
           </ul>
