@@ -105,30 +105,7 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/map" element={<Map />}></Route>
           </Routes>
-          <nav>
-            <Link to="/">Home</Link> |{' '}
-            <Link to="/explore">Explore</Link> |{' '}
-            <Link to="/register">Register</Link> |{' '}
-            <Link to="/login">Login</Link> |{' '}
-            <Link to="/outfits">Outfits</Link> |{' '}
-            {user && (
-              <>
-                <Link to="/logout">Logout</Link> |{' '}
-                <Link to="/profile">Profile</Link> |{' '}
-                <Link to="/addClothingItem">Add Item</Link> |{' '}
 
-                <Link to="/stores">Stores</Link> |{' '}
-                <Link to="/addOutfit">Add Outfit</Link>
-                {user.role === 'admin' && (
-                  <>
-                    {' '}| <Link to="/admin">Admin Dashboard</Link>
-                    <Link to="/addClothingStore">Add Store</Link> |{' '}
-                    <Link to="/addClothingStoreLocation">Add Store location</Link> |{' '}
-                  </>
-                )}
-              </>
-            )}
-          </nav>
           <ReceivedItemModal
             isOpen={modalIsOpen}
             onRequestClose={closeReceivedItemModal}

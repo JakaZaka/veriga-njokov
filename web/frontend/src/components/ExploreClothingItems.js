@@ -28,42 +28,41 @@ function ExploreClothingItems() {
     });
     const { user } = useContext(UserContext);
 
-    const handleWantToGet = async (itemId, alreadyWants) => {
-        if (!user) {
-            alert("You must be logged in to mark Want To Get.");
-            return;
-        }
-        setClothes(prev =>
-            prev.map(item => {
-                if (item._id !== itemId) return item;
-                let wantToGet = Array.isArray(item.wantToGet) ? [...item.wantToGet] : [];
-                if (alreadyWants) {
-                    wantToGet = wantToGet.filter(User => String(User) !== String(user._id));
-                } else {
-                    wantToGet.push(user._id);
-                }
-                console.log(wantToGet);
-                return { ...item, wantToGet };
-            })
-        );
+const handleWantToGet = async (itemId, alreadyWants) => {
+    if (!user) {
+        alert("You must be logged in to mark Want To Get.");
+        return;
+    }
+    setClothes(prev =>
+        prev.map(item => {
+            if (item._id !== itemId) return item;
+            let wantToGet = Array.isArray(item.wantToGet) ? [...item.wantToGet] : [];
+            if (alreadyWants) {
+                wantToGet = wantToGet.filter(User => String(User) !== String(user._id));
+            } else {
+                wantToGet.push(user._id);
+            }
+            return { ...item, wantToGet };
+        })
+    );
 
-        const token = localStorage.getItem('token');
-        const res = await fetch(`/api/clothing/${itemId}/wantToGet`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token ? { Authorization: `Bearer ${token}` } : {})
-            },
-            body: JSON.stringify({ want: !alreadyWants })
-        });
-        if (res.ok) {
-            const updatedItem = await res.json();
-            setClothes(prev =>
-                prev.map(item => item._id === updatedItem._id ? updatedItem : item)
-            );
-        }
-    };
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/api/clothing/${itemId}/wantToGet`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ want: !alreadyWants })
+    });
+    if (res.ok) {
+        const updatedItem = await res.json();
+        setClothes(prev =>
+            prev.map(item => item._id === updatedItem._id ? updatedItem : item)
+        );
+    }
+};
 
     useEffect(() => {
         async function getClothes() {

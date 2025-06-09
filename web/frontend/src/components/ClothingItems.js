@@ -57,18 +57,35 @@ function ClothingItems() {
     };
     if (!user) return null;
 
+    const handleDeleteItem = async (itemId) => {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/clothing/${itemId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.ok) {
+            setClothes(prev => prev.filter(item => item._id !== itemId));
+        } else {
+            const error = await res.json();
+            alert(error.message || 'Failed to delete item');
+            console.error('Delete error:', error);
+        }
+    };
+
+
     return (
         <div>
             <h3>My Closet:</h3>
             <div className='clothes-grid'>
-                {clothes
-                    .filter(item => {
-                        // item.user can be an object or an id string
-                        const itemUserId = typeof item.user === 'object' && item.user !== null
-                            ? item.user._id
-                            : item.user;
-                        return itemUserId && user._id && String(itemUserId) === String(user._id);
-                    })
+            {clothes
+                .filter(item => {
+                    if (!user) return false; 
+                    const itemUserId = typeof item.user === 'object' && item.user !== null
+                        ? item.user._id
+                        : item.user;
+                    return itemUserId && user._id && String(itemUserId) === String(user._id);
+                })
                     .map(clothingItem => (
                         <div key={clothingItem._id} style={{ position: 'relative' }}>
                             <ClothingItem clothingItem={clothingItem} />
@@ -89,6 +106,24 @@ function ClothingItems() {
                                 onClick={() => handleWantToGive(clothingItem._id, clothingItem.wantToGive)}
                             >
                                 {clothingItem.wantToGive ? "✓ Want To Give" : "Want To Give"}
+                            </button>
+                            <button
+                                style={{
+                                    position: 'absolute',
+                                    top: 8,
+                                    left: 8,
+                                    background: '#fff',
+                                    color: '#d32f2f',
+                                    border: '2px solid #d32f2f',
+                                    borderRadius: 6,
+                                    padding: '4px 10px',
+                                    cursor: 'pointer',
+                                    fontWeight: 500,
+                                    transition: 'background 0.15s, color 0.15s'
+                                }}
+                                onClick={() => handleDeleteItem(clothingItem._id)}
+                            >
+                                Delete
                             </button>
                         </div>
                     ))}

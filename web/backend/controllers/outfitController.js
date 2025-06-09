@@ -11,7 +11,7 @@ const crypto = require('crypto');
 // @access  Private
 const getOutfits = async (req, res) => {
   try {
-    const outfits = await Outfit.find().populate('items.item');
+    const outfits = await Outfit.find({ user: req.user._id }).populate('items.item');
     res.json(outfits);
   } catch (error) {
     res.status(500).json({ message: error.message });
