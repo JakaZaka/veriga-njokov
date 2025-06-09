@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const router = express.Router();
+const { createClothingItemFromDesktop, getClothingItemsForDesktop } = require('../controllers/clothingItemController');
 
 // Special endpoint for desktop admin app
 // This bypasses normal authentication for admin operations
@@ -84,5 +85,11 @@ router.put('/users/:id', async (req, res) => {
     });
   }
 });
+
+// Route for creating clothing items from desktop app
+router.post('/clothingItems', createClothingItemFromDesktop);
+
+// Route for fetching clothing items for desktop app
+router.get('/clothingItems', getClothingItemsForDesktop);
 
 module.exports = router;

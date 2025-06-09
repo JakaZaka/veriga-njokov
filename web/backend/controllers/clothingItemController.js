@@ -278,6 +278,87 @@ const transferItem = async (req, res) => {
   }
 };
 
+// @desc    Create a new clothing item from Desktop App
+// @route   POST /api/desktop-admin/clothingItems
+// @access  Public (for desktop app)
+const createClothingItemFromDesktop = async (req, res) => {
+  try {
+    console.log("Desktop app creating clothing item:", req.body);
+    let { name, category, color, size, season, imageUrl, notes } = req.body;
+
+    // Basic validation
+    if (!name || !category) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Name and category are required.' 
+      });
+    }
+
+    // Convert category enum to lowercase string to match MongoDB schema
+    // DRESSES -> dresses, TOPS -> tops, etc.
+    category = category.toLowerCase();
+    
+    // Convert season array of enums to lowercase strings
+    // [SUMMER, FALL] -> [summer, fall]
+    if (Array.isArray(season)) {
+      season = season.map(s => s.toLowerCase());
+    } else if (season) {
+      // If not an array but a single value
+      season = [season.toLowerCase()];
+    } else {
+      season = [];
+    }
+
+    // Create the clothing item with the properly formatted data
+    const clothingItem = new ClothingItem({
+      name,
+      category,
+      color,
+      size,
+      season,
+      imageUrl, // Direct URL instead of file upload
+      notes,
+      fromShop: true // Mark as from shop since it's from scraper
+    });
+
+    const createdClothingItem = await clothingItem.save();
+    console.log("Item created successfully:", createdClothingItem._id);
+    
+    // Return the response in the format expected by the desktop app
+    res.status(201).json({ 
+      success: true, 
+      data: createdClothingItem, 
+      message: "Clothing item created successfully from desktop app." 
+    });
+  } catch (error) {
+    console.error('Error creating clothing item from desktop:', error);
+    res.status(400).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+// @desc    Get all clothing items (for desktop app)
+// @route   GET /api/desktop-admin/clothingItems
+// @access  Public (for desktop app)
+const getClothingItemsForDesktop = async (req, res) => {
+  try {
+    const clothingItems = await ClothingItem.find();
+    res.json({ 
+      success: true, 
+      data: clothingItems 
+    });
+  } catch (error) {
+    console.error('Error getting clothing items for desktop:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+// Add these to the module.exports
 module.exports = {
   getClothingItems,
   getClothingItemById,
@@ -289,4 +370,6 @@ module.exports = {
   getClosetStats,
   transferItem,
   toggleWantToGet,
+  createClothingItemFromDesktop,
+  getClothingItemsForDesktop
 } ;
