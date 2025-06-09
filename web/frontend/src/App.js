@@ -21,7 +21,8 @@ import AdminDashboard from "./components/AdminDashboard";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Map from './components/Map.js';
 import socket from './socket';
-import ReceivedItemModal from './components/ReceivedItemModal.js';  
+import ReceivedItemModal from './components/ReceivedItemModal.js';
+import HomePage from './components/HomePage'; 
 
 
 
@@ -91,7 +92,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/" element={<ClothingItems />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/clothingItems" element={<ClothingItems />} />
             <Route path="/explore" element={<ExploreClothingItems />} />
             <Route path="/addClothingItem" element={<AddClothingItem />} />
             <Route path="/clothingItem/:id" element={<ClothingItemInfo />} />

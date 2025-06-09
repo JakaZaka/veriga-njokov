@@ -11,8 +11,8 @@ function AdminDashboard() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
- 
-  // Pridobi seznam uporabnikov
+  
+  // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
       if (activeTab === 'users') {
@@ -23,13 +23,9 @@ function AdminDashboard() {
               'Authorization': `Bearer ${userContext.user.token}`
             }
           });
-
-          if (!response.ok) {
-            throw new Error(`API napaka: ${response.status}`);
-          }
-
+          if (!response.ok) throw new Error(`API napaka: ${response.status}`);
           const data = await response.json();
-          setUsers(data);
+          setUsers(data.data || data); // Support both { data: [...] } and [...] responses
           setError(null);
         } catch (err) {
           console.error('Napaka pri pridobivanju uporabnikov:', err);
@@ -39,11 +35,10 @@ function AdminDashboard() {
         }
       }
     };
-
     fetchUsers();
   }, [activeTab, userContext.user.token]);
 
-  // Pridobi sistemske nastavitve
+  // Fetch settings
   useEffect(() => {
     const fetchSettings = async () => {
       if (activeTab === 'settings') {
@@ -54,13 +49,9 @@ function AdminDashboard() {
               'Authorization': `Bearer ${userContext.user.token}`
             }
           });
-
-          if (!response.ok) {
-            throw new Error(`API napaka: ${response.status}`);
-          }
-
+          if (!response.ok) throw new Error(`API napaka: ${response.status}`);
           const data = await response.json();
-          setSettings(data);
+          setSettings(data.data || data);
           setError(null);
         } catch (err) {
           console.error('Napaka pri pridobivanju nastavitev:', err);
@@ -70,22 +61,27 @@ function AdminDashboard() {
         }
       }
     };
-
     fetchSettings();
   }, [activeTab, userContext.user.token]);
 
-   // Preveri, ali je trenutni uporabnik admin
-  if (!userContext.user || userContext.user.role !== 'admin') {
+  // Guard for user loading
+  if (!userContext.user) {
+    return (
+      <div className="text-center my-4">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+  if (userContext.user.role !== 'admin') {
     return <Navigate replace to="/" />;
   }
 
 
-  // Brisanje uporabnika
+  // Delete user
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Ali res želite izbrisati tega uporabnika?')) {
-      return;
-    }
-
+    if (!window.confirm('Ali res želite izbrisati tega uporabnika?')) return;
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -94,11 +90,7 @@ function AdminDashboard() {
           'Authorization': `Bearer ${userContext.user.token}`
         }
       });
-
-      if (!response.ok) {
-        throw new Error(`Napaka pri brisanju: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`Napaka pri brisanju: ${response.status}`);
       setUsers(users.filter(user => user._id !== userId));
       setSuccess('Uporabnik uspešno izbrisan.');
       setTimeout(() => setSuccess(null), 3000);
@@ -110,10 +102,9 @@ function AdminDashboard() {
     }
   };
 
-  // Sprememba vloge uporabnika
+  // Toggle user role
   const handleToggleRole = async (userId, currentRole) => {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
-    
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/users/${userId}/role`, {
@@ -124,13 +115,8 @@ function AdminDashboard() {
         },
         body: JSON.stringify({ role: newRole })
       });
-
-      if (!response.ok) {
-        throw new Error(`Napaka pri spremembi vloge: ${response.status}`);
-      }
-
-      // Posodobi seznam uporabnikov
-      setUsers(users.map(user => 
+      if (!response.ok) throw new Error(`Napaka pri spremembi vloge: ${response.status}`);
+      setUsers(users.map(user =>
         user._id === userId ? { ...user, role: newRole } : user
       ));
       setSuccess(`Vloga uporabnika spremenjena v "${newRole}".`);
@@ -146,22 +132,15 @@ function AdminDashboard() {
   return (
     <div className="container mt-4">
       <h2>Admin Dashboard</h2>
-      
       {error && (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
+        <div className="alert alert-danger" role="alert">{error}</div>
       )}
-      
       {success && (
-        <div className="alert alert-success" role="alert">
-          {success}
-        </div>
+        <div className="alert alert-success" role="alert">{success}</div>
       )}
-      
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
-          <button 
+          <button
             className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
             onClick={() => setActiveTab('users')}
           >
@@ -169,7 +148,7 @@ function AdminDashboard() {
           </button>
         </li>
         <li className="nav-item">
-          <button 
+          <button
             className={`nav-link ${activeTab === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveTab('settings')}
           >
@@ -177,7 +156,6 @@ function AdminDashboard() {
           </button>
         </li>
       </ul>
-
       {loading && (
         <div className="text-center my-4">
           <div className="spinner-border" role="status">
@@ -185,7 +163,6 @@ function AdminDashboard() {
           </div>
         </div>
       )}
-
       {activeTab === 'users' && !loading && (
         <div>
           <h3>User Management</h3>
@@ -206,14 +183,14 @@ function AdminDashboard() {
                     <td>{user.email}</td>
                     <td>{user.role}</td>
                     <td>
-                      <button 
+                      <button
                         className="btn btn-sm btn-outline-primary me-1"
                         onClick={() => handleToggleRole(user._id, user.role)}
                         disabled={user._id === userContext.user._id}
                       >
                         Toggle Role
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-outline-danger"
                         onClick={() => handleDeleteUser(user._id)}
                         disabled={user._id === userContext.user._id}
@@ -228,7 +205,6 @@ function AdminDashboard() {
           </div>
         </div>
       )}
-
       {activeTab === 'settings' && !loading && (
         <div>
           <h3>System Settings</h3>

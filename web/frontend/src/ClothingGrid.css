@@ -17,6 +17,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 18px 12px 12px 12px;
+}
+
+.clothingItem-card-img-bracket {
+  width: 180px;
+  height: 180px;
+  background: #f7f7f7;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border: 1.5px solid #e3eafc;
+  box-shadow: 0 2px 8px #e3eafc33;
+}
+
+.clothingItem-card-img-bracket img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #f7f7f7;
+  border-radius: 10px;
+  display: block;
 }
 
 .clothingItem-card:hover {
@@ -126,4 +149,27 @@
   text-align: center;
   width: 100%;
   background: #fafbfc;
+}
+
+.add-clothing-fab {
+  position: fixed;
+  bottom: 32px;
+  left: 32px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #1976d2;
+  color: #fff;
+  font-size: 3.5rem;
+  border: none;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.18);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: background 0.18s;
+}
+.add-clothing-fab:hover {
+  background: #1565c0;
 }

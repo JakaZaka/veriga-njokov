@@ -1,12 +1,11 @@
-import { useEffect, useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import '../ClothingGrid.css';
-import { UserContext } from '../userContext';
 
 function OutfitList() {
   const [outfits, setOutfits] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userContext = useContext(UserContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchOutfits() {
@@ -22,41 +21,54 @@ function OutfitList() {
     fetchOutfits();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (!outfits.length) return <div>No outfits found.</div>;
-
   return (
-    <div>
+    <div style={{ position: 'relative' }}>
       <h2>Outfits</h2>
       <div className="outfits-grid">
-        {outfits.map(outfit => (
-          <Link
-            to={`/outfit/${outfit._id}`}
-            key={outfit._id}
-            className="outfit-card"
-            style={{ textDecoration: 'none' }}
-          >
-            <div className="outfit-card-img-frame">
-              {outfit.imageUrl ? (
-                <img
-                  className="outfit-card-img-single"
-                  src={
-                    outfit.imageUrl.startsWith('/images/')
-                      ? outfit.imageUrl
-                      : `/images/${outfit.imageUrl}`
-                  }
-                  alt="Outfit"
-                />
-              ) : (
-                <div className="outfit-card-img-grid">
-                  {/* ...handle multiple images or fallback... */}
-                </div>
-              )}
-            </div>
-            <div className="outfit-card-title">{outfit.name}</div>
-          </Link>
-        ))}
+        {loading ? (
+          <div>Loading...</div>
+        ) : outfits.length === 0 ? (
+          <div style={{ textAlign: 'center', width: '100%', marginTop: 40 }}>
+            No outfits found.
+          </div>
+        ) : (
+          outfits.map(outfit => (
+            <Link
+              to={`/outfit/${outfit._id}`}
+              key={outfit._id}
+              className="outfit-card"
+              style={{ textDecoration: 'none' }}
+            >
+              <div className="outfit-card-img-frame">
+                {outfit.imageUrl ? (
+                  <img
+                    className="outfit-card-img-single"
+                    src={
+                      outfit.imageUrl.startsWith('/images/')
+                        ? outfit.imageUrl
+                        : `/images/${outfit.imageUrl}`
+                    }
+                    alt="Outfit"
+                  />
+                ) : (
+                  <div className="outfit-card-img-grid">
+                    {/* ...handle multiple images or fallback... */}
+                  </div>
+                )}
+              </div>
+              <div className="outfit-card-title">{outfit.name}</div>
+            </Link>
+          ))
+        )}
       </div>
+      {/* Floating Add Outfit Button - always visible */}
+      <button
+        className="add-clothing-fab"
+        onClick={() => navigate('/addOutfit')}
+        aria-label="Add Outfit"
+      >
+        +
+      </button>
     </div>
   );
 }
