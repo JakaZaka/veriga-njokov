@@ -55,6 +55,14 @@ dependencies {
     
     // Add this if you want Gradle to automatically download the JDK if needed
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+    
+    // Add Kotlin Faker for generating realistic random data
+    implementation("com.github.javafaker:javafaker:1.0.2")
+    
+    // Add Foundation layout for FlowRow
+    implementation(compose.material)
+    implementation(compose.foundation)
+    implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.5.1")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

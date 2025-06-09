@@ -20,6 +20,19 @@ class ScraperViewModel(private val repository: ClothingItemRepository) {
     var errorMessage by mutableStateOf<String?>(null)
     var scrapedItems by mutableStateOf<List<ScrapedClothingItem>>(emptyList())
     
+    // Original unfiltered items
+    private var allScrapedItems = listOf<ScrapedClothingItem>()
+
+    // Filter state
+    var filterText by mutableStateOf("")
+    var filterCategory by mutableStateOf<String?>(null)
+    var filterColor by mutableStateOf<String?>(null)
+    var showOnlySelected by mutableStateOf(false)
+
+    // Available filter options (populated during scraping)
+    var availableCategories by mutableStateOf<Set<String>>(emptySet())
+    var availableColors by mutableStateOf<Set<String>>(emptySet())
+    
     fun startScraping(limit: Int = 30) {
         isLoading = true
         errorMessage = null
@@ -31,7 +44,15 @@ class ScraperViewModel(private val repository: ClothingItemRepository) {
                     println("Starting scraping with limit: $limit")
                     hmScraper.getWomenClothes(limit)
                 }
-                scrapedItems = items
+                allScrapedItems = items
+                
+                // Extract available filter options
+                availableCategories = items.mapNotNull { it.category }.toSet()
+                availableColors = items.mapNotNull { it.color }.toSet()
+                
+                // Apply filters (initially none)
+                applyFilters()
+                
                 println("Scraping completed. Retrieved ${items.size} items.")
             } catch (e: Exception) {
                 errorMessage = "Failed to scrape data: ${e.message}"
@@ -110,5 +131,24 @@ class ScraperViewModel(private val repository: ClothingItemRepository) {
             "winter" -> models.Season.WINTER
             else -> models.Season.ALL // Default fallback
         }
+    }
+
+    // Add filter function
+    fun applyFilters() {
+        scrapedItems = allScrapedItems.filter { item ->
+            (filterText.isEmpty() || item.name.contains(filterText, ignoreCase = true)) &&
+            (filterCategory == null || item.category == filterCategory) &&
+            (filterColor == null || item.color == filterColor) &&
+            (!showOnlySelected || item.selected)
+        }
+    }
+
+    // Update clear filters function
+    fun clearFilters() {
+        filterText = ""
+        filterCategory = null
+        filterColor = null
+        showOnlySelected = false
+        applyFilters()
     }
 }

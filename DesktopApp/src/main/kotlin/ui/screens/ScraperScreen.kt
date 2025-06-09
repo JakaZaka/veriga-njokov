@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,15 +33,21 @@ fun ScraperScreen() {
     // State for the currently edited item
     var itemToEdit by remember { mutableStateOf<ScrapedClothingItem?>(null) }
     
+    // Add a scroll state to make the entire content scrollable
+    val scrollState = rememberScrollState()
+    
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(scrollState),  // Add vertical scroll
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header
         Text(
             text = "Data Scraper",
             style = MaterialTheme.typography.h4,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 16.dp)  // Reduced padding
         )
         
         // Scraping buttons
@@ -64,9 +74,158 @@ fun ScraperScreen() {
             }
         }
         
-        Spacer(modifier = Modifier.height(16.dp))
+        // More compact filter section
+        if (viewModel.scrapedItems.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                elevation = 2.dp
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    // Filter header and search in one row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Filter Items",
+                            style = MaterialTheme.typography.subtitle1
+                        )
+                        
+                        Spacer(modifier = Modifier.weight(1f))
+                        
+                        // Clear filters button
+                        TextButton(
+                            onClick = { viewModel.clearFilters() },
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Text("Clear")
+                        }
+                    }
+                    
+                    // Name search
+                    OutlinedTextField(
+                        value = viewModel.filterText,
+                        onValueChange = { 
+                            viewModel.filterText = it
+                            viewModel.applyFilters() 
+                        },
+                        label = { Text("Search by name") },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        singleLine = true
+                    )
+                    
+                    // Category and Color dropdowns in one row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Category dropdown
+                        Box(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            var categoryExpanded by remember { mutableStateOf(false) }
+                            ExposedDropdownMenuBox(
+                                expanded = categoryExpanded,
+                                onExpandedChange = { categoryExpanded = it }
+                            ) {
+                                OutlinedTextField(
+                                    value = viewModel.filterCategory ?: "All Categories",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Category") },
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true
+                                )
+                                
+                                ExposedDropdownMenu(
+                                    expanded = categoryExpanded,
+                                    onDismissRequest = { categoryExpanded = false }
+                                ) {
+                                    // Add "All" option
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            viewModel.filterCategory = null
+                                            viewModel.applyFilters()
+                                            categoryExpanded = false
+                                        }
+                                    ) {
+                                        Text("All Categories")
+                                    }
+                                    
+                                    // Add all available categories
+                                    viewModel.availableCategories.forEach { category ->
+                                        DropdownMenuItem(
+                                            onClick = {
+                                                viewModel.filterCategory = category
+                                                viewModel.applyFilters()
+                                                categoryExpanded = false
+                                            }
+                                        ) {
+                                            Text(category)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Color dropdown
+                        Box(modifier = Modifier.weight(1f)) {
+                            var colorExpanded by remember { mutableStateOf(false) }
+                            ExposedDropdownMenuBox(
+                                expanded = colorExpanded,
+                                onExpandedChange = { colorExpanded = it }
+                            ) {
+                                OutlinedTextField(
+                                    value = viewModel.filterColor ?: "All Colors",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Color") },
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = colorExpanded)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true
+                                )
+                                
+                                ExposedDropdownMenu(
+                                    expanded = colorExpanded,
+                                    onDismissRequest = { colorExpanded = false }
+                                ) {
+                                    // Add "All" option
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            viewModel.filterColor = null
+                                            viewModel.applyFilters()
+                                            colorExpanded = false
+                                        }
+                                    ) {
+                                        Text("All Colors")
+                                    }
+                                    
+                                    // Add all available colors
+                                    viewModel.availableColors.forEach { color ->
+                                        DropdownMenuItem(
+                                            onClick = {
+                                                viewModel.filterColor = color
+                                                viewModel.applyFilters()
+                                                colorExpanded = false
+                                            }
+                                        ) {
+                                            Text(color)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Removed "Show only selected" checkbox
+                }
+            }
+        }
         
-        // Error message
+        // Error message and loading indicator
         viewModel.errorMessage?.let {
             Text(
                 text = it,
@@ -75,27 +234,27 @@ fun ScraperScreen() {
             )
         }
         
-        // Loading indicator
         if (viewModel.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.padding(16.dp)
             )
         }
         
-        // Scraped items grid
+        // Scraped items grid - now part of the scroll container
         if (viewModel.scrapedItems.isNotEmpty()) {
             Text(
                 "Scraped Items (${viewModel.scrapedItems.count { it.selected }} selected)",
                 style = MaterialTheme.typography.h6,
-                modifier = Modifier.padding(vertical = 16.dp)
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
             
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 250.dp),
-                contentPadding = PaddingValues(8.dp),
+                contentPadding = PaddingValues(4.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.weight(1f)
+                // Remove the weight modifier as we're in a scroll container
+                modifier = Modifier.fillMaxWidth().height(800.dp)  // Fixed height
             ) {
                 items(viewModel.scrapedItems) { item ->
                     ScrapedItemCard(
@@ -108,7 +267,7 @@ fun ScraperScreen() {
         }
     }
     
-    // Show edit dialog when needed
+    // Show edit dialog when needed (outside the scroll container)
     itemToEdit?.let { item ->
         EditScrapedItemDialog(
             item = item,
@@ -206,13 +365,11 @@ fun ScrapedItemCard(
                     Text("Select")
                 }
                 
-                Button(
-                    onClick = onEdit,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.secondary
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Item"
                     )
-                ) {
-                    Text("Edit")
                 }
             }
         }
