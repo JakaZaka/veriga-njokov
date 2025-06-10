@@ -141,9 +141,12 @@ const deleteLocation = async (req, res) => {
       return res.status(404).json({ message: 'Location store not found' });
     }
 
-    await location.remove();
+    // Change from location.remove() to Location.findByIdAndDelete()
+    await Location.findByIdAndDelete(req.params.id);
+    
     res.json({ message: 'Location store removed' });
   } catch (error) {
+    console.error('Error deleting location:', error);
     res.status(500).json({ message: error.message });
   }
 };
