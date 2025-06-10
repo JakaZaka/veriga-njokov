@@ -41,7 +41,6 @@ function Header(props) {
                     <ul className="tab-nav">
                         <li><Link to="/">Home</Link></li>
                         <li><Link to="/weather">Weather</Link></li>
-                        <li><Link to="/stores">Stores</Link></li>
                         {user ? (
                             <>
                                 <li><Link to="/explore">Explore</Link></li>
@@ -52,6 +51,7 @@ function Header(props) {
                                 {userContext.user.role === 'admin' && (
                                     <>
                                         <li><Link to="/admin">Admin</Link></li>
+                                        <li><Link to="/stores">Stores</Link></li>
                                         <li><Link to="/addClothingStore">Add Store</Link></li>
                                         <li><Link to="/addClothingStoreLocation">Add Store Location</Link></li>
                                     </>

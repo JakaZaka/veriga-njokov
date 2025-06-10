@@ -4,8 +4,7 @@ import { Navigate } from 'react-router-dom';
 import '../ProfileCard.css';
 import OutfitTrendChart from './OutfitTrendChart';
 import DistrictSellingChart from './DistrictSellingChart';
-import ClosetStats from './ClosetStats';    
-
+import ClosetStats from './ClosetStats';
 
 function Profile() {
     const userContext = useContext(UserContext);
@@ -56,29 +55,28 @@ function Profile() {
         // eslint-disable-next-line
     }, []);
 
-     useEffect(() => {
-    fetch('/api/outfits/trends')
-        .then(res => res.json())
-        .then(setChartData)
-        .catch(err => console.error("Failed to fetch trends", err));
+    useEffect(() => {
+        fetch('/api/outfits/trends')
+            .then(res => res.json())
+            .then(setChartData)
+            .catch(err => console.error("Failed to fetch trends", err));
     }, []);
 
     useEffect(() => {
-    fetch('/api/users/districtSales')
-        .then(res => res.json())
-        .then(setDistrictData)
-        .catch(err => console.error("Failed to fetch trends", err));
+        fetch('/api/users/districtSales')
+            .then(res => res.json())
+            .then(setDistrictData)
+            .catch(err => console.error("Failed to fetch trends", err));
     }, []);
 
     const fetchRequests = async () => {
-    try {
-        const res = await fetch('/api/users/requests');
-        const data = await res.json();
-        setRequests(data);
-        console.log("Fetched requests:", data);
-    } catch (err) {
-        console.error("Failed to fetch requests", err);
-    }
+        try {
+            const res = await fetch('/api/users/requests');
+            const data = await res.json();
+            setRequests(data);
+        } catch (err) {
+            console.error("Failed to fetch requests", err);
+        }
     };
 
     useEffect(() => {
@@ -86,10 +84,10 @@ function Profile() {
     }, []);
 
     useEffect(() => {
-    fetch('/api/clothing/closetStats')
-        .then(res => res.json())
-        .then(setClosetData)
-        .catch(err => console.error("Failed to fetch trends", err));
+        fetch('/api/clothing/closetStats')
+            .then(res => res.json())
+            .then(setClosetData)
+            .catch(err => console.error("Failed to fetch trends", err));
     }, []);
 
     if (!userContext.user) {
@@ -99,13 +97,10 @@ function Profile() {
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
-        // Simple validation for file size (2MB max)
         if (file.size > 2 * 1024 * 1024) {
             setError("Image is too large. Maximum size is 2MB.");
             return;
         }
-        
         setAvatarFile(file);
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -117,17 +112,14 @@ function Profile() {
     const handleAvatarUpload = async (e) => {
         e.preventDefault();
         if (!avatarFile) return;
-        
         setSaving(true);
         setError("");
         setSuccess("");
-        
         try {
             const reader = new FileReader();
             reader.onloadend = async () => {
                 const base64Avatar = reader.result;
                 const token = localStorage.getItem('token');
-                
                 const res = await fetch("/api/users/profile", {
                     method: "PUT",
                     credentials: "include",
@@ -137,12 +129,10 @@ function Profile() {
                     },
                     body: JSON.stringify({ avatar: base64Avatar }),
                 });
-                
                 if (!res.ok) {
                     const err = await res.json();
                     throw new Error(err.message || "Failed to update avatar");
                 }
-                
                 const data = await res.json();
                 setProfile(data);
                 setAvatarPreview(data.avatar || null);
@@ -168,7 +158,6 @@ function Profile() {
         setSaving(true);
         setError("");
         setSuccess("");
-        
         try {
             const token = localStorage.getItem('token');
             const res = await fetch("/api/users/profile", {
@@ -189,12 +178,10 @@ function Profile() {
                     address: form.address,
                 }),
             });
-            
             if (!res.ok) {
                 const err = await res.json();
                 throw new Error(err.message || "Failed to update profile");
             }
-            
             const data = await res.json();
             setProfile(data);
             setForm({
@@ -215,42 +202,65 @@ function Profile() {
         }
     };
 
-   
     const handleAcceptRequest = async (userId, clothingId) => {
-    try {
-        const res = await fetch(`/api/clothing/transfer/${clothingId}/${userId}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ newUserId: userId })
-        });
-
-        if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message);
+        try {
+            const res = await fetch(`/api/clothing/transfer/${clothingId}/${userId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ newUserId: userId })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message);
+            }
+            setSuccess("Transfer succesful!");
+            fetchRequests();
+        } catch (err) {
+            console.error(err);
+            alert("Transfer failed: " + err.message);
         }
-
-        alert("Transfer successful!");
-        fetchRequests(); 
-    } catch (err) {
-        console.error(err);
-        alert("Transfer failed: " + err.message);
-    }
     };
 
     return (
         <>
-        <div className="profile-card-container">
-            <div className="profile-card">
-                <div className="text-center mb-4">
-                    <img
-                        src={avatarPreview || "https://via.placeholder.com/150"}
-                        alt="User Avatar"
-                        className="profile-avatar-preview"
-                        onClick={() => fileInputRef.current.click()}
-                    />
-                    <form onSubmit={handleAvatarUpload}>
+            <div className="profile-card-container">
+                <div className="profile-card">
+                    <div className="text-center mb-4" style={{ position: "relative" }}>
+                        <img
+                            src={avatarPreview || "https://via.placeholder.com/150"}
+                            alt="User Avatar"
+                            className="profile-avatar-preview"
+                            style={{ cursor: editing ? "pointer" : "default" }}
+                            onClick={editing ? () => fileInputRef.current.click() : undefined}
+                        />
+                        {/* Avatar actions */}
+                        <div className="avatar-actions">
+                            {editing && !avatarFile && (
+                                <button
+                                    type="button"
+                                    className="btn btn-link p-0"
+                                    style={{ fontSize: 22 }}
+                                    onClick={() => fileInputRef.current.click()}
+                                    aria-label="Edit profile picture"
+                                >
+                                    ✏️
+                                </button>
+                            )}
+                            {editing && avatarFile && (
+                                <button
+                                    type="button"
+                                    className="btn btn-link p-0"
+                                    style={{ fontSize: 22, color: "#1976d2" }}
+                                    onClick={handleAvatarUpload}
+                                    aria-label="Save new profile picture"
+                                    disabled={saving}
+                                >
+                                    ✔️
+                                </button>
+                            )}
+                        </div>
                         <input
                             type="file"
                             accept="image/*"
@@ -258,148 +268,152 @@ function Profile() {
                             ref={fileInputRef}
                             onChange={handleAvatarChange}
                         />
-                        <button type="submit" className="btn btn-secondary mt-2" disabled={saving || !avatarFile}>
-                            {saving ? "Saving..." : "Save new profile picture"}
-                        </button>
-                    </form>
-                </div>
-                <h2 className="text-center mb-4">{profile.username}</h2>
-                {editing ? (
-                    <form onSubmit={handleEditSubmit}>
-                        <label className="form-label">Username</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            name="username"
-                            value={form.username}
-                            onChange={handleEditChange}
-                            required
-                        />
-                        <label className="form-label">Email</label>
-                        <input
-                            type="email"
-                            className="form-control"
-                            name="email"
-                            value={form.email}
-                            onChange={handleEditChange}
-                            required
-                        />
-                        <label className="form-label">New Password</label>
-                        <input
-                            type="password"
-                            className="form-control"
-                            name="password"
-                            value={form.password}
-                            onChange={handleEditChange}
-                            placeholder="Leave blank to keep current password"
-                        />
-                        <label className="form-label">Phone Number</label>
-                        <input
-                            type="tel"
-                            className="form-control"
-                            name="phoneNumber"
-                            value={form.phoneNumber}
-                            onChange={handleEditChange}
-                        />
-                        <label className="form-label">Contact Email</label>
-                        <input
-                            type="email"
-                            className="form-control"
-                            name="emailAddress"
-                            value={form.emailAddress}
-                            onChange={handleEditChange}
-                        />
-                        <label className="form-label">Address</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            name="address"
-                            value={form.address}
-                            onChange={handleEditChange}
-                            placeholder="Enter your address"
-                        />
-                        <button type="submit" className="btn btn-primary" disabled={saving}>
-                            {saving ? "Saving..." : "Save Changes"}
-                        </button>
-                        <button type="button" className="btn btn-secondary mt-2" onClick={() => setEditing(false)}>
-                            Cancel
-                        </button>
-                    </form>
-                ) : (
-                    <ul className="list-group list-group-flush">
-                        <li className="list-group-item d-flex justify-content-between align-items-center">
-                            <strong>Email:</strong>
-                            <span>{profile.email}</span>
-                        </li>
-                        <li className="list-group-item d-flex justify-content-between align-items-center">
-                            <strong>Phone Number:</strong>
-                            <span>{profile.contactInfo?.phoneNumber || "-"}</span>
-                        </li>
-                        <li className="list-group-item d-flex justify-content-between align-items-center">
-                            <strong>Contact Email:</strong>
-                            <span>{profile.contactInfo?.emailAddress || "-"}</span>
-                        </li>
-                        <li className="list-group-item d-flex justify-content-between align-items-center">
-                            <strong>Address:</strong>
+                    </div>
+                    <h2 className="text-center mb-4">{profile.username}</h2>
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    {success && (
+                        <div className="profile-success-alert">
+                            <span className="icon">✔️</span>
+                            {success}
+                        </div>
+                    )}
+                    {editing ? (
+                        <form onSubmit={handleEditSubmit}>
+                            <label className="form-label">Username</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                name="username"
+                                value={form.username}
+                                onChange={handleEditChange}
+                                required
+                            />
+                            <label className="form-label">Email</label>
+                            <input
+                                type="email"
+                                className="form-control"
+                                name="email"
+                                value={form.email}
+                                onChange={handleEditChange}
+                                required
+                            />
+                            <label className="form-label">New Password</label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                name="password"
+                                value={form.password}
+                                onChange={handleEditChange}
+                                placeholder="Leave blank to keep current password"
+                            />
+                            <label className="form-label">Phone Number</label>
+                            <input
+                                type="tel"
+                                className="form-control"
+                                name="phoneNumber"
+                                value={form.phoneNumber}
+                                onChange={handleEditChange}
+                            />
+                            <label className="form-label">Contact Email</label>
+                            <input
+                                type="email"
+                                className="form-control"
+                                name="emailAddress"
+                                value={form.emailAddress}
+                                onChange={handleEditChange}
+                            />
+                            <label className="form-label">Address</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                name="address"
+                                value={form.address}
+                                onChange={handleEditChange}
+                                placeholder="Enter your address"
+                            />
+                            <button type="submit" className="btn btn-primary" disabled={saving}>
+                                {saving ? "Saving..." : "Save Changes"}
+                            </button>
+                            <button type="button" className="btn btn-secondary mt-2" onClick={() => setEditing(false)}>
+                                Cancel
+                            </button>
+                        </form>
+                    ) : (
+                        <ul className="list-group list-group-flush">
+                            <li className="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>Email:</strong>
+                                <span>{profile.email}</span>
+                            </li>
+                            <li className="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>Phone Number:</strong>
+                                <span>{profile.contactInfo?.phoneNumber || "-"}</span>
+                            </li>
+                            <li className="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>Contact Email:</strong>
+                                <span>{profile.contactInfo?.emailAddress || "-"}</span>
+                            </li>
+                            <li className="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>Address:</strong>
                                 <span>
-                                {profile.location
-                                    ? [
-                                        profile.location.address,
-                                        profile.location.city,
-                                        profile.location.country
-                                    ].filter(Boolean).join(', ')
-                                    : "-"}
-                            </span>
-                        </li>
-                    </ul>
-                )}
-                {!editing && (
-                    <button className="btn btn-outline-primary mt-3" onClick={() => setEditing(true)}>
-                        Edit Profile
-                    </button>
-                )}
-            </div>
-        </div>
-        <div className="requests-container">
-        <h3>Requests</h3>
-        {requests.length > 0 && requests.some(item => item.wantToGet.length > 0) ? (
-            <div className="request-cards">
-            {requests.map((item) =>
-                item.wantToGet.map((user) => (
-                <div
-                    key={`${item.itemId}-${user._id}`}
-                    className="card mb-3 p-3 shadow-sm"
-                    style={{ borderRadius: "12px" }}
-                >
-                    <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>{user.username}</strong> wants to buy <strong>{item.name}</strong>
-                    </div>
-                    <button className="btn btn-success btn-sm"
-                    onClick={() => {
-                    handleAcceptRequest(user._id, item.itemId);
-                    console.log(`Accepted request from ${user.username} for item ${item.name}`)
-                    }}>
-                        Accept
-                    </button>
-                    </div>
+                                    {profile.location
+                                        ? [
+                                            profile.location.address,
+                                            profile.location.city,
+                                            profile.location.country
+                                        ].filter(Boolean).join(', ')
+                                        : "-"}
+                                </span>
+                            </li>
+                        </ul>
+                    )}
+                    {!editing && (
+                        <div className="edit-profile-btn">
+                            <button className="btn btn-outline-primary" onClick={() => setEditing(true)}>
+                                Edit Profile
+                            </button>
+                        </div>
+                    )}
                 </div>
-                ))
-            )}
             </div>
-        ) : (
-            <p>No requests found.</p>
-        )}
-        </div>
-        <div className='graphs-container'>
-            <div className='graphs'>
-                <h3>Graphs and Statistics</h3>
-                <OutfitTrendChart data={chartData} />
-                <DistrictSellingChart data={districtData}/>
-                <ClosetStats data={closetData}/>
+            <div className="requests-container">
+                <h3>Requests</h3>
+                {requests.length > 0 && requests.some(item => item.wantToGet.length > 0) ? (
+                    <div className="request-cards">
+                        {requests.map((item) =>
+                            item.wantToGet.map((user) => (
+                                <div
+                                    key={`${item.itemId}-${user._id}`}
+                                    className="card mb-3 p-3 shadow-sm"
+                                    style={{ borderRadius: "12px" }}
+                                >
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{user.username}</strong> wants to buy <strong>{item.name}</strong>
+                                        </div>
+                                        <button className="btn btn-success btn-sm"
+                                            onClick={() => {
+                                                handleAcceptRequest(user._id, item.itemId);
+                                            }}>
+                                            Accept
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                ) : (
+                    <p>No requests found.</p>
+                )}
             </div>
-        </div>
-    </>
+            <div className='graphs-container'>
+                <div className='graphs'>
+                    <h3>Graphs and Statistics</h3>
+                    <OutfitTrendChart data={chartData} />
+                    <DistrictSellingChart data={districtData} />
+                    <ClosetStats data={closetData} />
+                </div>
+            </div>
+        </>
     );
 }
 

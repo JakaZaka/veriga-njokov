@@ -20,23 +20,26 @@
   padding: 18px 12px 12px 12px;
 }
 
+/* Clothing Item Card Image Bracket */
 .clothingItem-card-img-bracket {
-  width: 180px;
-  height: 180px;
+  width: 100%;
+  height: 220px;
   background: #f7f7f7;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 12px;
-  border: 1.5px solid #e3eafc;
-  box-shadow: 0 2px 8px #e3eafc33;
+  padding: 8px;
+  border: none;
+  box-shadow: none;
+  overflow: hidden;
 }
 
 .clothingItem-card-img-bracket img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;   /* fill the bracket, cropping if needed */
   background: #f7f7f7;
   border-radius: 10px;
   display: block;
@@ -75,13 +78,40 @@
   font-size: 0.98em;
 }
 
+
+/* Outfit Card Image Bracket */
+.outfit-card-img-bracket {
+  width: 100%;
+  aspect-ratio: 9/16;
+  background: #f7f7f7;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  padding: 8px;
+  border: none;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.outfit-card-img-bracket img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #f7f7f7;
+  border-radius: 10px;
+  display: block;
+}
+
 .outfits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 32px;
   padding: 32px 0;
   margin: 0 auto;
   max-width: 1200px;
+  justify-content: center; 
 }
 
 .outfit-card {
@@ -93,8 +123,11 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
+  padding: 18px 12px 12px 12px;
   min-height: 260px;
+  max-width: 320px;      /* Prevent card from being too wide */
+  margin: 0 auto;        /* Center card in grid cell */
 }
 
 .outfit-card:hover {
@@ -124,7 +157,16 @@
   margin: auto;
 }
 
-.outfit-card-img-grid img,
+.outfit-card-img-single,
+.outfit-card-img-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+  border-radius: 8px;
+  background: #eee;
+  display: block;
+}
+
 .outfit-card-img-single {
   width: 100%;
   height: 100%;

@@ -381,7 +381,7 @@ function AddClothingItem(props) {
                         <label className="form-label" htmlFor="file">Choose photo</label>
                         <input type="file" className="form-control" id="file" onChange={(e)=>{setFile(e.target.files[0])}}/>
                     </div>
-                    <button className="btn btn-primary w-100" type="submit">Naloži</button>
+                    <button className="btn btn-primary w-100" type="submit">Upload</button>
                 </form>
             </div>
         </div>

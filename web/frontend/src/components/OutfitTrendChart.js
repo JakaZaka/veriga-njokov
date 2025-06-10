@@ -18,8 +18,22 @@ export default function OutfitTrendChart({ data }) {
         const keys = ['casual', 'formal', 'sport', 'party', 'work', 'other'];
         const stackedData = d3.stack().keys(keys)(data);
 
-        const tooltip = d3.select("#tooltip");
-
+        // Use a unique tooltip for this chart
+        let tooltip = d3.select("#outfit-trend-tooltip");
+        if (tooltip.empty()) {
+            tooltip = d3.select("body")
+                .append("div")
+                .attr("id", "outfit-trend-tooltip")
+                .style("position", "fixed")
+                .style("background", "white")
+                .style("border", "1px solid #ccc")
+                .style("padding", "5px 10px")
+                .style("border-radius", "4px")
+                .style("pointer-events", "none")
+                .style("font-size", "12px")
+                .style("display", "none")
+                .style("box-shadow", "0px 2px 4px rgba(0,0,0,0.2)");
+        }
 
         const x = d3
             .scaleBand()
@@ -36,7 +50,7 @@ export default function OutfitTrendChart({ data }) {
         const color = d3
             .scaleOrdinal()
             .domain(keys)
-            .range(["#4CAF50", "#FF9800", "#2196F3", "#9C27B0"]);
+            .range(["#4CAF50", "#FF9800", "#2196F3", "#9C27B0", "#1976d2", "#607d8b"]);
 
         // Axes
         svg.append("g")
@@ -64,37 +78,52 @@ export default function OutfitTrendChart({ data }) {
             .attr("height", d => y(d[0]) - y(d[1]))
             .attr("width", x.bandwidth())
             .on("mouseover", function (event, d) {
-            
-            tooltip
-                .style("display", "block")
-                .html(`<strong>${d.key}</strong><br/>${d.data.date}: ${d.data[d.key]}`);
+                tooltip
+                    .style("display", "block")
+                    .html(`<strong>${d.key}</strong><br/>${d.data.date}: ${d.data[d.key]}`);
             })
             .on("mousemove", function (event) {
                 tooltip
-                    .style("left", `${event.offsetX + 10}px`)
-                    .style("top", `${event.offsetY - 30}px`);
+                    .style("left", `${event.clientX + 12}px`)
+                    .style("top", `${event.clientY - 32}px`);
             })
             .on("mouseout", function () {
                 tooltip.style("display", "none");
             });
 
+        // Clean up tooltip on unmount
+        return () => {
+            tooltip.style("display", "none");
+        };
     }, [data]);
 
     return (
-       <div style={{ marginTop: "40px", textAlign: "center", position: "relative" }}>
-    <h4>Outfit Trend Over Time</h4>
-    <svg ref={ref}></svg>
-    <div id="tooltip" style={{
-        position: "absolute",
-        backgroundColor: "white",
-        border: "1px solid #ccc",
-        padding: "5px 10px",
-        borderRadius: "4px",
-        pointerEvents: "none",
-        fontSize: "12px",
-        display: "none",
-        boxShadow: "0px 2px 4px rgba(0,0,0,0.2)"
-    }}></div>
-</div>
+        <div style={{ marginTop: "40px", textAlign: "center", position: "relative" }}>
+        <h4
+            style={{
+            textAlign: "center",
+            color: "#1976d2",
+            fontSize: "1.5em",
+            fontWeight: 100,
+            letterSpacing: "1.2px",
+            marginBottom: "18px",
+            marginTop: 0,
+            position: "relative",
+            display: "block"
+            }}
+        >
+            Outfit Trend Over Time
+            <span
+            style={{
+                display: "block",
+                margin: "12px auto 0 auto",
+                width: 60,
+                height: 4,
+                borderRadius: 2
+            }}
+            ></span>
+        </h4>
+        <svg ref={ref}></svg>
+        </div>
     );
 }
