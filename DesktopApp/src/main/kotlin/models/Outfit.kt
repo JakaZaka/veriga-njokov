@@ -9,7 +9,7 @@ data class Outfit(
     val id: String? = null,
     val name: String,
     val items: List<OutfitItemRef> = emptyList(),
-    val season: List<Season> = emptyList(),
+    val season: List<String> = listOf("all"), // Changed to List<String>
     val occasion: String? = null,
     val liked: Int = 0,
     val likedBy: List<String> = emptyList(),
@@ -19,11 +19,4 @@ data class Outfit(
     val user: String? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null
-)
-
-@Serializable
-data class OutfitItemRef(
-    @SerialName("_id")
-    val id: String? = null,
-    val item: ClothingItem? = null
 )

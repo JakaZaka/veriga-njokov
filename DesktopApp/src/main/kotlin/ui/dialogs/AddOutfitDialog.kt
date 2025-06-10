@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import models.Outfit
+import models.OutfitItemRef
 import models.Season
 import viewmodels.AppViewModel
 
@@ -19,6 +20,9 @@ fun AddOutfitDialog(
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var occasion by remember { mutableStateOf("casual") } // Default value
+    
+    // Default item ID - this is a placeholder that would normally come from selection
+    val defaultItemId = "682cba6cab337b6c852ecc05" // Use a real item ID from your database
     
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
@@ -57,8 +61,14 @@ fun AddOutfitDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 
-                // To fix the items selection, we'd need to implement a multi-select component
-                // For now, this is a placeholder
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Info text about item selection
+                Text(
+                    "Note: This simplified version will use a default item.",
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
@@ -76,14 +86,19 @@ fun AddOutfitDialog(
                     
                     Button(
                         onClick = {
-                            // Create new Outfit with all required parameters
+                            // Create a simple OutfitItemRef with just the item ID
+                            val itemRef = OutfitItemRef(
+                                item = defaultItemId  // This is correct since item is now a String
+                            )
+                            
+                            // Create new Outfit with properly structured data
                             val newOutfit = Outfit(
                                 name = name,
                                 description = description,
-                                items = emptyList(), // Empty list of OutfitItemRef for now
-                                season = listOf(Season.ALL), // Default season
+                                items = listOf(itemRef), // Include the default item
+                                season = listOf("all"), // Use string seasons
                                 occasion = occasion,
-                                user = viewModel.currentUserId // Use logged in user ID
+                                user = viewModel.currentUserId ?: "683cb5ef0457c4ac1ad75b13" // Use a default user ID if current is null
                             )
                             onOutfitAdded(newOutfit)
                             onDismissRequest()

@@ -167,11 +167,9 @@ router.delete('/locations/:id', async (req, res) => {
 router.get('/outfits', async (req, res) => {
   try {
     const Outfit = require('../models/Outfit');
-    // Populate the items to get full clothing item details
-    const outfits = await Outfit.find().populate({
-      path: 'items.item',
-      model: 'ClothingItem'
-    });
+    
+    // Don't populate the items - just return the references
+    const outfits = await Outfit.find();
     
     res.json({
       success: true,
@@ -208,6 +206,43 @@ router.delete('/outfits/:id', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: error.message 
+    });
+  }
+});
+
+// Add this to your desktopAdminRoutes.js file
+router.post('/outfits', async (req, res) => {
+  try {
+    // Import models at the top of your file or use here
+    const Outfit = require('../models/Outfit');
+    
+    const { name, description, items, season, occasion, user } = req.body;
+    
+    // Create the outfit document
+    const outfit = new Outfit({
+      name,
+      description,
+      items, // These should now be properly formatted with item IDs
+      season,
+      occasion,
+      user,
+      liked: 0,
+      likedBy: [],
+      images: []
+    });
+    
+    const savedOutfit = await outfit.save();
+    
+    res.status(201).json({
+      success: true,
+      data: savedOutfit,
+      message: 'Outfit created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating outfit:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 });
