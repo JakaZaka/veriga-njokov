@@ -136,4 +136,31 @@ router.get('/locations', async (req, res) => {
   }
 });
 
+// Add DELETE endpoint for store locations
+router.delete('/locations/:id', async (req, res) => {
+  try {
+    const Location = require('../models/Location');
+    const location = await Location.findById(req.params.id);
+    
+    if (!location) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Location not found' 
+      });
+    }
+    
+    await Location.findByIdAndDelete(req.params.id);
+    res.json({ 
+      success: true,
+      message: 'Location deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting location:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 module.exports = router;
