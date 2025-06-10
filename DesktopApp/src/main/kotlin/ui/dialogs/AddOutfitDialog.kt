@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import models.Outfit
+import models.OutfitItemRef
+import models.Season
 import viewmodels.AppViewModel
 
 @Composable
@@ -17,9 +19,11 @@ fun AddOutfitDialog(
 ) {
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var selectedItems by remember { mutableStateOf(listOf<String>()) }
-    var occasion by remember { mutableStateOf("") }
-
+    var occasion by remember { mutableStateOf("casual") } // Default value
+    
+    // Default item ID - this is a placeholder that would normally come from selection
+    val defaultItemId = "682cba6cab337b6c852ecc05" // Use a real item ID from your database
+    
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -43,7 +47,7 @@ fun AddOutfitDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description") },
+                    label = { Text("Description (Optional)") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -53,12 +57,18 @@ fun AddOutfitDialog(
                 OutlinedTextField(
                     value = occasion,
                     onValueChange = { occasion = it },
-                    label = { Text("Occasion") },
+                    label = { Text("Occasion (e.g., casual, formal, sport)") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
-                // To fix the items selection, we'd need to implement a multi-select component
-                // For now, this is a placeholder
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Info text about item selection
+                Text(
+                    "Note: This simplified version will use a default item.",
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
@@ -76,12 +86,19 @@ fun AddOutfitDialog(
                     
                     Button(
                         onClick = {
-                            // Create new Outfit with all required parameters
+                            // Create a simple OutfitItemRef with just the item ID
+                            val itemRef = OutfitItemRef(
+                                item = defaultItemId  // This is correct since item is now a String
+                            )
+                            
+                            // Create new Outfit with properly structured data
                             val newOutfit = Outfit(
                                 name = name,
                                 description = description,
-                                items = selectedItems, // Empty list for now
-                                owner = viewModel.currentUserId ?: "" // Use logged in user or empty string
+                                items = listOf(itemRef), // Include the default item
+                                season = listOf("all"), // Use string seasons
+                                occasion = occasion,
+                                user = viewModel.currentUserId ?: "683cb5ef0457c4ac1ad75b13" // Use a default user ID if current is null
                             )
                             onOutfitAdded(newOutfit)
                             onDismissRequest()

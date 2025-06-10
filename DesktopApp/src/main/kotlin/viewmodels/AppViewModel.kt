@@ -9,6 +9,7 @@ import repositories.DataRepository
 import repositories.ClothingItemRepository
 import repositories.ClothingStoreRepository
 import repositories.StoreLocationRepository
+import repositories.OutfitRepository
 import models.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +19,7 @@ class AppViewModel {
     private val clothingItemRepository = ClothingItemRepository()
     private val clothingStoreRepository = ClothingStoreRepository()
     private val storeLocationRepository = StoreLocationRepository()
+    private val outfitRepository = OutfitRepository()
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     // Add current user id property
@@ -37,6 +39,11 @@ class AppViewModel {
     val storeLocations = storeLocationRepository.locations
     val storeLocationsLoading = storeLocationRepository.isLoading
     val storeLocationsError = storeLocationRepository.errorMessage
+    
+    // Outfit data
+    val outfits = outfitRepository.outfits  
+    val outfitsLoading = outfitRepository.isLoading
+    val outfitsError = outfitRepository.errorMessage
     
     // Filter state
     var selectedCategory by mutableStateOf<ClothingCategory?>(null)
@@ -73,6 +80,13 @@ class AppViewModel {
         }
     }
     
+    // Load outfits
+    fun loadOutfits() {
+        viewModelScope.launch {
+            outfitRepository.getAllOutfits()
+        }
+    }
+    
     // Add clothing item
     fun addClothingItem(item: ClothingItem) {
         viewModelScope.launch {
@@ -87,6 +101,13 @@ class AppViewModel {
             storeLocationRepository.createLocation(location)
             // Refresh the list after addition
             loadStoreLocations()
+        }
+    }
+    
+    // Add outfit
+    fun addOutfit(outfit: Outfit) {
+        viewModelScope.launch {
+            outfitRepository.createOutfit(outfit)
         }
     }
     
@@ -126,6 +147,19 @@ class AppViewModel {
             storeLocationRepository.deleteLocation(id)
             // Refresh the list after deletion
             loadStoreLocations()
+        }
+    }
+    
+    // Delete outfit
+    fun deleteOutfit(id: String) {
+        if (id.isBlank()) {
+            return
+        }
+        
+        viewModelScope.launch {
+            outfitRepository.deleteOutfit(id)
+            // Refresh the list after deletion
+            loadOutfits()
         }
     }
     

@@ -163,4 +163,88 @@ router.delete('/locations/:id', async (req, res) => {
   }
 });
 
+// Get outfits for desktop app
+router.get('/outfits', async (req, res) => {
+  try {
+    const Outfit = require('../models/Outfit');
+    
+    // Don't populate the items - just return the references
+    const outfits = await Outfit.find();
+    
+    res.json({
+      success: true,
+      data: outfits
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Delete outfit endpoint
+router.delete('/outfits/:id', async (req, res) => {
+  try {
+    const Outfit = require('../models/Outfit');
+    const outfit = await Outfit.findById(req.params.id);
+    
+    if (!outfit) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Outfit not found' 
+      });
+    }
+    
+    await Outfit.findByIdAndDelete(req.params.id);
+    res.json({ 
+      success: true,
+      message: 'Outfit deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting outfit:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Add this to your desktopAdminRoutes.js file
+router.post('/outfits', async (req, res) => {
+  try {
+    // Import models at the top of your file or use here
+    const Outfit = require('../models/Outfit');
+    
+    const { name, description, items, season, occasion, user } = req.body;
+    
+    // Create the outfit document
+    const outfit = new Outfit({
+      name,
+      description,
+      items, // These should now be properly formatted with item IDs
+      season,
+      occasion,
+      user,
+      liked: 0,
+      likedBy: [],
+      images: []
+    });
+    
+    const savedOutfit = await outfit.save();
+    
+    res.status(201).json({
+      success: true,
+      data: savedOutfit,
+      message: 'Outfit created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating outfit:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
