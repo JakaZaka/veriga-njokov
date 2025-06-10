@@ -299,10 +299,32 @@ object ApiClient {
         }
         
         return try {
-            val url = "$BASE_URL/stores/$id"
+            // Change from /stores/:id to /locations/:id to match backend route
+            val url = "$BASE_URL/locations/$id"
+            println("Deleting location with ID: $id")
+            
             apiService.delete(url)
         } catch (e: Exception) {
+            println("Failed to delete location: ${e.message}")
             ApiResponse(success = false, error = e.message, data = false)
+        }
+    }
+    
+    // Create store location
+    suspend fun createStoreLocation(location: Location): ApiResponse<Location> {
+        return try {
+            println("Creating store location: ${location.address}, ${location.city}")
+            println("Store ID: ${location.clothingStoreId?.id}, Store Name: ${location.clothingStoreId?.name}")
+            
+            apiService.post("$BASE_URL/locations", location) { responseText ->
+                println("Raw create response: $responseText")
+                
+                // Never return null - throw exception instead
+                jsonConfig.decodeFromString<Location>(responseText)
+            }
+        } catch (e: Exception) {
+            println("Failed to create store location: ${e.message}")
+            ApiResponse(success = false, error = e.message)
         }
     }
 }

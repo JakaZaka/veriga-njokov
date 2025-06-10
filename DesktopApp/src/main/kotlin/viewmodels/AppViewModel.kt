@@ -81,6 +81,15 @@ class AppViewModel {
         }
     }
     
+    // Add store location
+    fun addStoreLocation(location: Location) {
+        viewModelScope.launch {
+            storeLocationRepository.createLocation(location)
+            // Refresh the list after addition
+            loadStoreLocations()
+        }
+    }
+    
     // Delete clothing item
     fun deleteClothingItem(id: String) {
         if (id.isBlank()) {

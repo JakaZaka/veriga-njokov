@@ -9,7 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import models.Location
+import models.ClothingStoreRef
 import viewmodels.AppViewModel
+import androidx.compose.foundation.clickable
 
 @Composable
 fun StoreLocationsScreen(viewModel: AppViewModel = remember { AppViewModel() }) {
@@ -17,13 +19,16 @@ fun StoreLocationsScreen(viewModel: AppViewModel = remember { AppViewModel() }) 
     val isLoading by viewModel.storeLocationsLoading.collectAsState()
     val errorMessage by viewModel.storeLocationsError.collectAsState()
     
+    // State to control the add location dialog
+    var showAddDialog by remember { mutableStateOf(false) }
+    
     // Load locations when the screen is first displayed
     LaunchedEffect(Unit) {
         viewModel.loadStoreLocations()
     }
     
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // Header with title
+        // Header with title and add button
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -33,7 +38,9 @@ fun StoreLocationsScreen(viewModel: AppViewModel = remember { AppViewModel() }) 
                 text = "Store Locations",
                 style = MaterialTheme.typography.h4
             )
-            // Add button will be implemented later
+            Button(onClick = { showAddDialog = true }) {
+                Text("Add Location")
+            }
         }
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -87,6 +94,17 @@ fun StoreLocationsScreen(viewModel: AppViewModel = remember { AppViewModel() }) 
                 )
             }
         }
+    }
+    
+    // Show custom dialog when needed
+    if (showAddDialog) {
+        AddStoreLocationDialog(
+            onDismissRequest = { showAddDialog = false },
+            onLocationAdded = { location ->
+                viewModel.addStoreLocation(location)
+            },
+            viewModel = viewModel  // Add this line to pass the viewModel
+        )
     }
 }
 
@@ -148,4 +166,148 @@ private fun LocationCard(location: Location, onDelete: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+fun AddStoreLocationDialog(
+    onDismissRequest: () -> Unit,
+    onLocationAdded: (Location) -> Unit,
+    viewModel: AppViewModel
+) {
+    // Define the two specific stores with their IDs
+    val zaraStore = ClothingStoreRef(
+        id = "6830fc0250fe3e4f4364aef7",
+        name = "ZARA", 
+        website = "https://www.zara.com/si/"
+    )
+    
+    val hmStore = ClothingStoreRef(
+        id = "683c82e19ebb2e3b6cd224b3",
+        name = "H&M",
+        website = "https://www2.hm.com/en_eur/index.html"
+    )
+    
+    // State variables for the form fields
+    var selectedStore by remember { mutableStateOf<ClothingStoreRef?>(null) }
+    var address by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
+    var country by remember { mutableStateOf("Slovenia") } // Default value
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Add Store Location") },
+        text = {
+            Column {
+                // Store selection with radio buttons
+                Text(
+                    "Select Store:",
+                    style = MaterialTheme.typography.subtitle1,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                // Radio button for Zara
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    RadioButton(
+                        selected = selectedStore == zaraStore,
+                        onClick = { selectedStore = zaraStore }
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "ZARA",
+                        modifier = Modifier.clickable { selectedStore = zaraStore }
+                    )
+                }
+                
+                // Radio button for H&M
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    RadioButton(
+                        selected = selectedStore == hmStore,
+                        onClick = { selectedStore = hmStore }
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "H&M",
+                        modifier = Modifier.clickable { selectedStore = hmStore }
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Address field
+                TextField(
+                    value = address,
+                    onValueChange = { address = it },
+                    label = { Text("Address") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // City field
+                TextField(
+                    value = city,
+                    onValueChange = { city = it },
+                    label = { Text("City") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Country field
+                TextField(
+                    value = country,
+                    onValueChange = { country = it },
+                    label = { Text("Country") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                // Error message
+                errorMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    // Validate and save the new location
+                    if (selectedStore == null || address.isBlank() || city.isBlank() || country.isBlank()) {
+                        errorMessage = "Please select a store and fill in all fields"
+                    } else {
+                        errorMessage = null
+                        onLocationAdded(
+                            Location(
+                                id = null, // ID will be generated
+                                clothingStoreId = selectedStore!!, // Use the selected store with its correct ID
+                                address = address,
+                                city = city,
+                                country = country
+                            )
+                        )
+                        onDismissRequest()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismissRequest,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }

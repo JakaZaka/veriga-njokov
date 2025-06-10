@@ -68,4 +68,30 @@ class StoreLocationRepository {
             _isLoading.value = false
         }
     }
+    
+    // Add a new store location
+    suspend fun createLocation(location: Location): Boolean {
+        _isLoading.value = true
+        _errorMessage.value = null
+        
+        try {
+            val response = withContext(Dispatchers.IO) {
+                ApiClient.createStoreLocation(location)
+            }
+            
+            if (response.success && response.data != null) {
+                // Add the new location to the local list
+                _locations.value = _locations.value + response.data
+                return true
+            }
+            
+            _errorMessage.value = "Failed to create store location: ${response.error}"
+            return false
+        } catch (e: Exception) {
+            _errorMessage.value = "Error: ${e.message}"
+            return false
+        } finally {
+            _isLoading.value = false
+        }
+    }
 }
