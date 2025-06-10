@@ -10,7 +10,7 @@
 .clothingItem-card {
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 24px rgba(34, 70, 34, 0.10), 0 1.5px 4px rgba(255, 183, 77, 0.10);
   overflow: hidden;
   transition: transform 0.18s, box-shadow 0.18s;
   cursor: pointer;
@@ -20,26 +20,20 @@
   padding: 18px 12px 12px 12px;
 }
 
-/* Clothing Item Card Image Bracket */
 .clothingItem-card-img-bracket {
-  width: 100%;
-  height: 220px;
-  background: #f7f7f7;
+  width: 180px;
+  height: 180px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 12px;
-  padding: 8px;
-  border: none;
-  box-shadow: none;
-  overflow: hidden;
 }
 
 .clothingItem-card-img-bracket img {
   width: 100%;
   height: 100%;
-  object-fit: cover;   /* fill the bracket, cropping if needed */
+  object-fit: contain;
   background: #f7f7f7;
   border-radius: 10px;
   display: block;
@@ -47,43 +41,27 @@
 
 .clothingItem-card:hover {
   transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18), 0 2px 8px rgba(0,0,0,0.10);
-}
-
-.clothingItem-card-img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  border-bottom: 1px solid #eee;
-  background: #f7f7f7;
-}
-
-.clothingItem-card-overlay {
-  padding: 18px 12px 12px 12px;
-  width: 100%;
-  text-align: center;
+  box-shadow: 0 8px 32px rgba(34, 70, 34, 0.18), 0 2px 8px rgba(255, 183, 77, 0.13);
 }
 
 .clothingItem-card-overlay h5 {
-  margin: 6px 0;
-  font-size: 1.08em;
-  color: #1976d2;
+  margin: 4px 0 2px 0;
+  font-size: 1em;
+  color: #225622; 
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 
 .clothingItem-card-overlay p {
-  margin: 2px 0;
+  margin: 1px 0;
   color: #555;
-  font-size: 0.98em;
+  font-size: 0.92em;
 }
-
 
 /* Outfit Card Image Bracket */
 .outfit-card-img-bracket {
   width: 100%;
   aspect-ratio: 9/16;
-  background: #f7f7f7;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -99,7 +77,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #f7f7f7;
   border-radius: 10px;
   display: block;
 }
@@ -117,7 +94,7 @@
 .outfit-card {
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 24px rgba(34, 70, 34, 0.10), 0 1.5px 4px rgba(255, 183, 77, 0.10);
   overflow: hidden;
   transition: transform 0.18s, box-shadow 0.18s;
   cursor: pointer;
@@ -126,18 +103,18 @@
   align-items: center;
   padding: 18px 12px 12px 12px;
   min-height: 260px;
-  max-width: 320px;      /* Prevent card from being too wide */
-  margin: 0 auto;        /* Center card in grid cell */
+  max-width: 320px;
+  margin: 0 auto;
 }
 
 .outfit-card:hover {
   transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18), 0 2px 8px rgba(0,0,0,0.10);
+  box-shadow: 0 8px 32px rgba(34, 70, 34, 0.18), 0 2px 8px rgba(255, 183, 77, 0.13);
 }
 
 .outfit-card-img-frame {
   width: 100%;
-  aspect-ratio: 1.6/1; /* Wider frame for better layout */
+  aspect-ratio: 1.6/1;
   background: #f7f7f7;
   display: flex;
   align-items: center;
@@ -187,10 +164,10 @@
   padding: 16px 0 10px 0;
   font-size: 1.1em;
   font-weight: 600;
-  color: #1976d2;
+  color: #225622; /* dark green */
   text-align: center;
   width: 100%;
-  background: #fafbfc;
+  background: #ffe5b4; /* peach */
 }
 
 .add-clothing-fab {
@@ -200,11 +177,11 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: #1976d2;
+  background: #225622;
   color: #fff;
   font-size: 3.5rem;
   border: none;
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.18);
+  box-shadow: 0 4px 16px rgba(34, 70, 34, 0.18);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -213,5 +190,5 @@
   transition: background 0.18s;
 }
 .add-clothing-fab:hover {
-  background: #1565c0;
+  background: #183c18;
 }

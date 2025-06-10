@@ -42,7 +42,6 @@ if (Array.isArray(data)) {
 
     return(
         <div>
-            <h3>Stores:</h3>
             
             <ul>
                 <div className='stores-grid'>{stores.map(clothingStore=>(<ClothingStore clothingStore={clothingStore} key={clothingStore._id} onDelete={handleDelete}></ClothingStore>))}</div>

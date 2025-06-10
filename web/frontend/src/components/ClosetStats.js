@@ -17,9 +17,21 @@ export default function ClosetStats({ data }) {
     const g = svg.append("g")
       .attr("transform", `translate(${width / 2},${height / 2})`);
 
+    // Dark green and peach color palette
+    const palette = [
+      "#225622", // dark green
+      "#ffe5b4", // peach
+      "#388e3c", // secondary green
+      "#ffd9a0", // lighter peach
+      "#b7b97a", // olive
+      "#fffaf6", // light peach background
+      "#a5d6a7", // light green
+      "#ffb74d"  // accent peach
+    ];
+
     const color = d3.scaleOrdinal()
       .domain(data.map(d => d.category))
-      .range(d3.schemeSet2);
+      .range(palette);
 
     const pie = d3.pie()
       .sort(null)
@@ -36,14 +48,15 @@ export default function ClosetStats({ data }) {
         .append("div")
         .attr("id", "closet-stats-tooltip")
         .style("position", "fixed")
-        .style("background", "white")
-        .style("border", "1px solid gray")
-        .style("padding", "6px 12px")
-        .style("border-radius", "4px")
+        .style("background", "#fffaf6")
+        .style("border", "1.5px solid #225622")
+        .style("padding", "8px 14px")
+        .style("border-radius", "6px")
         .style("pointer-events", "none")
-        .style("font-size", "12px")
+        .style("font-size", "13px")
+        .style("color", "#225622")
         .style("display", "none")
-        .style("box-shadow", "0 2px 6px rgba(0,0,0,0.2)");
+        .style("box-shadow", "0 2px 8px rgba(34,70,34,0.13)");
     }
 
     const arcs = pie(data);
@@ -89,8 +102,8 @@ export default function ClosetStats({ data }) {
       .attr("y", (d, i) => i * 22 + 13)
       .text(d => d.category)
       .style("font-size", "14px")
+      .style("fill", "#225622")
       .attr("alignment-baseline", "middle");
-
 
     // Clean up tooltip on unmount
     return () => {
@@ -103,9 +116,9 @@ export default function ClosetStats({ data }) {
       <h4
         style={{
           textAlign: "center",
-          color: "#1976d2",
+          color: "#225622",
           fontSize: "1.5em",
-          fontWeight: 100,
+          fontWeight: 700,
           letterSpacing: "1.2px",
           marginBottom: "18px",
           marginTop: 0,
@@ -120,7 +133,8 @@ export default function ClosetStats({ data }) {
             margin: "12px auto 0 auto",
             width: 60,
             height: 4,
-            borderRadius: 2
+            borderRadius: 2,
+            background: "#ffe5b4"
           }}
         ></span>
       </h4>

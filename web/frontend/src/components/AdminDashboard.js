@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../userContext';
 import { Navigate } from 'react-router-dom';
+import '../AdminDashboard.css';
 
 function AdminDashboard() {
   const userContext = useContext(UserContext);
@@ -10,8 +11,9 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
-  
   // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
@@ -78,10 +80,8 @@ function AdminDashboard() {
     return <Navigate replace to="/" />;
   }
 
-
   // Delete user
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Ali res želite izbrisati tega uporabnika?')) return;
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -129,8 +129,32 @@ function AdminDashboard() {
     }
   };
 
+  // Custom confirmation modal for delete
+  const ConfirmModal = () => (
+    <div className="custom-modal-backdrop">
+      <div className="custom-modal">
+        <p>Ali res želite izbrisati tega uporabnika?</p>
+        <button
+          className="btn btn-danger"
+          onClick={async () => {
+            setShowConfirm(false);
+            await handleDeleteUser(userToDelete);
+          }}
+        >
+          Delete
+        </button>
+        <button
+          className="btn btn-secondary"
+          onClick={() => setShowConfirm(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="container mt-4">
+    <div className="admin-dashboard-container">
       <h2>Admin Dashboard</h2>
       {error && (
         <div className="alert alert-danger" role="alert">{error}</div>
@@ -138,6 +162,7 @@ function AdminDashboard() {
       {success && (
         <div className="alert alert-success" role="alert">{success}</div>
       )}
+      {showConfirm && <ConfirmModal />}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
           <button
@@ -192,7 +217,10 @@ function AdminDashboard() {
                       </button>
                       <button
                         className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleDeleteUser(user._id)}
+                        onClick={() => {
+                          setUserToDelete(user._id);
+                          setShowConfirm(true);
+                        }}
                         disabled={user._id === userContext.user._id}
                       >
                         Delete

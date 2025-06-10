@@ -23,6 +23,7 @@ import Map from './components/Map.js';
 import socket from './socket';
 import ReceivedItemModal from './components/ReceivedItemModal.js';
 import HomePage from './components/HomePage'; 
+import css from './index.css'
 
 
 

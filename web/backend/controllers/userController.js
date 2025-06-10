@@ -209,6 +209,29 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getAllUsersWithExtras = async (req, res) => {
+  try {
+    const users = await User.find();
+    const outfits = await Outfit.find().populate('items.item').select('user name items season occasion liked likedBy imageUrl images');
+    const clothes = await ClothingItem.find({ wantToGive: true });
+
+    const usersWithExtras = users.map(user => {
+      const userOutfits = outfits.filter(o => o.user.toString() === user._id.toString());
+      const clothesForSale = clothes.filter(c => c.user.toString() === user._id.toString());
+      return {
+        ...user.toObject(),
+        outfits: userOutfits,
+        clothesForSale,
+      };
+    });
+
+    res.json(usersWithExtras);
+  } catch (err) {
+    console.error('Error fetching all users with extras:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
 // @desc    Delete user (admin only)
 // @route   DELETE /api/users/:id
 // @access  Private/Admin
@@ -400,5 +423,6 @@ module.exports = {
   updateUserRole,
   nearbyUsers,
   getSalesPerDistrict,
-  getRequests
+  getRequests,
+  getAllUsersWithExtras
 };

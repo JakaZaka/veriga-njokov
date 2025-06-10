@@ -234,9 +234,9 @@ function ClothingItems() {
                     justifyContent: 'center'
                 }}>
                     <div style={{
-                        background: '#fff',
+                        background: '#fffaf6',
                         borderRadius: '12px',
-                        boxShadow: '0 4px 24px rgba(25, 118, 210, 0.18)',
+                        boxShadow: '0 4px 24px rgba(34,70,34,0.13)',
                         padding: '32px 28px 24px 28px',
                         minWidth: 320,
                         maxWidth: '90vw',
@@ -299,8 +299,8 @@ function ClothingItems() {
                         right: 0,
                         width: '370px',
                         height: '100vh',
-                        background: '#fafdff',
-                        boxShadow: '-4px 0 24px rgba(25, 118, 210, 0.13)',
+                        background: '#fffaf6',
+                        boxShadow: '-4px 0 24px rgba(34,70,34,0.13)',
                         zIndex: 2000,
                         padding: '32px 28px 24px 28px',
                         overflowY: 'auto',
@@ -319,7 +319,7 @@ function ClothingItems() {
                             background: 'none',
                             border: 'none',
                             fontSize: '2em',
-                            color: '#1976d2',
+                            color: '#225622',
                             cursor: 'pointer'
                         }}
                         aria-label="Close"
@@ -334,31 +334,31 @@ function ClothingItems() {
                             height: '240px',
                             objectFit: 'cover',
                             borderRadius: '14px',
-                            boxShadow: '0 2px 12px rgba(25, 118, 210, 0.10)',
+                            boxShadow: '0 2px 12px rgba(34,70,34,0.10)',
                             marginBottom: '18px',
                             marginTop: '18px',
-                            background: '#f7f7f7'
+                            background: '#ffe5b4'
                         }}
                     />
                     <h2 style={{
                         fontSize: '1.6em',
                         fontWeight: 700,
-                        color: '#1976d2',
+                        color: '#225622',
                         marginBottom: 10,
                         textAlign: 'center'
                     }}>{sidebarItem.name}</h2>
                     <div style={{ width: '100%', marginBottom: 10 }}>
-                        <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Category:</div>
+                        <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Category:</div>
                         <div style={{ color: '#333', marginBottom: 8 }}>{sidebarItem.category} {sidebarItem.subCategory ? `- ${sidebarItem.subCategory}` : ''}</div>
-                        <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Size:</div>
+                        <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Size:</div>
                         <div style={{ color: '#333', marginBottom: 8 }}>{sidebarItem.size}</div>
-                        <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Color:</div>
+                        <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Color:</div>
                         <div style={{ color: '#333', marginBottom: 8 }}>{sidebarItem.color}</div>
-                        <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Season:</div>
+                        <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Season:</div>
                         <div style={{ color: '#333', marginBottom: 8 }}>{Array.isArray(sidebarItem.season) ? sidebarItem.season.join(', ') : sidebarItem.season}</div>
                         {sidebarItem.notes && (
                             <>
-                                <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Notes:</div>
+                                <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Notes:</div>
                                 <div style={{ color: '#333', marginBottom: 8 }}>{sidebarItem.notes}</div>
                             </>
                         )}
@@ -387,15 +387,15 @@ function ClothingItems() {
                 gap: '18px',
                 margin: '32px 0 18px 0'
             }}>
-                <MdOutlineCheckroom size={44} style={{ color: "#1976d2" }} />
+                <MdOutlineCheckroom size={44} style={{ color: "#225622" }} />
                 <h2 style={{
                     margin: 0,
                     fontSize: '2.5rem',
                     fontWeight: 800,
-                    color: '#1976d2',
+                    color: '#225622',
                     letterSpacing: '2px',
                     fontFamily: "'Montserrat', 'Segoe UI', Arial, sans-serif",
-                    textShadow: '0 2px 8px #e3eafc'
+                    textShadow: '0 2px 8px #ffe5b4'
                 }}>
                     My Closet
                 </h2>
@@ -414,16 +414,16 @@ function ClothingItems() {
                         style={{
                             padding: '6px 10px',
                             borderRadius: '6px',
-                            border: categoryFilters[category] ? '2px solid #1976d2' : '1px solid #ccc',
-                            backgroundColor: categoryFilters[category] ? '#e3eafc' : '#fff',
-                            color: categoryFilters[category] ? '#1976d2' : '#333',
+                            border: categoryFilters[category] ? '2px solid #225622' : '1px solid #ccc',
+                            backgroundColor: categoryFilters[category] ? '#ffe5b4' : '#fff',
+                            color: categoryFilters[category] ? '#225622' : '#333',
                             fontWeight: 600,
                             fontSize: '18px',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
                             cursor: 'pointer',
-                            boxShadow: categoryFilters[category] ? '0 2px 8px #e3eafc' : 'none'
+                            boxShadow: categoryFilters[category] ? '0 2px 8px #ffe5b4' : 'none'
                         }}
                         aria-pressed={categoryFilters[category]}
                     >
@@ -441,12 +441,12 @@ function ClothingItems() {
                             width: 36,
                             height: 36,
                             borderRadius: '6px',
-                            border: colorFilters.length === 0 ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                            background: '#e3eafc',
+                            border: colorFilters.length === 0 ? '2.5px solid #225622' : '1.5px solid #ccc',
+                            background: '#ffe5b4',
                             color: 'transparent',
                             cursor: 'pointer',
-                            boxShadow: colorFilters.length === 0 ? '0 2px 8px #e3eafc' : 'none',
-                            outline: colorFilters.length === 0 ? '2px solid #1976d2' : 'none',
+                            boxShadow: colorFilters.length === 0 ? '0 2px 8px #ffe5b4' : 'none',
+                            outline: colorFilters.length === 0 ? '2px solid #225622' : 'none',
                             marginBottom: 2,
                             transition: 'border 0.15s'
                         }}
@@ -457,7 +457,7 @@ function ClothingItems() {
                     </button>
                     <span style={{
                         fontSize: '0.95em',
-                        color: '#444',
+                        color: '#225622',
                         marginTop: 2,
                         textAlign: 'center'
                     }}>
@@ -472,12 +472,12 @@ function ClothingItems() {
                                 width: 36,
                                 height: 36,
                                 borderRadius: '6px',
-                                border: colorFilters.includes(color) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
+                                border: colorFilters.includes(color) ? '2.5px solid #225622' : '1.5px solid #ccc',
                                 background: color.toLowerCase(),
                                 color: 'transparent',
                                 cursor: 'pointer',
-                                boxShadow: colorFilters.includes(color) ? '0 2px 8px #e3eafc' : 'none',
-                                outline: colorFilters.includes(color) ? '2px solid #1976d2' : 'none',
+                                boxShadow: colorFilters.includes(color) ? '0 2px 8px #ffe5b4' : 'none',
+                                outline: colorFilters.includes(color) ? '2px solid #225622' : 'none',
                                 marginBottom: 2,
                                 transition: 'border 0.15s'
                             }}
@@ -488,7 +488,7 @@ function ClothingItems() {
                         </button>
                         <span style={{
                             fontSize: '0.95em',
-                            color: '#444',
+                            color: '#225622',
                             marginTop: 2,
                             textAlign: 'center'
                         }}>
@@ -506,12 +506,12 @@ function ClothingItems() {
                             width: 36,
                             height: 36,
                             borderRadius: '6px',
-                            border: seasonFilters.length === 0 ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                            background: '#e3eafc',
+                            border: seasonFilters.length === 0 ? '2.5px solid #225622' : '1.5px solid #ccc',
+                            background: '#ffe5b4',
                             color: 'transparent',
                             cursor: 'pointer',
-                            boxShadow: seasonFilters.length === 0 ? '0 2px 8px #e3eafc' : 'none',
-                            outline: seasonFilters.length === 0 ? '2px solid #1976d2' : 'none',
+                            boxShadow: seasonFilters.length === 0 ? '0 2px 8px #ffe5b4' : 'none',
+                            outline: seasonFilters.length === 0 ? '2px solid #225622' : 'none',
                             marginBottom: 2,
                             transition: 'border 0.15s'
                         }}
@@ -522,7 +522,7 @@ function ClothingItems() {
                     </button>
                     <span style={{
                         fontSize: '0.95em',
-                        color: '#444',
+                        color: '#225622',
                         marginTop: 4,
                         textAlign: 'center'
                     }}>
@@ -537,12 +537,12 @@ function ClothingItems() {
                                 width: 56,
                                 height: 56,
                                 borderRadius: '12px',
-                                border: seasonFilters.includes(season.key) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
+                                border: seasonFilters.includes(season.key) ? '2.5px solid #225622' : '1.5px solid #ccc',
                                 background: '#fff',
                                 color: '#222',
                                 cursor: 'pointer',
-                                boxShadow: seasonFilters.includes(season.key) ? '0 2px 8px #e3eafc' : 'none',
-                                outline: seasonFilters.includes(season.key) ? '2px solid #1976d2' : 'none',
+                                boxShadow: seasonFilters.includes(season.key) ? '0 2px 8px #ffe5b4' : 'none',
+                                outline: seasonFilters.includes(season.key) ? '2px solid #225622' : 'none',
                                 marginBottom: 2,
                                 fontSize: '2.6em',
                                 display: 'flex',
@@ -565,7 +565,7 @@ function ClothingItems() {
                         </button>
                         <span style={{
                             fontSize: '0.95em',
-                            color: '#444',
+                            color: '#225622',
                             marginTop: 1,
                             textAlign: 'center'
                         }}>
@@ -583,12 +583,12 @@ function ClothingItems() {
                             minWidth: 36,
                             minHeight: 36,
                             borderRadius: '6px',
-                            border: sizeFilters.length === 0 ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                            background: '#e3eafc',
+                            border: sizeFilters.length === 0 ? '2.5px solid #225622' : '1.5px solid #ccc',
+                            background: '#ffe5b4',
                             color: 'transparent',
                             cursor: 'pointer',
-                            boxShadow: sizeFilters.length === 0 ? '0 2px 8px #e3eafc' : 'none',
-                            outline: sizeFilters.length === 0 ? '2px solid #1976d2' : 'none',
+                            boxShadow: sizeFilters.length === 0 ? '0 2px 8px #ffe5b4' : 'none',
+                            outline: sizeFilters.length === 0 ? '2px solid #225622' : 'none',
                             marginBottom: 2,
                             transition: 'border 0.15s'
                         }}
@@ -599,7 +599,7 @@ function ClothingItems() {
                     </button>
                     <span style={{
                         fontSize: '0.95em',
-                        color: '#444',
+                        color: '#225622',
                         marginTop: 2,
                         textAlign: 'center'
                     }}>
@@ -614,12 +614,12 @@ function ClothingItems() {
                                 minWidth: 36,
                                 minHeight: 36,
                                 borderRadius: '6px',
-                                border: sizeFilters.includes(size) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                                background: sizeFilters.includes(size) ? '#e3eafc' : '#fff',
+                                border: sizeFilters.includes(size) ? '2.5px solid #225622' : '1.5px solid #ccc',
+                                background: sizeFilters.includes(size) ? '#ffe5b4' : '#fff',
                                 color: '#333',
                                 cursor: 'pointer',
-                                boxShadow: sizeFilters.includes(size) ? '0 2px 8px #e3eafc' : 'none',
-                                outline: sizeFilters.includes(size) ? '2px solid #1976d2' : 'none',
+                                boxShadow: sizeFilters.includes(size) ? '0 2px 8px #ffe5b4' : 'none',
+                                outline: sizeFilters.includes(size) ? '2px solid #225622' : 'none',
                                 marginBottom: 2,
                                 fontWeight: 600,
                                 fontSize: '1em',
@@ -640,13 +640,13 @@ function ClothingItems() {
                     style={{
                         padding: '8px 18px',
                         borderRadius: '8px',
-                        border: !showWantToGiveOnly ? '2px solid #1976d2' : '1px solid #ccc',
-                        background: !showWantToGiveOnly ? '#e3eafc' : '#fff',
-                        color: !showWantToGiveOnly ? '#1976d2' : '#333',
+                        border: !showWantToGiveOnly ? '2px solid #225622' : '1px solid #ccc',
+                        background: !showWantToGiveOnly ? '#ffe5b4' : '#fff',
+                        color: !showWantToGiveOnly ? '#225622' : '#333',
                         fontWeight: 600,
                         fontSize: '1.1em',
                         cursor: 'pointer',
-                        boxShadow: !showWantToGiveOnly ? '0 2px 8px #e3eafc' : 'none',
+                        boxShadow: !showWantToGiveOnly ? '0 2px 8px #ffe5b4' : 'none',
                         transition: 'border 0.15s'
                     }}
                     aria-pressed={!showWantToGiveOnly}
@@ -658,13 +658,13 @@ function ClothingItems() {
                     style={{
                         padding: '8px 18px',
                         borderRadius: '8px',
-                        border: showWantToGiveOnly ? '2px solid #1976d2' : '1px solid #ccc',
-                        background: showWantToGiveOnly ? '#e3eafc' : '#fff',
-                        color: showWantToGiveOnly ? '#1976d2' : '#333',
+                        border: showWantToGiveOnly ? '2px solid #225622' : '1px solid #ccc',
+                        background: showWantToGiveOnly ? '#ffe5b4' : '#fff',
+                        color: showWantToGiveOnly ? '#225622' : '#333',
                         fontWeight: 600,
                         fontSize: '1.1em',
                         cursor: 'pointer',
-                        boxShadow: showWantToGiveOnly ? '0 2px 8px #e3eafc' : 'none',
+                        boxShadow: showWantToGiveOnly ? '0 2px 8px #ffe5b4' : 'none',
                         transition: 'border 0.15s'
                     }}
                     aria-pressed={showWantToGiveOnly}
@@ -699,9 +699,9 @@ function ClothingItems() {
                                     position: 'absolute',
                                     top: 8,
                                     right: 8,
-                                    background: clothingItem.wantToGive ? '#1976d2' : '#fff',
-                                    color: clothingItem.wantToGive ? '#fff' : '#1976d2',
-                                    border: '2px solid #1976d2',
+                                    background: clothingItem.wantToGive ? '#225622' : '#fff',
+                                    color: clothingItem.wantToGive ? '#fff' : '#225622',
+                                    border: '2px solid #225622',
                                     borderRadius: 6,
                                     padding: '4px 10px',
                                     cursor: 'pointer',

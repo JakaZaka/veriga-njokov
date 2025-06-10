@@ -17,7 +17,7 @@ function AddClothingItem(props) {
     const [categories, setCategories] = useState([]);
     const [notes, setNotes] = useState('');
     const basicColors = [
-    "Black", "White", "Gray", "Red", "Blue", "Green", "Yellow", "Pink", "Purple", "Brown", "Beige", "Orange"
+        "Black", "White", "Gray", "Red", "Blue", "Green", "Yellow", "Pink", "Purple", "Brown", "Beige", "Orange"
     ];
     
     const [colorOption, setColorOption] = useState(''); // for select
@@ -41,8 +41,8 @@ function AddClothingItem(props) {
     };
 
     const fixedSizes = [
-    "XS", "S", "M", "L", "XL", "2XL",
-    "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"
+        "XS", "S", "M", "L", "XL", "2XL",
+        "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"
     ];
     const [sizeOption, setSizeOption] = useState('');
     const [customSize, setCustomSize] = useState('');
@@ -160,8 +160,8 @@ function AddClothingItem(props) {
                                         style={{
                                             fontSize: '2em',
                                             borderRadius: '8px',
-                                            border: category === cat ? '3px solid #1976d2' : '2px solid #ccc',
-                                            background: category === cat ? '#e3f2fd' : '#fff',
+                                            border: category === cat ? '3px solid #225622' : '2px solid #ccc',
+                                            background: category === cat ? '#ffe5b4' : '#fff',
                                             padding: '8px',
                                             marginBottom: '4px',
                                             transition: 'border 0.15s'
@@ -170,7 +170,7 @@ function AddClothingItem(props) {
                                     >
                                         {clothingIcons[cat]}
                                     </span>
-                                    <span style={{ fontSize: '0.95em', color: '#444' }}>
+                                    <span style={{ fontSize: '0.95em', color: '#225622' }}>
                                         {cat.charAt(0).toUpperCase() + cat.slice(1)}
                                     </span>
                                 </label>
@@ -199,16 +199,16 @@ function AddClothingItem(props) {
                                             width: 28,
                                             height: 28,
                                             borderRadius: '6px',
-                                            border: colorOption === c ? '3px solid #1976d2' : '2px solid #ccc',
+                                            border: colorOption === c ? '3px solid #225622' : '2px solid #ccc',
                                             background: c.toLowerCase(),
                                             display: 'inline-block',
                                             marginBottom: 2,
-                                            boxShadow: colorOption === c ? '0 0 0 2px #90caf9' : undefined,
+                                            boxShadow: colorOption === c ? '0 0 0 2px #ffe5b4' : undefined,
                                             transition: 'border 0.15s'
                                         }}
                                         title={c}
                                     />
-                                    <span style={{ fontSize: '0.85em', color: '#444' }}>{c}</span>
+                                    <span style={{ fontSize: '0.85em', color: '#225622' }}>{c}</span>
                                 </label>
                             ))}
                             <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>
@@ -225,7 +225,7 @@ function AddClothingItem(props) {
                                         width: 28,
                                         height: 28,
                                         borderRadius: '6px',
-                                        border: colorOption === "Other" ? '3px solid #1976d2' : '2px dashed #aaa',
+                                        border: colorOption === "Other" ? '3px solid #225622' : '2px dashed #aaa',
                                         background: '#fff',
                                         display: 'inline-block',
                                         marginBottom: 2,
@@ -242,7 +242,7 @@ function AddClothingItem(props) {
                                         color: '#888'
                                     }}>?</span>
                                 </span>
-                                <span style={{ fontSize: '0.85em', color: '#444' }}>Other</span>
+                                <span style={{ fontSize: '0.85em', color: '#225622' }}>Other</span>
                             </label>
                         </div>
                         {colorOption === "Other" && (
@@ -277,15 +277,16 @@ function AddClothingItem(props) {
                                             minHeight: 28,
                                             padding: '4px 10px',
                                             borderRadius: '6px',
-                                            border: sizeOption === s ? '3px solid #1976d2' : '2px solid #ccc',
-                                            background: sizeOption === s ? '#e3f2fd' : '#fff',
+                                            border: sizeOption === s ? '3px solid #225622' : '2px solid #ccc',
+                                            background: sizeOption === s ? '#ffe5b4' : '#fff',
                                             display: 'inline-block',
                                             marginBottom: 2,
                                             textAlign: 'center',
                                             fontWeight: 500,
                                             fontSize: '1em',
-                                            boxShadow: sizeOption === s ? '0 0 0 2px #90caf9' : undefined,
-                                            transition: 'border 0.15s'
+                                            boxShadow: sizeOption === s ? '0 0 0 2px #ffe5b4' : undefined,
+                                            transition: 'border 0.15s',
+                                            color: '#225622'
                                         }}
                                     >{s}</span>
                                 </label>
@@ -305,17 +306,18 @@ function AddClothingItem(props) {
                                         minHeight: 28,
                                         padding: '4px 10px',
                                         borderRadius: '6px',
-                                        border: sizeOption === "Other" ? '3px solid #1976d2' : '2px dashed #aaa',
+                                        border: sizeOption === "Other" ? '3px solid #225622' : '2px dashed #aaa',
                                         background: '#fff',
                                         display: 'inline-block',
                                         marginBottom: 2,
                                         textAlign: 'center',
                                         fontWeight: 500,
                                         fontSize: '1em',
-                                        position: 'relative'
+                                        position: 'relative',
+                                        color: '#225622'
                                     }}
                                 >?</span>
-                                <span style={{ fontSize: '0.85em', color: '#444' }}>Other</span>
+                                <span style={{ fontSize: '0.85em', color: '#225622' }}>Other</span>
                             </label>
                         </div>
                         {sizeOption === "Other" && (
@@ -360,8 +362,8 @@ function AddClothingItem(props) {
                                         style={{
                                             fontSize: '2em',
                                             borderRadius: '8px',
-                                            border: season === seasonOption ? '3px solid #1976d2' : '2px solid #ccc',
-                                            background: season === seasonOption ? '#e3f2fd' : '#fff',
+                                            border: season === seasonOption ? '3px solid #225622' : '2px solid #ccc',
+                                            background: season === seasonOption ? '#ffe5b4' : '#fff',
                                             padding: '8px',
                                             marginBottom: '4px',
                                             transition: 'border 0.15s'
@@ -370,7 +372,7 @@ function AddClothingItem(props) {
                                     >
                                         {seasonIcons[seasonOption] || "🌀"}
                                     </span>
-                                    <span style={{ fontSize: '0.95em', color: '#444' }}>
+                                    <span style={{ fontSize: '0.95em', color: '#225622' }}>
                                         {seasonOption.charAt(0).toUpperCase() + seasonOption.slice(1)}
                                     </span>
                                 </label>

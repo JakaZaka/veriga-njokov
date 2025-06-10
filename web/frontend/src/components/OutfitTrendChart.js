@@ -25,14 +25,15 @@ export default function OutfitTrendChart({ data }) {
                 .append("div")
                 .attr("id", "outfit-trend-tooltip")
                 .style("position", "fixed")
-                .style("background", "white")
-                .style("border", "1px solid #ccc")
-                .style("padding", "5px 10px")
-                .style("border-radius", "4px")
+                .style("background", "#fffaf6") // light peach
+                .style("border", "1.5px solid #225622") // dark green
+                .style("padding", "7px 14px")
+                .style("border-radius", "6px")
                 .style("pointer-events", "none")
-                .style("font-size", "12px")
+                .style("font-size", "13px")
+                .style("color", "#225622")
                 .style("display", "none")
-                .style("box-shadow", "0px 2px 4px rgba(0,0,0,0.2)");
+                .style("box-shadow", "0px 2px 8px #ffe5b4");
         }
 
         const x = d3
@@ -47,10 +48,18 @@ export default function OutfitTrendChart({ data }) {
             .nice()
             .range([height - margin.bottom, margin.top]);
 
+        // Dark green and light peach palette
         const color = d3
             .scaleOrdinal()
             .domain(keys)
-            .range(["#4CAF50", "#FF9800", "#2196F3", "#9C27B0", "#1976d2", "#607d8b"]);
+            .range([
+                "#225622", // dark green
+                "#ffe5b4", // light peach
+                "#388e3c", // secondary green
+                "#ffd9a0", // lighter peach
+                "#b7b97a", // olive
+                "#fffaf6"  // light peach background
+            ]);
 
         // Axes
         svg.append("g")
@@ -58,11 +67,16 @@ export default function OutfitTrendChart({ data }) {
             .call(d3.axisBottom(x).tickSizeOuter(0))
             .selectAll("text")
             .attr("transform", "rotate(-40)")
-            .style("text-anchor", "end");
+            .style("text-anchor", "end")
+            .style("fill", "#225622")
+            .style("font-weight", 600);
 
         svg.append("g")
             .attr("transform", `translate(${margin.left},0)`)
-            .call(d3.axisLeft(y));
+            .call(d3.axisLeft(y))
+            .selectAll("text")
+            .style("fill", "#225622")
+            .style("font-weight", 600);
 
         // Bars
         svg.append("g")
@@ -99,31 +113,32 @@ export default function OutfitTrendChart({ data }) {
 
     return (
         <div style={{ marginTop: "40px", textAlign: "center", position: "relative" }}>
-        <h4
-            style={{
-            textAlign: "center",
-            color: "#1976d2",
-            fontSize: "1.5em",
-            fontWeight: 100,
-            letterSpacing: "1.2px",
-            marginBottom: "18px",
-            marginTop: 0,
-            position: "relative",
-            display: "block"
-            }}
-        >
-            Outfit Trend Over Time
-            <span
-            style={{
-                display: "block",
-                margin: "12px auto 0 auto",
-                width: 60,
-                height: 4,
-                borderRadius: 2
-            }}
-            ></span>
-        </h4>
-        <svg ref={ref}></svg>
+            <h4
+                style={{
+                    textAlign: "center",
+                    color: "#225622", // dark green
+                    fontSize: "1.5em",
+                    fontWeight: 700,
+                    letterSpacing: "1.2px",
+                    marginBottom: "18px",
+                    marginTop: 0,
+                    position: "relative",
+                    display: "block"
+                }}
+            >
+                Outfit Trend Over Time
+                <span
+                    style={{
+                        display: "block",
+                        margin: "12px auto 0 auto",
+                        width: 60,
+                        height: 4,
+                        borderRadius: 2,
+                        background: "#ffe5b4"
+                    }}
+                ></span>
+            </h4>
+            <svg ref={ref}></svg>
         </div>
     );
 }

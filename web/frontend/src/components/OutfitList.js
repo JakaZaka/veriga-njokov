@@ -108,15 +108,15 @@ function OutfitList() {
         gap: '18px',
         margin: '32px 0 18px 0'
       }}>
-        <span style={{ fontSize: 44, color: "#1976d2" }}></span>
+        <span style={{ fontSize: 44, color: "#225622" }}></span>
         <h2 style={{
           margin: 0,
           fontSize: '2.5rem',
           fontWeight: 800,
-          color: '#1976d2',
+          color: '#225622',
           letterSpacing: '2px',
           fontFamily: "'Montserrat', 'Segoe UI', Arial, sans-serif",
-          textShadow: '0 2px 8px #e3eafc'
+          textShadow: '0 2px 8px #ffe5b4'
         }}>
           Outfits
         </h2>
@@ -126,19 +126,19 @@ function OutfitList() {
       <div style={{ display: 'flex', gap: '32px', marginBottom: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
         {/* Season Filter */}
         <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-          <span style={{ fontWeight: 600, color: '#1976d2' }}>Season:</span>
+          <span style={{ fontWeight: 600, color: '#225622' }}>Season:</span>
           <button
             onClick={clearSeasonFilters}
             style={{
               width: 36,
               height: 36,
               borderRadius: '6px',
-              border: seasonFilters.length === 0 ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-              background: '#e3eafc',
+              border: seasonFilters.length === 0 ? '2.5px solid #225622' : '1.5px solid #ccc',
+              background: '#ffe5b4',
               color: 'transparent',
               cursor: 'pointer',
-              boxShadow: seasonFilters.length === 0 ? '0 2px 8px #e3eafc' : 'none',
-              outline: seasonFilters.length === 0 ? '2px solid #1976d2' : 'none',
+              boxShadow: seasonFilters.length === 0 ? '0 2px 8px #ffe5b4' : 'none',
+              outline: seasonFilters.length === 0 ? '2px solid #225622' : 'none',
               marginBottom: 2,
               transition: 'border 0.15s'
             }}
@@ -155,12 +155,12 @@ function OutfitList() {
                 width: 36,
                 height: 36,
                 borderRadius: '6px',
-                border: seasonFilters.includes(season.key) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                background: seasonFilters.includes(season.key) ? '#e3eafc' : '#fff',
+                border: seasonFilters.includes(season.key) ? '2.5px solid #225622' : '1.5px solid #ccc',
+                background: seasonFilters.includes(season.key) ? '#ffe5b4' : '#fff',
                 color: '#222',
                 cursor: 'pointer',
-                boxShadow: seasonFilters.includes(season.key) ? '0 2px 8px #e3eafc' : 'none',
-                outline: seasonFilters.includes(season.key) ? '2px solid #1976d2' : 'none',
+                boxShadow: seasonFilters.includes(season.key) ? '0 2px 8px #ffe5b4' : 'none',
+                outline: seasonFilters.includes(season.key) ? '2px solid #225622' : 'none',
                 marginBottom: 2,
                 fontSize: '1.5em',
                 display: 'flex',
@@ -177,19 +177,19 @@ function OutfitList() {
         </div>
         {/* Occasion Filter */}
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <span style={{ fontWeight: 600, color: '#1976d2' }}>Occasion:</span>
+          <span style={{ fontWeight: 600, color: '#225622' }}>Occasion:</span>
           <button
             onClick={clearOccasionFilters}
             style={{
               padding: '6px 10px',
               borderRadius: '6px',
-              border: occasionFilters.length === 0 ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-              background: '#e3eafc',
-              color: '#1976d2',
+              border: occasionFilters.length === 0 ? '2.5px solid #225622' : '1.5px solid #ccc',
+              background: '#ffe5b4',
+              color: '#225622',
               fontWeight: 600,
               cursor: 'pointer',
-              boxShadow: occasionFilters.length === 0 ? '0 2px 8px #e3eafc' : 'none',
-              outline: occasionFilters.length === 0 ? '2px solid #1976d2' : 'none',
+              boxShadow: occasionFilters.length === 0 ? '0 2px 8px #ffe5b4' : 'none',
+              outline: occasionFilters.length === 0 ? '2px solid #225622' : 'none',
               marginBottom: 2,
               transition: 'border 0.15s'
             }}
@@ -205,13 +205,13 @@ function OutfitList() {
               style={{
                 padding: '6px 10px',
                 borderRadius: '6px',
-                border: occasionFilters.includes(occasion.key) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                background: occasionFilters.includes(occasion.key) ? '#e3eafc' : '#fff',
-                color: occasionFilters.includes(occasion.key) ? '#1976d2' : '#333',
+                border: occasionFilters.includes(occasion.key) ? '2.5px solid #225622' : '1.5px solid #ccc',
+                background: occasionFilters.includes(occasion.key) ? '#ffe5b4' : '#fff',
+                color: occasionFilters.includes(occasion.key) ? '#225622' : '#333',
                 fontWeight: 600,
                 cursor: 'pointer',
-                boxShadow: occasionFilters.includes(occasion.key) ? '0 2px 8px #e3eafc' : 'none',
-                outline: occasionFilters.includes(occasion.key) ? '2px solid #1976d2' : 'none',
+                boxShadow: occasionFilters.includes(occasion.key) ? '0 2px 8px #ffe5b4' : 'none',
+                outline: occasionFilters.includes(occasion.key) ? '2px solid #225622' : 'none',
                 marginBottom: 2,
                 transition: 'border 0.15s'
               }}
@@ -284,8 +284,8 @@ function OutfitList() {
               width: '370px',
               height: '100vh',
               maxHeight: '100vh', // Ensure sidebar never exceeds viewport
-              background: '#fafdff',
-              boxShadow: '-4px 0 24px rgba(25, 118, 210, 0.13)',
+              background: '#fffaf6',
+              boxShadow: '-4px 0 24px rgba(34, 86, 34, 0.13)',
               zIndex: 2000,
               padding: '32px 28px 24px 28px',
               overflowY: 'auto', // Enable vertical scrolling
@@ -304,7 +304,7 @@ function OutfitList() {
                 background: 'none',
                 border: 'none',
                 fontSize: '2em',
-                color: '#1976d2',
+                color: '#225622',
                 cursor: 'pointer'
               }}
               aria-label="Close"
@@ -323,7 +323,7 @@ function OutfitList() {
                 height: '426px',
                 objectFit: 'cover',
                 borderRadius: '14px',
-                boxShadow: '0 2px 12px rgba(25, 118, 210, 0.10)',
+                boxShadow: '0 2px 12px rgba(34, 86, 34, 0.10)',
                 marginBottom: '18px',
                 marginTop: '18px',
                 background: '#f7f7f7'
@@ -332,18 +332,18 @@ function OutfitList() {
             <h2 style={{
               fontSize: '1.6em',
               fontWeight: 700,
-              color: '#1976d2',
+              color: '#225622',
               marginBottom: 10,
               textAlign: 'center'
             }}>{sidebarOutfit.name}</h2>
             <div style={{ width: '100%', marginBottom: 10 }}>
-              <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Season:</div>
+              <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Season:</div>
               <div style={{ color: '#333', marginBottom: 8 }}>{Array.isArray(sidebarOutfit.season) ? sidebarOutfit.season.join(', ') : sidebarOutfit.season}</div>
-              <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Occasion:</div>
+              <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Occasion:</div>
               <div style={{ color: '#333', marginBottom: 8 }}>{sidebarOutfit.occasion}</div>
             </div>
             <div style={{ width: '100%', marginBottom: 10 }}>
-              <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Items in this outfit:</div>
+              <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Items in this outfit:</div>
               {sidebarOutfit.items && sidebarOutfit.items.length > 0 ? (
                 sidebarOutfit.items.map((entry, idx) =>
                   entry.item ? (
@@ -377,7 +377,7 @@ function OutfitList() {
                         }}
                       />
                       <div>
-                        <div style={{ fontWeight: 600, color: '#1976d2' }}>{entry.item.name}</div>
+                        <div style={{ fontWeight: 600, color: '#225622' }}>{entry.item.name}</div>
                         <div style={{ fontSize: '0.9em', color: '#555' }}>{entry.position}</div>
                       </div>
                     </div>
@@ -397,7 +397,7 @@ function OutfitList() {
                   width: '370px',
                   height: '100vh',
                   background: '#fff',
-                  boxShadow: '-4px 0 24px rgba(25, 118, 210, 0.13)',
+                  boxShadow: '-4px 0 24px rgba(34, 86, 34, 0.13)',
                   zIndex: 2100,
                   padding: '32px 28px 24px 28px',
                   overflowY: 'auto',
@@ -416,7 +416,7 @@ function OutfitList() {
                     background: 'none',
                     border: 'none',
                     fontSize: '2em',
-                    color: '#1976d2',
+                    color: '#225622',
                     cursor: 'pointer'
                   }}
                   aria-label="Close"
@@ -435,7 +435,7 @@ function OutfitList() {
                     height: '240px',
                     objectFit: 'cover',
                     borderRadius: '14px',
-                    boxShadow: '0 2px 12px rgba(25, 118, 210, 0.10)',
+                    boxShadow: '0 2px 12px rgba(34, 86, 34, 0.10)',
                     marginBottom: '18px',
                     marginTop: '18px',
                     background: '#f7f7f7'
@@ -444,22 +444,22 @@ function OutfitList() {
                 <h2 style={{
                   fontSize: '1.6em',
                   fontWeight: 700,
-                  color: '#1976d2',
+                  color: '#225622',
                   marginBottom: 10,
                   textAlign: 'center'
                 }}>{sidebarItem.name}</h2>
                 <div style={{ width: '100%', marginBottom: 10 }}>
-                  <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Category:</div>
+                  <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Category:</div>
                   <div style={{ color: '#333', marginBottom: 8 }}>{sidebarItem.category} {sidebarItem.subCategory ? `- ${sidebarItem.subCategory}` : ''}</div>
-                  <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Size:</div>
+                  <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Size:</div>
                   <div style={{ color: '#333', marginBottom: 8 }}>{sidebarItem.size}</div>
-                  <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Color:</div>
+                  <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Color:</div>
                   <div style={{ color: '#333', marginBottom: 8 }}>{sidebarItem.color}</div>
-                  <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Season:</div>
+                  <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Season:</div>
                   <div style={{ color: '#333', marginBottom: 8 }}>{Array.isArray(sidebarItem.season) ? sidebarItem.season.join(', ') : sidebarItem.season}</div>
                   {sidebarItem.notes && (
                     <>
-                      <div style={{ color: '#1976d2', fontWeight: 500, marginBottom: 4 }}>Notes:</div>
+                      <div style={{ color: '#225622', fontWeight: 500, marginBottom: 4 }}>Notes:</div>
                       <div style={{ color: '#333', marginBottom: 8 }}>{sidebarItem.notes}</div>
                     </>
                   )}

@@ -171,7 +171,7 @@ function AddOutfit() {
         <div style={{
             minHeight: '100vh',
             width: '100vw',
-            background: '#f5f8fa',
+            background: '#fffaf6', // peach
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'center',
@@ -181,7 +181,7 @@ function AddOutfit() {
             <div style={{
                 background: '#fff',
                 borderRadius: 18,
-                boxShadow: '0 4px 24px rgba(25, 118, 210, 0.10), 0 1.5px 4px rgba(0,0,0,0.06)',
+                boxShadow: '0 4px 24px rgba(34,70,34,0.10), 0 1.5px 4px rgba(255,183,77,0.06)',
                 width: '100%',
                 maxWidth: 1200,
                 margin: '32px 0',
@@ -189,10 +189,10 @@ function AddOutfit() {
                 fontFamily: "'Segoe UI', 'Roboto', Arial, sans-serif",
                 minHeight: 'calc(100vh - 64px)'
             }}>
-                <h2 style={{ textAlign: 'center', color: '#1976d2', fontWeight: 700, marginBottom: 24 }}>Add Outfit</h2>
+                <h2 style={{ textAlign: 'center', color: '#225622', fontWeight: 700, marginBottom: 24 }}>Add Outfit</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <label className="form-label" style={{ fontWeight: 600, color: "#1976d2", fontSize: "1.1em" }}>Outfit Name:</label>
+                        <label className="form-label" style={{ fontWeight: 600, color: "#225622", fontSize: "1.1em" }}>Outfit Name:</label>
                         <input
                             type="text"
                             className="form-control"
@@ -200,21 +200,21 @@ function AddOutfit() {
                             onChange={e => setName(e.target.value)}
                             required
                             style={{
-                                border: "2px solid #1976d2",
+                                border: "2px solid #225622",
                                 borderRadius: "10px",
                                 padding: "12px 16px",
                                 fontSize: "1.15em",
                                 fontWeight: 500,
-                                background: "#fafdff",
+                                background: "#ffe5b4",
                                 color: "#222",
                                 marginBottom: 0,
-                                boxShadow: "0 2px 8px #e3eafc33"
+                                boxShadow: "0 2px 8px #ffe5b455"
                             }}
                             placeholder="Enter outfit name"
                         />
                     </div>
                     <div className="mb-3">
-                        <label className="form-label" style={{ fontWeight: 600, color: "#1976d2", fontSize: "1.1em" }}>Season:</label>
+                        <label className="form-label" style={{ fontWeight: 600, color: "#225622", fontSize: "1.1em" }}>Season:</label>
                         <div style={{ display: 'flex', gap: '18px', marginBottom: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                             {seasonOptions.map(seasonOption => (
                                 <div key={seasonOption.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -225,12 +225,12 @@ function AddOutfit() {
                                             width: 56,
                                             height: 56,
                                             borderRadius: '12px',
-                                            border: season.includes(seasonOption.key) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                                            background: season.includes(seasonOption.key) ? '#e3eafc' : '#fff',
+                                            border: season.includes(seasonOption.key) ? '2.5px solid #225622' : '1.5px solid #ccc',
+                                            background: season.includes(seasonOption.key) ? '#ffe5b4' : '#fff',
                                             color: '#222',
                                             cursor: 'pointer',
-                                            boxShadow: season.includes(seasonOption.key) ? '0 2px 8px #e3eafc' : 'none',
-                                            outline: season.includes(seasonOption.key) ? '2px solid #1976d2' : 'none',
+                                            boxShadow: season.includes(seasonOption.key) ? '0 2px 8px #ffe5b4' : 'none',
+                                            outline: season.includes(seasonOption.key) ? '2px solid #225622' : 'none',
                                             marginBottom: 2,
                                             fontSize: '2.6em',
                                             display: 'flex',
@@ -253,7 +253,7 @@ function AddOutfit() {
                                     </button>
                                     <span style={{
                                         fontSize: '0.95em',
-                                        color: '#444',
+                                        color: '#225622',
                                         marginTop: 1,
                                         textAlign: 'center'
                                     }}>
@@ -264,7 +264,7 @@ function AddOutfit() {
                         </div>
                     </div>
                     <div className="mb-3">
-                        <label className="form-label" style={{ fontWeight: 600, color: "#1976d2", fontSize: "1.1em" }}>Occasion:</label>
+                        <label className="form-label" style={{ fontWeight: 600, color: "#225622", fontSize: "1.1em" }}>Occasion:</label>
                         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: 0 }}>
                             {OCCASION_OPTIONS.map(opt => (
                                 <button
@@ -274,13 +274,13 @@ function AddOutfit() {
                                     style={{
                                         padding: '8px 22px',
                                         borderRadius: '8px',
-                                        border: occasion === opt ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                                        background: occasion === opt ? '#e3eafc' : '#fff',
-                                        color: occasion === opt ? '#1976d2' : '#333',
+                                        border: occasion === opt ? '2.5px solid #225622' : '1.5px solid #ccc',
+                                        background: occasion === opt ? '#ffe5b4' : '#fff',
+                                        color: occasion === opt ? '#225622' : '#333',
                                         fontWeight: 600,
                                         fontSize: '1.08em',
                                         cursor: 'pointer',
-                                        boxShadow: occasion === opt ? '0 2px 8px #e3eafc' : 'none',
+                                        boxShadow: occasion === opt ? '0 2px 8px #ffe5b4' : 'none',
                                         transition: 'border 0.15s'
                                     }}
                                     aria-pressed={occasion === opt}
@@ -291,12 +291,12 @@ function AddOutfit() {
                         </div>
                     </div>
                     <div style={{
-                        borderTop: "2px solid #e3eafc",
+                        borderTop: "2px solid #ffe5b4",
                         margin: "32px 0 22px 0",
                         width: "100%"
                     }} />
                     <div className="mb-3">
-                        <label className="form-label" style={{ fontWeight: 600, color: "#1976d2", fontSize: "1.1em" }}>Select clothing items for this outfit:</label>
+                        <label className="form-label" style={{ fontWeight: 600, color: "#225622", fontSize: "1.1em" }}>Select clothing items for this outfit:</label>
                         {/* Closet-like filters */}
                         <div style={{ marginBottom: 18 }}>
                             {/* Category Filters */}
@@ -314,16 +314,16 @@ function AddOutfit() {
                                         style={{
                                             padding: '6px 10px',
                                             borderRadius: '6px',
-                                            border: categoryFilters[category] ? '2px solid #1976d2' : '1px solid #ccc',
-                                            backgroundColor: categoryFilters[category] ? '#e3eafc' : '#fff',
-                                            color: categoryFilters[category] ? '#1976d2' : '#333',
+                                            border: categoryFilters[category] ? '2px solid #225622' : '1px solid #ccc',
+                                            backgroundColor: categoryFilters[category] ? '#ffe5b4' : '#fff',
+                                            color: categoryFilters[category] ? '#225622' : '#333',
                                             fontWeight: 600,
                                             fontSize: '18px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '4px',
                                             cursor: 'pointer',
-                                            boxShadow: categoryFilters[category] ? '0 2px 8px #e3eafc' : 'none'
+                                            boxShadow: categoryFilters[category] ? '0 2px 8px #ffe5b4' : 'none'
                                         }}
                                         aria-pressed={categoryFilters[category]}
                                     >
@@ -342,12 +342,12 @@ function AddOutfit() {
                                             width: 36,
                                             height: 36,
                                             borderRadius: '6px',
-                                            border: colorFilters.length === 0 ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                                            background: '#e3eafc',
+                                            border: colorFilters.length === 0 ? '2.5px solid #225622' : '1.5px solid #ccc',
+                                            background: '#ffe5b4',
                                             color: 'transparent',
                                             cursor: 'pointer',
-                                            boxShadow: colorFilters.length === 0 ? '0 2px 8px #e3eafc' : 'none',
-                                            outline: colorFilters.length === 0 ? '2px solid #1976d2' : 'none',
+                                            boxShadow: colorFilters.length === 0 ? '0 2px 8px #ffe5b4' : 'none',
+                                            outline: colorFilters.length === 0 ? '2px solid #225622' : 'none',
                                             marginBottom: 2,
                                             transition: 'border 0.15s'
                                         }}
@@ -358,7 +358,7 @@ function AddOutfit() {
                                     </button>
                                     <span style={{
                                         fontSize: '0.95em',
-                                        color: '#444',
+                                        color: '#225622',
                                         marginTop: 2,
                                         textAlign: 'center'
                                     }}>
@@ -374,12 +374,12 @@ function AddOutfit() {
                                                 width: 36,
                                                 height: 36,
                                                 borderRadius: '6px',
-                                                border: colorFilters.includes(color) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
+                                                border: colorFilters.includes(color) ? '2.5px solid #225622' : '1.5px solid #ccc',
                                                 background: color.toLowerCase(),
                                                 color: 'transparent',
                                                 cursor: 'pointer',
-                                                boxShadow: colorFilters.includes(color) ? '0 2px 8px #e3eafc' : 'none',
-                                                outline: colorFilters.includes(color) ? '2px solid #1976d2' : 'none',
+                                                boxShadow: colorFilters.includes(color) ? '0 2px 8px #ffe5b4' : 'none',
+                                                outline: colorFilters.includes(color) ? '2px solid #225622' : 'none',
                                                 marginBottom: 2,
                                                 transition: 'border 0.15s'
                                             }}
@@ -390,7 +390,7 @@ function AddOutfit() {
                                         </button>
                                         <span style={{
                                             fontSize: '0.95em',
-                                            color: '#444',
+                                            color: '#225622',
                                             marginTop: 2,
                                             textAlign: 'center'
                                         }}>
@@ -409,12 +409,12 @@ function AddOutfit() {
                                             width: 36,
                                             height: 36,
                                             borderRadius: '6px',
-                                            border: seasonFilters.length === 0 ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                                            background: '#e3eafc',
+                                            border: seasonFilters.length === 0 ? '2.5px solid #225622' : '1.5px solid #ccc',
+                                            background: '#ffe5b4',
                                             color: 'transparent',
                                             cursor: 'pointer',
-                                            boxShadow: seasonFilters.length === 0 ? '0 2px 8px #e3eafc' : 'none',
-                                            outline: seasonFilters.length === 0 ? '2px solid #1976d2' : 'none',
+                                            boxShadow: seasonFilters.length === 0 ? '0 2px 8px #ffe5b4' : 'none',
+                                            outline: seasonFilters.length === 0 ? '2px solid #225622' : 'none',
                                             marginBottom: 2,
                                             transition: 'border 0.15s'
                                         }}
@@ -425,7 +425,7 @@ function AddOutfit() {
                                     </button>
                                     <span style={{
                                         fontSize: '0.95em',
-                                        color: '#444',
+                                        color: '#225622',
                                         marginTop: 4,
                                         textAlign: 'center'
                                     }}>
@@ -441,12 +441,12 @@ function AddOutfit() {
                                                 width: 56,
                                                 height: 56,
                                                 borderRadius: '12px',
-                                                border: seasonFilters.includes(season.key) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                                                background: '#fff',
+                                                border: seasonFilters.includes(season.key) ? '2.5px solid #225622' : '1.5px solid #ccc',
+                                                background: seasonFilters.includes(season.key) ? '#ffe5b4' : '#fff',
                                                 color: '#222',
                                                 cursor: 'pointer',
-                                                boxShadow: seasonFilters.includes(season.key) ? '0 2px 8px #e3eafc' : 'none',
-                                                outline: seasonFilters.includes(season.key) ? '2px solid #1976d2' : 'none',
+                                                boxShadow: seasonFilters.includes(season.key) ? '0 2px 8px #ffe5b4' : 'none',
+                                                outline: seasonFilters.includes(season.key) ? '2px solid #225622' : 'none',
                                                 marginBottom: 2,
                                                 fontSize: '2.6em',
                                                 display: 'flex',
@@ -469,7 +469,7 @@ function AddOutfit() {
                                         </button>
                                         <span style={{
                                             fontSize: '0.95em',
-                                            color: '#444',
+                                            color: '#225622',
                                             marginTop: 1,
                                             textAlign: 'center'
                                         }}>
@@ -488,12 +488,12 @@ function AddOutfit() {
                                             minWidth: 36,
                                             minHeight: 36,
                                             borderRadius: '6px',
-                                            border: sizeFilters.length === 0 ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                                            background: '#e3eafc',
+                                            border: sizeFilters.length === 0 ? '2.5px solid #225622' : '1.5px solid #ccc',
+                                            background: '#ffe5b4',
                                             color: 'transparent',
                                             cursor: 'pointer',
-                                            boxShadow: sizeFilters.length === 0 ? '0 2px 8px #e3eafc' : 'none',
-                                            outline: sizeFilters.length === 0 ? '2px solid #1976d2' : 'none',
+                                            boxShadow: sizeFilters.length === 0 ? '0 2px 8px #ffe5b4' : 'none',
+                                            outline: sizeFilters.length === 0 ? '2px solid #225622' : 'none',
                                             marginBottom: 2,
                                             transition: 'border 0.15s'
                                         }}
@@ -504,7 +504,7 @@ function AddOutfit() {
                                     </button>
                                     <span style={{
                                         fontSize: '0.95em',
-                                        color: '#444',
+                                        color: '#225622',
                                         marginTop: 2,
                                         textAlign: 'center'
                                     }}>
@@ -520,12 +520,12 @@ function AddOutfit() {
                                                 minWidth: 36,
                                                 minHeight: 36,
                                                 borderRadius: '6px',
-                                                border: sizeFilters.includes(size) ? '2.5px solid #1976d2' : '1.5px solid #ccc',
-                                                background: sizeFilters.includes(size) ? '#e3eafc' : '#fff',
+                                                border: sizeFilters.includes(size) ? '2.5px solid #225622' : '1.5px solid #ccc',
+                                                background: sizeFilters.includes(size) ? '#ffe5b4' : '#fff',
                                                 color: '#333',
                                                 cursor: 'pointer',
-                                                boxShadow: sizeFilters.includes(size) ? '0 2px 8px #e3eafc' : 'none',
-                                                outline: sizeFilters.includes(size) ? '2px solid #1976d2' : 'none',
+                                                boxShadow: sizeFilters.includes(size) ? '0 2px 8px #ffe5b4' : 'none',
+                                                outline: sizeFilters.includes(size) ? '2px solid #225622' : 'none',
                                                 marginBottom: 2,
                                                 fontWeight: 600,
                                                 fontSize: '1em',
@@ -553,8 +553,8 @@ function AddOutfit() {
                                         className="clothingItem-card"
                                         style={{
                                             position: 'relative',
-                                            border: selectedItems.includes(item._id) ? '2.5px solid #1976d2' : undefined,
-                                            background: selectedItems.includes(item._id) ? '#e3eafc' : undefined,
+                                            border: selectedItems.includes(item._id) ? '2.5px solid #225622' : undefined,
+                                            background: selectedItems.includes(item._id) ? '#ffe5b4' : undefined,
                                             cursor: 'pointer'
                                         }}
                                         onClick={() => toggleItem(item)}
@@ -577,7 +577,7 @@ function AddOutfit() {
                                         <div style={{
                                             textAlign: 'center',
                                             fontWeight: 600,
-                                            color: '#1976d2',
+                                            color: '#225622',
                                             marginTop: 8
                                         }}>
                                             {item.name}
@@ -600,14 +600,14 @@ function AddOutfit() {
                         style={{
                             width: '100%',
                             marginTop: 24,
-                            background: "#1976d2",
+                            background: "#225622",
                             color: "#fff",
                             fontWeight: 700,
                             fontSize: "1.25em",
                             border: "none",
                             borderRadius: "12px",
                             padding: "14px 0",
-                            boxShadow: "0 4px 16px #e3eafc88",
+                            boxShadow: "0 4px 16px #22562233",
                             letterSpacing: "0.04em",
                             transition: "background 0.15s"
                         }}

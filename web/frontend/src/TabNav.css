@@ -5,8 +5,8 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  background: #f5f5f5;
-  border-bottom: 2px solid #ddd;
+  background: #fffaf6; /* peach */
+  border-bottom: 2px solid #ffe5b4; /* peach */
 }
 
 .tab-nav li {
@@ -20,7 +20,7 @@
   padding: 8px 0;
   text-decoration: none;
   font-size: 0.8rem;
-  color: #333;
+  color: #225622; /* dark green */
   font-weight: 500;
   border-bottom: 3px solid transparent;
   transition: background 0.2s, border-bottom 0.2s;
@@ -30,7 +30,7 @@
 
 .tab-nav li a:hover,
 .tab-nav li a.active {
-  background: #e0e0e0;
-  border-bottom: 3px solid #1976d2;
-  color: #1976d2;
+  background: #ffe5b4; /* peach */
+  border-bottom: 3px solid #225622; /* dark green */
+  color: #225622;
 }

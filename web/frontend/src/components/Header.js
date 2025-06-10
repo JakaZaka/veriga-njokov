@@ -11,15 +11,29 @@ function Header(props) {
     const navigate = useNavigate();
 
     return (
-        <header className="main-header" style={{ background: "#fafdff", boxShadow: "0 2px 8px rgba(25,118,210,0.06)" }}>
-            <div className="header-container" style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "100%" }}>
+        <header
+            className="main-header"
+            style={{
+                background: "#fffaf6", // light peach
+                boxShadow: "0 2px 8px rgba(34,86,34,0.08)"
+            }}
+        >
+            <div
+                className="header-container"
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: "100%"
+                }}
+            >
                 <div
                     className="logo"
                     onClick={() => navigate('/')}
                     style={{
                         cursor: "pointer",
-                        color: "#1976d2",
-                        fontWeight: 900,
+                        color: "#225622", // dark green
+                        fontWeight: 500,
                         letterSpacing: "3px",
                         fontSize: "3.5rem",
                         margin: "0 32px 0 0",
@@ -34,20 +48,13 @@ function Header(props) {
                     }}
                     title="Go to Home"
                 >
-                    <GiClothes size={56} style={{ marginBottom: 2 }} />
+                    <GiClothes size={56} style={{ marginBottom: 2, color: "#225622" }} />
                     {title}
                 </div>
                 <nav style={{ width: "100%" }}>
                     <ul className="tab-nav">
-                        <li><Link to="/">Home</Link></li>
-                        <li><Link to="/weather">Weather</Link></li>
                         {user ? (
                             <>
-                                <li><Link to="/explore">Explore</Link></li>
-                                <li><Link to="/profile">Profile</Link></li>
-                                <li><Link to="/logout">Logout</Link></li>
-                                <li><Link to="/map">Map</Link></li>
-                                <li><Link to="/outfits">Outfits</Link></li>
                                 {userContext.user.role === 'admin' && (
                                     <>
                                         <li><Link to="/admin">Admin</Link></li>
@@ -56,13 +63,9 @@ function Header(props) {
                                         <li><Link to="/addClothingStoreLocation">Add Store Location</Link></li>
                                     </>
                                 )}
-                                <li><Link to="/addClothingItem">Add Item</Link></li>
-                                <li><Link to="/addOutfit">Add Outfit</Link></li>
                             </>
                         ) : (
                             <>
-                                <li><Link to="/register">Register</Link></li>
-                                <li><Link to="/login">Login</Link></li>
                             </>
                         )}
                     </ul>
