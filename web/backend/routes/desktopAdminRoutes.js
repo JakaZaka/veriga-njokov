@@ -163,4 +163,53 @@ router.delete('/locations/:id', async (req, res) => {
   }
 });
 
+// Get outfits for desktop app
+router.get('/outfits', async (req, res) => {
+  try {
+    const Outfit = require('../models/Outfit');
+    // Populate the items to get full clothing item details
+    const outfits = await Outfit.find().populate({
+      path: 'items.item',
+      model: 'ClothingItem'
+    });
+    
+    res.json({
+      success: true,
+      data: outfits
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Delete outfit endpoint
+router.delete('/outfits/:id', async (req, res) => {
+  try {
+    const Outfit = require('../models/Outfit');
+    const outfit = await Outfit.findById(req.params.id);
+    
+    if (!outfit) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Outfit not found' 
+      });
+    }
+    
+    await Outfit.findByIdAndDelete(req.params.id);
+    res.json({ 
+      success: true,
+      message: 'Outfit deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting outfit:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 module.exports = router;

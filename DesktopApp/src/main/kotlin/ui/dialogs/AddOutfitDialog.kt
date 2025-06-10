@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import models.Outfit
+import models.Season
 import viewmodels.AppViewModel
 
 @Composable
@@ -17,9 +18,8 @@ fun AddOutfitDialog(
 ) {
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var selectedItems by remember { mutableStateOf(listOf<String>()) }
-    var occasion by remember { mutableStateOf("") }
-
+    var occasion by remember { mutableStateOf("casual") } // Default value
+    
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -43,7 +43,7 @@ fun AddOutfitDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description") },
+                    label = { Text("Description (Optional)") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -53,7 +53,7 @@ fun AddOutfitDialog(
                 OutlinedTextField(
                     value = occasion,
                     onValueChange = { occasion = it },
-                    label = { Text("Occasion") },
+                    label = { Text("Occasion (e.g., casual, formal, sport)") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -80,8 +80,10 @@ fun AddOutfitDialog(
                             val newOutfit = Outfit(
                                 name = name,
                                 description = description,
-                                items = selectedItems, // Empty list for now
-                                owner = viewModel.currentUserId ?: "" // Use logged in user or empty string
+                                items = emptyList(), // Empty list of OutfitItemRef for now
+                                season = listOf(Season.ALL), // Default season
+                                occasion = occasion,
+                                user = viewModel.currentUserId // Use logged in user ID
                             )
                             onOutfitAdded(newOutfit)
                             onDismissRequest()

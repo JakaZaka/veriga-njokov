@@ -7,6 +7,9 @@ import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.jsonArray
 import models.*
 import network.ApiService
 import kotlinx.coroutines.delay
@@ -325,6 +328,72 @@ object ApiClient {
         } catch (e: Exception) {
             println("Failed to create store location: ${e.message}")
             ApiResponse(success = false, error = e.message)
+        }
+    }
+    
+    // Get all outfits
+    suspend fun getOutfits(): ApiResponse<List<Outfit>> {
+        var lastException: Exception? = null
+        for (attempt in 1..MAX_RETRIES) {
+            try {
+                println("Fetching outfits, attempt $attempt")
+                
+                val response = apiService.get("$BASE_URL/desktop-admin/outfits") { responseText ->
+                    println("Raw response: $responseText")
+                    
+                    // Use the same pattern as other working methods
+                    val apiResponse = jsonConfig.decodeFromString<ApiResponse<List<Outfit>>>(responseText)
+                    apiResponse.data ?: emptyList()
+                }
+                
+                if (response.success && response.data != null) {
+                    return response
+                }
+                
+                throw Exception("API returned unsuccessful response: ${response.error}")
+            } catch (e: Exception) {
+                lastException = e
+                println("Attempt $attempt failed: ${e.message}")
+                
+                if (attempt < MAX_RETRIES) {
+                    delay(RETRY_DELAY_MS)
+                }
+            }
+        }
+        
+        return ApiResponse(success = false, error = lastException?.message, data = emptyList())
+    }
+    
+    // Create a new outfit
+    suspend fun createOutfit(outfit: Outfit): ApiResponse<Outfit> {
+        return try {
+            println("Creating outfit: ${outfit.name}")
+            
+            apiService.post("$BASE_URL/desktop-admin/outfits", outfit) { responseText ->
+                println("Raw create response: $responseText")
+                val apiResponse = jsonConfig.decodeFromString<ApiResponse<Outfit>>(responseText)
+                apiResponse.data ?: throw Exception("No data in response")
+            }
+        } catch (e: Exception) {
+            println("Failed to create outfit: ${e.message}")
+            ApiResponse(success = false, error = e.message)
+        }
+    }
+    
+    // Delete an outfit
+    suspend fun deleteOutfit(id: String): ApiResponse<Boolean> {
+        if (id.isBlank()) {
+            return ApiResponse(success = false, error = "Outfit ID cannot be empty", data = false)
+        }
+        
+        return try {
+            val url = "$BASE_URL/desktop-admin/outfits/$id"
+            println("Deleting outfit with ID: $id")
+            
+            apiService.delete(url)
+        } catch (e: Exception) {
+            println("Failed to delete outfit: ${e.message}")
+            ApiResponse(success = false, error = e.message, data = false)
         }
     }
 }
