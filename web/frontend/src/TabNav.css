@@ -1,0 +1,36 @@
+.tab-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: #fffaf6; /* peach */
+  border-bottom: 2px solid #ffe5b4; /* peach */
+}
+
+.tab-nav li {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.tab-nav li a {
+  display: block;
+  padding: 8px 0;
+  text-decoration: none;
+  font-size: 0.8rem;
+  color: #225622; /* dark green */
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: background 0.2s, border-bottom 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.tab-nav li a:hover,
+.tab-nav li a.active {
+  background: #ffe5b4; /* peach */
+  border-bottom: 3px solid #225622; /* dark green */
+  color: #225622;
+}
