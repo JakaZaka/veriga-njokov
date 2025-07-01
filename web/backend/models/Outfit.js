@@ -41,6 +41,11 @@ const outfitSchema = mongoose.Schema(
     imageUrl: {
       type: String,
     },
+        images: [
+      {
+        type: String, // store image URLs (e.g., "/images/filename.jpg")
+      }
+    ],
   },
   { timestamps: true }
 );

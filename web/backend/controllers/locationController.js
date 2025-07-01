@@ -1,6 +1,7 @@
 const ClothingStore = require('../models/ClothingStore');
 const Location = require('../models/Location');
-const fetch = require('node-fetch');
+const NodeGeocoder = require('node-geocoder');
+const geocoder = NodeGeocoder({ provider: 'openstreetmap' });
 
 async function geocodeAddress(address) {
   const apiKey = process.env.OPENCAGE_API_KEY;
@@ -60,8 +61,8 @@ const createLocation = async (req, res) => {
   try {
    
     console.log("Request body:", req.body);
-
     const { address, city, country, clothingStoreId } = req.body;
+
     if (!address || !city || !country || !clothingStoreId) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -69,18 +70,31 @@ const createLocation = async (req, res) => {
     const fullAddress = `${address}, ${city}, ${country}`;
     console.log("Full address to geocode:", fullAddress);
 
-    const [lng, lat] = await geocodeAddress(fullAddress);
-    console.log("Geocoded coordinates:", lng, lat);
+    const geoRes = await geocoder.geocode(fullAddress);
+
+    let coordinates = null;
+    let geoCity = city;
+    let geoCountry = country;
+
+    if (geoRes && geoRes.length > 0) {
+      const geo = geoRes[0];
+      coordinates = {
+        type: 'Point',
+        coordinates: [geo.longitude, geo.latitude],
+      };
+      geoCity = geo.city || city;
+      geoCountry = geo.country || country;
+      console.log("Geocoded coordinates:", coordinates.coordinates);
+    } else {
+      console.warn("Geocoding failed. Proceeding without coordinates.");
+    }
 
     const newLocation = new Location({
       address,
-      city,
-      country,
+      city: geoCity,
+      country: geoCountry,
       clothingStoreId,
-      coordinates: {
-        type: 'Point',
-        coordinates: [lng, lat],
-      },
+      ...(coordinates && { coordinates })
     });
 
     const savedLocation = await newLocation.save();
@@ -127,9 +141,12 @@ const deleteLocation = async (req, res) => {
       return res.status(404).json({ message: 'Location store not found' });
     }
 
-    await location.remove();
+    // Change from location.remove() to Location.findByIdAndDelete()
+    await Location.findByIdAndDelete(req.params.id);
+    
     res.json({ message: 'Location store removed' });
   } catch (error) {
+    console.error('Error deleting location:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -138,30 +155,34 @@ const deleteLocation = async (req, res) => {
 // @desc    Get nearby stores based on coordinates
 // @route   GET /api/stores/nearby
 // @access  Public
-const getNearbyStores = async (req, res) => {
-  try {
-    const { longitude, latitude, maxDistance = 10000 } = req.query; // maxDistance in meters, default 10km
-    
-    if (!longitude || !latitude) {
-      return res.status(400).json({ message: 'Longitude and latitude are required' });
+const getNearbyLocations = async (req, res) => {
+ try {
+    const { latitude, longitude, maxDistance } = req.query;
+
+    const lat = parseFloat(latitude);
+    const lon = parseFloat(longitude);
+    const distance = parseFloat(maxDistance);
+
+    if (isNaN(lat) || isNaN(lon) || isNaN(distance)) {
+      return res.status(400).json({ error: 'Invalid or missing query parameters' });
     }
-    
-    // Find stores within the specified radius
-    const nearbyStores = await ClothingStore.find({
-      'location.coordinates': {
-        $near: {
+
+    const nearbyLocations = await Location.find({ 
+      coordinates: {
+        $nearSphere: {
           $geometry: {
-            type: 'Point',
-            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+            type: "Point",
+            coordinates: [lon, lat]
           },
-          $maxDistance: parseInt(maxDistance),
-        },
-      },
-    });
-    
-    res.json(nearbyStores);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+          $maxDistance: distance
+        }
+      }
+    }).populate('clothingStoreId');
+
+    res.json(nearbyLocations);
+  } catch (err) {
+    console.error('Error finding locations:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -171,5 +192,5 @@ module.exports = {
   createLocation,
   updateLocation,
   deleteLocation,
-  getNearbyStores,
+  getNearbyLocations,
 };

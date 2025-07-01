@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ClothingStore from './ClothingStore';
 import { useLocation } from 'react-router-dom';
+import '../FormAndStoreCard.css';
 
 function Stores(){
     const location = useLocation();
@@ -9,7 +10,7 @@ function Stores(){
     const getStores = async function() {
        
         
-        const res = await fetch('http://localhost:8000/locations', {
+        const res = await fetch('/api/locations', {
             method: 'GET',
             credentials: 'include'
         });
@@ -41,7 +42,6 @@ if (Array.isArray(data)) {
 
     return(
         <div>
-            <h3>Stores:</h3>
             
             <ul>
                 <div className='stores-grid'>{stores.map(clothingStore=>(<ClothingStore clothingStore={clothingStore} key={clothingStore._id} onDelete={handleDelete}></ClothingStore>))}</div>

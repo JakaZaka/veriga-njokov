@@ -1,70 +1,48 @@
 import { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../userContext';
 import { Navigate, useParams } from 'react-router-dom';
-
-//import Comment from './Comment';
+import '../DetailsCard.css';
 
 function ClothingItemInfo(){
     const userContext = useContext(UserContext); 
     const { id } = useParams();
     const [clothingItem, setClothingItem] = useState({});
-   
+    const [redirectToLogin, setRedirectToLogin] = useState(false);
+
     useEffect(function(){
         const getClothingItemById = async function(){
-            const res = await fetch(`http://localhost:8000/clothing/${id}`);
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/clothing/${id}`, {
+                credentials: 'include',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
             const data = await res.json();
             setClothingItem(data);
         }
         getClothingItemById();
     }, [id]);
 
-    
-
-
-    
-  
-    const [clothingItemId, setClothingItemID] = useState(id);
-    const [uploaded, setUploaded] = useState(false);
-    const [redirectToLogin, setRedirectToLogin] = useState(false); // track if we need to redirect
-
-   
-
     if (redirectToLogin) {
-        return <Navigate replace to="/login" />; // redirect to login page only when trying to submit a comment
+        return <Navigate replace to="/login" />;
     }
 
-   
-
-
-
-
     return (
-        <>
-            
-            <div className="clothingItem-detail-container">
-  <h1 className="Clothing-title">{clothingItem.name}</h1>
-
-  <img
-    src={`http://localhost:8000/${clothingItem.imageUrl}`}
-    style={{ width: '300px', height: '300px', objectFit: 'cover' }}
-    alt={clothingItem.name}
-    className="photo-detail-img"
-  />
-
-  <div className="clothingItem-meta">
-    <p><strong>Season:</strong> {clothingItem.season}</p>
-    <p><strong>Category:</strong> {clothingItem.category}</p>
-    <p><strong>Sub-category:</strong> {clothingItem.subCategory}</p>
-    <p><strong>Size:</strong> {clothingItem.size}</p>
-    <p><strong>Color:</strong> {clothingItem.color}</p>
-    <p><strong>Notes:</strong> {clothingItem.notes}</p>
-    <p><strong>Created by:</strong> {clothingItem.user ? clothingItem.user.name : 'Unknown'}</p>
-  </div>
-
-  
-</div>
-
-        </>
+        <div className="details-card">
+            <div className="details-title">{clothingItem.name}</div>
+            <img
+                src={`${clothingItem.imageUrl}`}
+                alt={clothingItem.name}
+                className="details-img-main"
+            />
+            <div className="details-section">
+                <div className="details-meta"><span className="details-label">Season:</span> <span className="details-value">{clothingItem.season?.join(', ')}</span></div>
+                <div className="details-meta"><span className="details-label">Category:</span> <span className="details-value">{clothingItem.category}</span></div>
+                <div className="details-meta"><span className="details-label">Sub-category:</span> <span className="details-value">{clothingItem.subCategory}</span></div>
+                <div className="details-meta"><span className="details-label">Size:</span> <span className="details-value">{clothingItem.size}</span></div>
+                <div className="details-meta"><span className="details-label">Color:</span> <span className="details-value">{clothingItem.color}</span></div>
+                <div className="details-meta"><span className="details-label">Notes:</span> <span className="details-value">{clothingItem.notes}</span></div>
+            </div>
+        </div>
     );
 }
 

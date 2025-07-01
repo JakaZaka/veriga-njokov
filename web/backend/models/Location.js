@@ -33,7 +33,7 @@ const locationSchema = mongoose.Schema(
 );
 
 // geospatial index for efficient location-based queries
-locationSchema.index({ 'location.coordinates': '2dsphere' });
+locationSchema.index({ 'coordinates': '2dsphere' });
 
 const Location = mongoose.model('Location', locationSchema);
-module.exports = Location;;
+module.exports = Location;

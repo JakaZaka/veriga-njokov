@@ -8,7 +8,10 @@ const {
   updateClothingItem,
   deleteClothingItem,
   favoriteClothingItem,
-  incrementWearCount
+  incrementWearCount,
+  getClosetStats,
+  toggleWantToGet,
+  transferItem
 } = require('../controllers/clothingItemController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -18,14 +21,18 @@ const router = express.Router();
 
 router.route('/')
   .get(getClothingItems)
-  .post(upload.single('image'), createClothingItem);
+  .post(protect, upload.single('image'), createClothingItem);
+
+router.get('/closetStats', getClosetStats); 
+router.put('/transfer/:clothingId/:newUserId', transferItem);
 
 router.route('/:id')
   .get(getClothingItemById)
-  .put(updateClothingItem)
-  .delete(deleteClothingItem);
+  .put(protect, updateClothingItem)
+  .delete(protect, deleteClothingItem);
 
-router.put('/:id/favorite', favoriteClothingItem);
+router.post('/:id/favorite', favoriteClothingItem);
 router.put('/:id/wear', incrementWearCount);
+router.post('/:id/wantToGet', protect, toggleWantToGet);
 
 module.exports = router;

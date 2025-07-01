@@ -5,26 +5,31 @@ const {
   createOutfit,
   updateOutfit,
   deleteOutfit,
-  favoriteOutfit,
-  wearOutfit
+  likeOutfit,
+  wearOutfit,
+  trendDataForChart
 } = require('../controllers/outfitController');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// All routes are protected
-router.use(protect);
+// All routes are protected by default
+//router.use(protect);
 
 router.route('/')
-  .get(getOutfits)
-  .post(createOutfit);
+  .get(protect, getOutfits)
+  .post(protect, createOutfit);
 
-/*router.route('/:id')
+  router.get('/trends', trendDataForChart);
+
+  router.route('/:id')
   .get(getOutfitById)
   .put(updateOutfit)
   .delete(deleteOutfit);
 
-router.put('/:id/favorite', favoriteOutfit);
-router.put('/:id/wear', wearOutfit);*/
+router.post('/:id/like', likeOutfit);
+
+
+//router.put('/:id/wear', wearOutfit);
 
 module.exports = router;

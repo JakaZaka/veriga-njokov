@@ -1,10 +1,10 @@
 import { useContext, useState } from 'react'
-import { Navigate } from 'react-router';
+import { Navigate } from 'react-router-dom';
 import { UserContext } from '../userContext';
 import { use } from 'react';
 import { useEffect } from 'react';
 import AddClothingStore from './AddClothingStore';
-
+import '../FormAndStoreCard.css';
 
 function AddClothingStoreLocation(props) {
     const userContext = useContext(UserContext); 
@@ -17,7 +17,7 @@ function AddClothingStoreLocation(props) {
     
     useEffect(() => {
         async function fetchStores() {
-            const res = await fetch('http://localhost:8000/stores/existing', {
+            const res = await fetch('/api/stores/existing', {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -56,7 +56,7 @@ function AddClothingStoreLocation(props) {
             clothingStoreId: store
         };
 
-        const res = await fetch('http://localhost:8000/locations', {
+        const res = await fetch('/api/locations', {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -70,22 +70,32 @@ function AddClothingStoreLocation(props) {
     }
 
     return (
-        <form className="form-group" onSubmit={onSubmit}>
-           
-            {uploaded ? <Navigate replace to="/" /> : ""}
-            <label>Store:
-            <select name="clothingStoreId" value= {store} onChange={(e) => setStore(e.target.value)} required>
-            <option value="">Select Store</option>
-            {stores.map(store => (
+    <div className="form-card-container">
+        <div className="form-card">
+        <h2>Add Store Location</h2>
+        <form onSubmit={onSubmit}>
+            <div className="mb-3">
+            <label>Store:</label>
+            <select name="clothingStoreId" className="form-control" value={store} onChange={(e) => setStore(e.target.value)} required>
+                <option value="">Select Store</option>
+                {stores.map(store => (
                 <option key={store._id} value={store._id}>{store.name}</option>
-            ))}
+                ))}
             </select>
-            </label>
+            </div>
+            <div className="mb-3">
             <input type="text" className="form-control" name="address" placeholder="Address" value={address} onChange={(e)=>{setAddress(e.target.value)}}/>
+            </div>
+            <div className="mb-3">
             <input type="text" className="form-control" name="city" placeholder="City" value={city} onChange={(e)=>{setCity(e.target.value)}}/>
+            </div>
+            <div className="mb-3">
             <input type="text" className="form-control" name="country" placeholder="Country" value={country} onChange={(e)=>{setCountry(e.target.value)}}/>
-            <input className="btn btn-primary" type="submit" name="submit" value="Naloži" />
+            </div>
+            <button className="btn btn-primary w-100" type="submit">Naloži</button>
         </form>
+        </div>
+    </div>
     )
 }
 
