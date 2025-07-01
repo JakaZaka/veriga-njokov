@@ -11,3 +11,15 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
+# IDE and editor settings
+.idea/
+.vscode/
+
+# Environment and sensitive files
+.env
+.env.*
+*.env
+web/backend/.env
+
+DesktopApp.zip
+h
