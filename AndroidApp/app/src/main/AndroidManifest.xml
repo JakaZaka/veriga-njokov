@@ -45,6 +45,12 @@
             android:label="Objavi dogodek"
             android:parentActivityName=".MainActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".SimulationActivity"
+            android:label="Simulacije"
+            android:parentActivityName=".MainActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

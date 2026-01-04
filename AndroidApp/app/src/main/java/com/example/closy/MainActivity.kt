@@ -78,12 +78,22 @@ class MainActivity : AppCompatActivity() {
             openEventPublisher()
         }
 
+        // Setup Simulation button
+        findViewById<Button>(R.id.openSimulationButton).setOnClickListener {
+            openSimulation()
+        }
+
         // Request permissions
         checkAndRequestPermissions()
     }
 
     private fun openEventPublisher() {
         val intent = Intent(this, EventPublisherActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openSimulation() {
+        val intent = Intent(this, SimulationActivity::class.java)
         startActivity(intent)
     }
 

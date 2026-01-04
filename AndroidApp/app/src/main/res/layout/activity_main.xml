@@ -70,6 +70,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="📝 Objavi dogodek (Digital Twin)"
+                        android:layout_marginBottom="8dp"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                    <Button
+                        android:id="@+id/openSimulationButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="🎲 Simulacije (Avtomatsko)"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
