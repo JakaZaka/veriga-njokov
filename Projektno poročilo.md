@@ -20,16 +20,23 @@ Veriga Njokov
 
 ## 2. Implementirane funkcionalnosti
 
-### 2.1 [Ime funkcionalnosti 1]
-- **Predmet:** [Ime predmeta]
-- **Odgovoren član:** [Ime Priimek]
+### 2.1 Osnovni skelet android aplikacije
+- **Predmet:** PORA
+- **Odgovoren član:** Jaka Počkaj
 - **Commit(i):** 
-  - [Link do commita 1](https://github.com/username/repo/commit/hash1)
-  - [Link do commita 2](https://github.com/username/repo/commit/hash2)
-- **Opis:** [Kratek opis funkcionalnosti v 1-2 stavkih - kaj funkcionalnost rešuje]
+  - https://github.com/JakaZaka/veriga-njokov/commit/c480d877d8367c09824cb4adac96d7ecccf740a1
+  - https://github.com/JakaZaka/veriga-njokov/commit/aa1bf8092d1dab393f4c73dacabda997b4ece1cd
+- **Opis:** Android aplikacijo za zbiranje senzorskih podatkov (8 senzorjev) z avtomatskim pošiljanjem na strežnik, sistem za objavljanje dogodkov digitalnega dvojčka s MQTT-style topic filteringom, ter simulator ki avtomatsko generira podatke in zaznava ekstremne dogodke (npr. več kot 50 ljudi v trgovini).
 - **Screenshoti:**
   
-  ![Screenshot funkcionalnosti 1](images/screenshot1.png)
+  <img width="495" height="1106" alt="image" src="https://github.com/user-attachments/assets/49ebe755-31ec-4891-8ce4-a7fb43308a23" />
+  <img width="495" height="1106" alt="image" src="https://github.com/user-attachments/assets/c76df0b8-bfc5-451d-96ea-75613512db0c" />
+  <img width="466" height="1109" alt="image" src="https://github.com/user-attachments/assets/5d1893b6-897b-4b5f-90d9-687d502b6453" />
+  <img width="495" height="572" alt="image" src="https://github.com/user-attachments/assets/8ba9112a-8d66-4ba8-8ec4-c423f7dcedaf" />
+
+
+
+
 
 ### 2.2 [Ime funkcionalnosti 2]
 - **Predmet:** [Ime predmeta]
