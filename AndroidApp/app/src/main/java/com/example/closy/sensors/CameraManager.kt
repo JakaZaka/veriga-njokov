@@ -23,6 +23,7 @@ import java.util.concurrent.Executors
 /**
  * Manager for camera image capture using CameraX
  */
+//comment
 class CameraManager(private val context: Context) {
 
     private var imageCapture: ImageCapture? = null
