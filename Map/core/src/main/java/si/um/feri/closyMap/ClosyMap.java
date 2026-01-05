@@ -1,6 +1,7 @@
 package si.um.feri.closyMap;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -24,6 +25,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
+
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
+
 
 import java.io.IOException;
 
@@ -63,6 +68,31 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         camera.update();
 
         touchPosition = new Vector3();
+
+        InputMultiplexer multiplexer = new InputMultiplexer();
+
+        multiplexer.addProcessor(new GestureDetector(this));
+
+        multiplexer.addProcessor(new InputAdapter() {
+            @Override
+            public boolean scrolled(float amountX, float amountY) {
+                Vector3 mouse = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+                camera.unproject(mouse);
+
+                float oldZoom = camera.zoom;
+                camera.zoom += amountY * 0.1f;
+                camera.zoom = MathUtils.clamp(camera.zoom, 0.5f, 2f);
+
+                float ratio = camera.zoom / oldZoom;
+                camera.position.x += (mouse.x - camera.position.x) * (1 - ratio);
+                camera.position.y += (mouse.y - camera.position.y) * (1 - ratio);
+
+                return true;
+            }
+        });
+
+        Gdx.input.setInputProcessor(multiplexer);
+
 
         try {
             //in most cases, geolocation won't be in the center of the tile because tile borders are predetermined (geolocation can be at the corner of a tile)
@@ -145,8 +175,8 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     @Override
     public boolean pan(float x, float y, float deltaX, float deltaY) {
-        camera.translate(-deltaX, deltaY);
-        return false;
+        camera.translate(-deltaX * camera.zoom, deltaY * camera.zoom);
+        return true;
     }
 
     @Override
@@ -192,6 +222,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             camera.translate(0, 3, 0);
         }
+
 
         camera.zoom = MathUtils.clamp(camera.zoom, 0.5f, 2f);
 
