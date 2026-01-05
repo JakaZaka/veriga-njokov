@@ -1,3 +1,4 @@
+currentLocation.png
 libgdx.png
 store.png
 wardrobe.png

@@ -51,6 +51,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     private Texture userIcon;
     private Texture storeIcon;
+    private Texture currentLocationIcon;
 
     private SpriteBatch batch;
 
@@ -75,6 +76,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         shapeRenderer = new ShapeRenderer();
         userIcon = new Texture("wardrobe.png");
         storeIcon = new Texture("store.png");
+        currentLocationIcon = new Texture("currentLocation.png");
         batch = new SpriteBatch();
 
 
@@ -162,6 +164,10 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     }
 
     private void drawMarkers() {
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        float iconSize = 82f;
+
         Vector2 marker = MapRasterTiles.getPixelPosition(
             MARKER_GEOLOCATION.lat,
             MARKER_GEOLOCATION.lng,
@@ -169,17 +175,17 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
             beginTile.y
         );
 
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.RED);
-        shapeRenderer.circle(marker.x, marker.y, 10);
-        shapeRenderer.end();
+        batch.draw(
+            currentLocationIcon,
+            marker.x - iconSize / 2,
+            marker.y - iconSize / 2,
+            iconSize,
+            iconSize
+        );
 
 
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
 
-        float iconSize = 32f;
+
 
         // STORES
         for (LocationDTO loc : storeLocations) {
