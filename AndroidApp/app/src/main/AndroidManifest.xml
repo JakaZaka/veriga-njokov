@@ -41,14 +41,20 @@
         </activity>
 
         <activity
+            android:name=".SensorsActivity"
+            android:label="Sensors"
+            android:parentActivityName=".MainActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".EventPublisherActivity"
-            android:label="Objavi dogodek"
+            android:label="Manual Events"
             android:parentActivityName=".MainActivity"
             android:exported="false" />
 
         <activity
             android:name=".SimulationActivity"
-            android:label="Simulacije"
+            android:label="Simulated Sensors"
             android:parentActivityName=".MainActivity"
             android:exported="false" />
     </application>

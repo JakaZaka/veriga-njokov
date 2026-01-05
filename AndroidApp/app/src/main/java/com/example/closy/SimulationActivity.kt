@@ -43,6 +43,11 @@ class SimulationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_simulation)
 
+        // Setup back button
+        findViewById<ImageButton>(R.id.backButton).setOnClickListener {
+            finish()
+        }
+
         // Initialize managers
         val serverUrl = getSharedPreferences("ClosyPreferences", MODE_PRIVATE)
             .getString("server_url", "http://your-server.com/api/sensor-data") ?: ""

@@ -40,6 +40,11 @@ class EventPublisherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_publisher)
 
+        // Setup back button
+        findViewById<ImageButton>(R.id.backButton).setOnClickListener {
+            finish()
+        }
+
         // Initialize network and event manager
         val serverUrl = getSharedPreferences("ClosyPreferences", MODE_PRIVATE)
             .getString("server_url", "http://your-server.com/api/sensor-data") ?: ""

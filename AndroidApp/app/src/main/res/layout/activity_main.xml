@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F5F5F5"
     tools:context=".MainActivity">
 
     <ScrollView
@@ -16,25 +17,35 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="24dp">
 
             <!-- Title -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Sensor Data Collection"
-                android:textSize="24sp"
+                android:text="Closy Control Panel"
+                android:textSize="28sp"
                 android:textStyle="bold"
                 android:gravity="center"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="8dp"
+                android:textColor="#1976D2" />
 
-            <!-- Server URL Configuration -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Digital Twin Sensor Management"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:layout_marginBottom="24dp"
+                android:textColor="#666666" />
+
+            <!-- Server Configuration Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardElevation="4dp"
-                app:cardCornerRadius="8dp">
+                app:cardCornerRadius="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -45,16 +56,15 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Server Configuration"
-                        android:textSize="18sp"
+                        android:text="Backend Configuration"
+                        android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="12dp" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Server URL"
-                        android:layout_marginBottom="8dp"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -64,31 +74,16 @@
                             android:inputType="textUri"
                             android:text="http://your-server.com/api/sensor-data" />
                     </com.google.android.material.textfield.TextInputLayout>
-
-                    <Button
-                        android:id="@+id/openEventPublisherButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="📝 Objavi dogodek (Digital Twin)"
-                        android:layout_marginBottom="8dp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
-
-                    <Button
-                        android:id="@+id/openSimulationButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="🎲 Simulacije (Avtomatsko)"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Sensor Controls -->
+            <!-- Global Status Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="24dp"
                 app:cardElevation="4dp"
-                app:cardCornerRadius="8dp">
+                app:cardCornerRadius="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -99,106 +94,324 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Sensor Controls"
-                        android:textSize="18sp"
+                        android:text="System Status"
+                        android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="12dp" />
 
-                    <!-- Accelerometer -->
-                    <include layout="@layout/sensor_item"
-                        android:id="@+id/accelerometerItem" />
-
-                    <View
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#E0E0E0"
-                        android:layout_marginVertical="8dp" />
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
 
-                    <!-- Gyroscope -->
-                    <include layout="@layout/sensor_item"
-                        android:id="@+id/gyroscopeItem" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Server:"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
 
-                    <View
+                        <TextView
+                            android:id="@+id/serverStatusText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="● Disconnected"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#F44336" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#E0E0E0"
-                        android:layout_marginVertical="8dp" />
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
 
-                    <!-- Light Sensor -->
-                    <include layout="@layout/sensor_item"
-                        android:id="@+id/lightItem" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Active Sensors:"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
 
-                    <View
+                        <TextView
+                            android:id="@+id/activeSensorsText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 / 7"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#1976D2" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#E0E0E0"
-                        android:layout_marginVertical="8dp" />
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-                    <!-- Proximity Sensor -->
-                    <include layout="@layout/sensor_item"
-                        android:id="@+id/proximityItem" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Active Simulations:"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#E0E0E0"
-                        android:layout_marginVertical="8dp" />
-
-                    <!-- GPS -->
-                    <include layout="@layout/sensor_item"
-                        android:id="@+id/gpsItem" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#E0E0E0"
-                        android:layout_marginVertical="8dp" />
-
-                    <!-- Camera -->
-                    <include layout="@layout/sensor_item"
-                        android:id="@+id/cameraItem" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#E0E0E0"
-                        android:layout_marginVertical="8dp" />
-
-                    <!-- Microphone -->
-                    <include layout="@layout/sensor_item"
-                        android:id="@+id/microphoneItem" />
+                        <TextView
+                            android:id="@+id/activeSimulationsText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#1976D2" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Status Display -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- Navigation Buttons -->
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="8dp">
+                android:text="Quick Access"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Sensors Button -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sensorsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardElevation="6dp"
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:text="📡"
+                        android:textSize="32sp"
+                        android:gravity="center"
+                        android:layout_marginEnd="16dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Status"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sensors"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#212121" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Manage sensor data collection"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/statusText"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ready to collect sensor data"
-                        android:textSize="14sp" />
+                        android:text="→"
+                        android:textSize="24sp"
+                        android:textColor="#1976D2" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Simulation Button -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/simulationCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardElevation="6dp"
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:text="🎲"
+                        android:textSize="32sp"
+                        android:gravity="center"
+                        android:layout_marginEnd="16dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Simulated Sensors"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#212121" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Create automated simulations"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="→"
+                        android:textSize="24sp"
+                        android:textColor="#1976D2" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Manual Events Button -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/eventsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardElevation="6dp"
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:text="✍️"
+                        android:textSize="32sp"
+                        android:gravity="center"
+                        android:layout_marginEnd="16dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Manual Events"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#212121" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Publish Digital Twin events"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="→"
+                        android:textSize="24sp"
+                        android:textColor="#1976D2" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- History Button (Optional) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/historyCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardElevation="6dp"
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:text="📊"
+                        android:textSize="32sp"
+                        android:gravity="center"
+                        android:layout_marginEnd="16dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="History"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#212121" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="View data and event logs"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="→"
+                        android:textSize="24sp"
+                        android:textColor="#1976D2" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
     </ScrollView>
 
