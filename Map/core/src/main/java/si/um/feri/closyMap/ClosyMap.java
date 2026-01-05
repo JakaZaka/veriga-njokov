@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -32,6 +33,9 @@ import com.badlogic.gdx.InputMultiplexer;
 
 import java.io.IOException;
 
+import si.um.feri.closyMap.dataBaseUtils.ApiService;
+import si.um.feri.closyMap.dataBaseUtils.LocationDTO;
+import si.um.feri.closyMap.dataBaseUtils.UserDTO;
 import si.um.feri.closyMap.utils.Constants;
 import si.um.feri.closyMap.utils.Geolocation;
 import si.um.feri.closyMap.utils.MapRasterTiles;
@@ -39,7 +43,18 @@ import si.um.feri.closyMap.utils.ZoomXY;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class ClosyMap extends ApplicationAdapter implements GestureDetector.GestureListener {
+    private Array<LocationDTO> storeLocations = new Array<>();
+    private Array<UserDTO> users = new Array<>();
+
+
     private ShapeRenderer shapeRenderer;
+
+    private Texture userIcon;
+    private Texture storeIcon;
+
+    private SpriteBatch batch;
+
+
     private Vector3 touchPosition;
 
     private TiledMap tiledMap;
@@ -58,6 +73,14 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();
+        userIcon = new Texture("wardrobe.png");
+        storeIcon = new Texture("store.png");
+        batch = new SpriteBatch();
+
+
+        ApiService.loadStoreLocations(data -> storeLocations = data);
+        ApiService.loadUsers(data -> users = data);
+
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
@@ -134,21 +157,76 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         tiledMapRenderer.render();
 
         drawMarkers();
+//        drawStores();
+//        drawUsers();
     }
 
     private void drawMarkers() {
-        Vector2 marker = MapRasterTiles.getPixelPosition(MARKER_GEOLOCATION.lat, MARKER_GEOLOCATION.lng, beginTile.x, beginTile.y);
+        Vector2 marker = MapRasterTiles.getPixelPosition(
+            MARKER_GEOLOCATION.lat,
+            MARKER_GEOLOCATION.lng,
+            beginTile.x,
+            beginTile.y
+        );
 
         shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.setColor(Color.RED);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.RED);
         shapeRenderer.circle(marker.x, marker.y, 10);
         shapeRenderer.end();
+
+
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+
+        float iconSize = 32f;
+
+        // STORES
+        for (LocationDTO loc : storeLocations) {
+            float lon = loc.coordinates.coordinates[0];
+            float lat = loc.coordinates.coordinates[1];
+
+            Vector2 pos = MapRasterTiles.getPixelPosition(lat, lon, beginTile.x, beginTile.y);
+
+            batch.draw(
+                storeIcon,
+                pos.x - iconSize / 2,
+                pos.y - iconSize / 2,
+                iconSize,
+                iconSize
+            );
+        }
+
+        // USERS
+        for (UserDTO user : users) {
+            if (user.location == null || user.location.coordinates == null) continue;
+
+            float lon = user.location.coordinates.coordinates[0];
+            float lat = user.location.coordinates.coordinates[1];
+
+            Vector2 pos = MapRasterTiles.getPixelPosition(lat, lon, beginTile.x, beginTile.y);
+
+            batch.draw(
+                userIcon,
+                pos.x - iconSize / 2,
+                pos.y - iconSize / 2,
+                iconSize,
+                iconSize
+            );
+        }
+
+        batch.end();
+
+
     }
 
     @Override
     public void dispose() {
         shapeRenderer.dispose();
+        batch.dispose();
+        userIcon.dispose();
+        storeIcon.dispose();
+
     }
 
     @Override
@@ -232,4 +310,42 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth / 2f, Constants.MAP_WIDTH - effectiveViewportWidth / 2f);
         camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight / 2f, Constants.MAP_HEIGHT - effectiveViewportHeight / 2f);
     }
+
+//    private void drawStores() {
+//        shapeRenderer.setProjectionMatrix(camera.combined);
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+//
+//        shapeRenderer.setColor(Color.BLUE);
+//
+//        for (LocationDTO loc : storeLocations) {
+//            float lon = loc.coordinates.coordinates[0];
+//            float lat = loc.coordinates.coordinates[1];
+//
+//            Vector2 pos = MapRasterTiles.getPixelPosition(lat, lon, beginTile.x, beginTile.y);
+//            shapeRenderer.circle(pos.x, pos.y, 8);
+//        }
+//
+//        shapeRenderer.end();
+//    }
+//
+//    private void drawUsers() {
+//        shapeRenderer.setProjectionMatrix(camera.combined);
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+//
+//        shapeRenderer.setColor(Color.GREEN);
+//
+//        for (UserDTO user : users) {
+//            if (user.location == null || user.location.coordinates == null) continue;
+//
+//            float lon = user.location.coordinates.coordinates[0];
+//            float lat = user.location.coordinates.coordinates[1];
+//
+//            Vector2 pos = MapRasterTiles.getPixelPosition(lat, lon, beginTile.x, beginTile.y);
+//            shapeRenderer.circle(pos.x, pos.y, 5);
+//        }
+//
+//        shapeRenderer.end();
+//    }
+
+
 }
