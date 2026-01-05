@@ -3,6 +3,7 @@ package si.um.feri.closyMap;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -46,6 +47,10 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     private Array<LocationDTO> storeLocations = new Array<>();
     private Array<UserDTO> users = new Array<>();
 
+    private LocationDTO selectedStore = null;
+    private UserDTO selectedUser = null;
+
+    private BitmapFont font;
 
     private ShapeRenderer shapeRenderer;
 
@@ -62,8 +67,16 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     private TiledMapRenderer tiledMapRenderer;
     private OrthographicCamera camera;
 
+    private OrthographicCamera uiCamera;
+
+
     private Texture[] mapTiles;
     private ZoomXY beginTile;   // top left tile
+
+    private Vector2 popupPos = new Vector2();
+
+    private float popupAlpha = 0f;
+
 
     // center geolocation
     private final Geolocation CENTER_GEOLOCATION = new Geolocation(46.557314, 15.637771);
@@ -78,6 +91,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         storeIcon = new Texture("store.png");
         currentLocationIcon = new Texture("currentLocation.png");
         batch = new SpriteBatch();
+        font = new BitmapFont(Gdx.files.internal("font/textFont.fnt"));
 
 
         ApiService.loadStoreLocations(data -> storeLocations = data);
@@ -91,6 +105,10 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         camera.viewportHeight = Constants.MAP_HEIGHT / 2f;
         camera.zoom = 2f;
         camera.update();
+
+        uiCamera = new OrthographicCamera();
+        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
 
         touchPosition = new Vector3();
 
@@ -115,6 +133,58 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
                 return true;
             }
         });
+
+        multiplexer.addProcessor(new InputAdapter() {
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
+                Vector3 world = new Vector3(screenX, screenY, 0);
+                camera.unproject(world);
+                popupPos.set(world.x + 20, world.y + 20);
+                popupAlpha = 0f;
+
+
+                selectedStore = null;
+                selectedUser = null;
+
+                float clickRadius = 45f * camera.zoom;
+
+                // STORES
+                for (LocationDTO loc : storeLocations) {
+                    Vector2 pos = MapRasterTiles.getPixelPosition(
+                        loc.coordinates.coordinates[1],
+                        loc.coordinates.coordinates[0],
+                        beginTile.x,
+                        beginTile.y
+                    );
+
+                    if (pos.dst(world.x, world.y) < clickRadius) {
+                        selectedStore = loc;
+                        return true;
+                    }
+                }
+
+                // USERS
+                for (UserDTO user : users) {
+                    if (user.location == null || user.location.coordinates == null) continue;
+
+                    Vector2 pos = MapRasterTiles.getPixelPosition(
+                        user.location.coordinates.coordinates[1],
+                        user.location.coordinates.coordinates[0],
+                        beginTile.x,
+                        beginTile.y
+                    );
+
+                    if (pos.dst(world.x, world.y) < clickRadius) {
+                        selectedUser = user;
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        });
+
 
         Gdx.input.setInputProcessor(multiplexer);
 
@@ -157,8 +227,11 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
+        popupAlpha = Math.min(1f, popupAlpha + Gdx.graphics.getDeltaTime() * 6f);
+
 
         drawMarkers();
+        drawPopup();
 //        drawStores();
 //        drawUsers();
     }
@@ -226,6 +299,70 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     }
 
+    private void drawPopup() {
+        if (selectedStore == null && selectedUser == null) return;
+
+        float width =900;
+        float height = 250;
+        float padding = 25;
+
+        float margin = 20f;
+
+        float x = margin;
+        float y = height + margin;
+
+
+
+        shapeRenderer.setProjectionMatrix(uiCamera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(1f, 0.84f, 0.8f, 0.95f*popupAlpha);
+        shapeRenderer.rect(x, y - height, width, height);
+        shapeRenderer.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(1f, 1f, 1f, 0.4f*popupAlpha);
+        shapeRenderer.rect(x, y - height, width, height);
+        shapeRenderer.end();
+
+        font.setColor(1f, 1f, 1f, popupAlpha);
+        batch.setProjectionMatrix(uiCamera.combined);
+        batch.begin();
+
+        float textY = y - padding;
+
+        if (selectedStore != null) {
+
+            font.draw(batch, selectedStore.clothingStoreId.name, x + padding, textY);
+            textY -= 47;
+
+            font.draw(batch, "Website:", x + padding, textY);
+            textY -= 45;
+
+            font.draw(batch, selectedStore.clothingStoreId.website, x + padding, textY);
+            textY -= 45;
+
+            font.draw(batch, "Address:", x + padding, textY);
+            textY -= 45;
+
+            font.draw(batch, selectedStore.address, x + padding, textY);
+        }
+
+        if (selectedUser != null) {
+            font.draw(batch, selectedUser.username, x + padding, textY);
+            textY -= 47;
+
+            font.draw(batch, "Email: " + selectedUser.email, x + padding, textY);
+            textY -= 45;
+
+            if (selectedUser.location != null) {
+                font.draw(batch, "Address: " + selectedUser.location.address, x + padding, textY);
+            }
+        }
+
+        batch.end();
+    }
+
+
     @Override
     public void dispose() {
         shapeRenderer.dispose();
@@ -286,6 +423,11 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     public void pinchStop() {
 
     }
+    @Override
+    public void resize(int width, int height) {
+        uiCamera.setToOrtho(false, width, height);
+    }
+
 
     private void handleInput() {
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
@@ -306,6 +448,11 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             camera.translate(0, 3, 0);
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            selectedStore = null;
+            selectedUser = null;
+        }
+
 
 
         camera.zoom = MathUtils.clamp(camera.zoom, 0.5f, 2f);
