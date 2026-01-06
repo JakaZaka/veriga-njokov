@@ -1,9 +1,19 @@
+import argparse
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 import hashlib
 import json
-from time import timezone
-from typing import List
+import os
+import threading
+import time
+from datetime import datetime, timedelta, timezone
+from typing import List, Optional
+from mpi4py import MPI
+
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
+
+
 
 
 def utcnow() -> datetime:
@@ -172,3 +182,199 @@ class Blockchain:
         for item in raw:
             chain.append(Block(**item))
         return chain
+    
+# ----------------------------
+# Paralelno rudarjenje: MPI (procesi) + niti (threads)
+# ----------------------------
+
+def mine_block_parallel(
+    latest: Block,
+    data: str,
+    difficulty: int,
+    rank: int,
+    world_size: int,
+    thread_count: int,
+    stop_event: threading.Event,
+) -> Optional[Block]:
+    """
+    Vrne nov blok, če ga najde; sicer None (če stop_event set).
+    Nonce prostor: start = rank*T + tid, step = P*T
+    """
+    target = "0" * difficulty
+    index = latest.index + 1
+    previous_hash = latest.hash
+
+    #timestamp "zamrznem" za ta mining attempt
+    timestamp_iso = dt_to_iso(utcnow())
+
+    found_lock = threading.Lock()
+    found: dict = {"block": None}
+
+    step = world_size * thread_count
+
+    def worker(tid: int):
+        start_nonce = rank * thread_count + tid
+        nonce = start_nonce
+        while not stop_event.is_set():
+            h = Block.compute_hash(index, data, timestamp_iso, previous_hash, difficulty, nonce)
+            if h.startswith(target):
+                with found_lock:
+                    if found["block"] is None:
+                        found["block"] = Block(
+                            index=index,
+                            data=data,
+                            timestamp=timestamp_iso,
+                            previous_hash=previous_hash,
+                            difficulty=difficulty,
+                            nonce=int(nonce),
+                            hash=h
+                        )
+                        stop_event.set()
+                return
+            nonce += step
+
+    threads = []
+    for tid in range(thread_count):
+        t = threading.Thread(target=worker, args=(tid,), daemon=True)
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    return found["block"]
+
+    
+# ----------------------------
+# MPI Node loop + komunikacija
+# ----------------------------
+
+TAG_CHAIN = 100
+
+def broadcast_chain_to_all(comm: MPI.Comm, chain_json: str, rank: int, world_size: int):
+    # enostavno: pošlji vsem ostalim (Send)
+    for r in range(world_size):
+        if r != rank:
+            comm.send(chain_json, dest=r, tag=TAG_CHAIN)
+
+def poll_incoming_chains(comm: MPI.Comm, blockchain: Blockchain, chain_lock: threading.Lock, mining_stop: threading.Event) -> bool:
+    """
+    Preveri, če je prišlo kaj novega po MPI, in poskusi ReplaceChain.
+    Če zamenja verigo, ustavi mining (mining_stop.set()).
+    Vrne True, če je veriga zamenjana.
+    """
+    replaced_any = False
+    status = MPI.Status()
+    while comm.iprobe(source=MPI.ANY_SOURCE, tag=TAG_CHAIN, status=status):
+        src = status.Get_source()
+        msg = comm.recv(source=src, tag=TAG_CHAIN)
+        try:
+            incoming_chain = Blockchain.from_json(msg)
+        except Exception:
+            continue
+
+        with chain_lock:
+            if blockchain.replace_chain(incoming_chain):
+                replaced_any = True
+                mining_stop.set()
+
+    return replaced_any
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--blocks", type=int, default=20, help="Koliko blokov naj se poskusi izrudariti (globalno).")
+    parser.add_argument("--threads", type=int, default=0, help="Št. niti na vozlišče (0 => os.cpu_count()).")
+    parser.add_argument("--difficulty", type=int, default=5, help="Začetna težavnost (genesis).")
+    parser.add_argument("--gen-interval", type=int, default=10, help="Ciljni čas bloka (sek).")
+    parser.add_argument("--adj-interval", type=int, default=10, help="Interval prilagoditve težavnosti (v blokih).")
+    args = parser.parse_args()
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    world_size = comm.Get_size()
+
+    thread_count = args.threads if args.threads > 0 else (os.cpu_count() or 1)
+
+    blockchain = Blockchain(
+        difficulty=args.difficulty,
+        block_generation_interval=args.gen_interval,
+        difficulty_adjustment_interval=args.adj_interval,
+    )
+
+    chain_lock = threading.Lock()
+
+    if rank == 0:
+        t0 = time.perf_counter()
+
+    mined_global_target = args.blocks
+
+    #main loop: poskusi rudariti dokler rank0 ne vidi dovolj blokov (ostali bodo sledili prek verige)
+    while True:
+        with chain_lock:
+            latest = blockchain.get_latest_block()
+            diff = blockchain.adjust_difficulty(latest.difficulty)
+
+        if latest.index >= mined_global_target:
+            break
+
+        mining_stop = threading.Event()
+
+        def listener():
+            while not mining_stop.is_set():
+                poll_incoming_chains(comm, blockchain, chain_lock, mining_stop)
+                time.sleep(0.01)
+
+        listener_thread = threading.Thread(target=listener, daemon=True)
+        listener_thread.start()
+
+        # rudarjenje (multi-thread)
+        new_block = mine_block_parallel(
+            latest=latest,
+            data="Block data",
+            difficulty=diff,
+            rank=rank,
+            world_size=world_size,
+            thread_count=thread_count,
+            stop_event=mining_stop,
+        )
+
+        mining_stop.set()
+        listener_thread.join(timeout=0.1)
+
+
+        if new_block is not None:
+            added = False
+            with chain_lock:
+                # preverim, da je latest še vedno aktualen (tvoja zaščita pred ReplaceChain)
+                current_latest = blockchain.get_latest_block()
+                if current_latest.hash == new_block.previous_hash and current_latest.index + 1 == new_block.index:
+                    added = blockchain.add_block(new_block)
+
+                chain_json = blockchain.to_json()
+
+            if added:
+                broadcast_chain_to_all(comm, chain_json, rank, world_size)
+
+        time.sleep(0.001)
+
+    #vsi se sinhronizirajo
+    comm.barrier()
+
+    if rank == 0:
+        t1 = time.perf_counter()
+        with chain_lock:
+            final_len = len(blockchain.get_chain())
+            final_idx = blockchain.get_latest_block().index
+            cumdiff = blockchain.calculate_cumulative_diff(blockchain.get_chain())
+
+        print("\n=== REZULTAT ===")
+        print(f"Procesi (vozlisca): {world_size}")
+        print(f"Niti na vozlisce:  {thread_count}")
+        print(f"Koncni index:      {final_idx}")
+        print(f"Dolzina verige:    {final_len}")
+        print(f"Kumulativna diff:  {cumdiff:.2f}")
+        print(f"Cas:               {t1 - t0:.3f} s")
+
+
+if __name__ == "__main__":
+    main()
