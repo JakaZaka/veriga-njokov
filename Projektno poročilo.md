@@ -26,9 +26,11 @@ Veriga Njokov
 - **Commit(i):** 
   - https://github.com/JakaZaka/veriga-njokov/commit/c480d877d8367c09824cb4adac96d7ecccf740a1
   - https://github.com/JakaZaka/veriga-njokov/commit/aa1bf8092d1dab393f4c73dacabda997b4ece1cd
+  - https://github.com/JakaZaka/veriga-njokov/commit/88dd92450924bf31a0ae3e716677c1783ccbc23e
 - **Opis:** Android aplikacijo za zbiranje senzorskih podatkov (8 senzorjev) z avtomatskim pošiljanjem na strežnik, sistem za objavljanje dogodkov digitalnega dvojčka s MQTT-style topic filteringom, ter simulator ki avtomatsko generira podatke in zaznava ekstremne dogodke (npr. več kot 50 ljudi v trgovini).
 - **Screenshoti:**
   
+  <img width="490" height="1096" alt="image" src="https://github.com/user-attachments/assets/e2594098-a912-4b1a-b8d1-e358849cb4d4" />
   <img width="495" height="1106" alt="image" src="https://github.com/user-attachments/assets/49ebe755-31ec-4891-8ce4-a7fb43308a23" />
   <img width="495" height="1106" alt="image" src="https://github.com/user-attachments/assets/c76df0b8-bfc5-451d-96ea-75613512db0c" />
   <img width="466" height="1109" alt="image" src="https://github.com/user-attachments/assets/5d1893b6-897b-4b5f-90d9-687d502b6453" />
