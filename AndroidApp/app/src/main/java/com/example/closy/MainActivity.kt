@@ -1,11 +1,18 @@
 package com.example.closy
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.Toolbar
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
+import java.util.Locale
 
 /**
  * Main Activity - Control Panel / Overview
@@ -28,7 +35,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Apply saved language before setting content view
+        applySavedLanguage()
+
+        // Apply saved dark mode preference
+        applySavedDarkMode()
+
         setContentView(R.layout.activity_main)
+
+        // Setup Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.title = getString(R.string.app_name)
 
         // Initialize views
         serverUrlInput = findViewById(R.id.serverUrlInput)
@@ -119,6 +138,46 @@ class MainActivity : AppCompatActivity() {
         // Update active simulations count (placeholder)
         val activeSimulations = getActiveSimulationsCount()
         activeSimulationsText.text = "$activeSimulations"
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun applySavedLanguage() {
+        val prefs = getSharedPreferences("ClosyPreferences", Context.MODE_PRIVATE)
+        val savedLanguage = prefs.getString("app_language", "en") ?: "en"
+
+        val locale = Locale(savedLanguage)
+        Locale.setDefault(locale)
+
+        val config = Configuration(resources.configuration)
+        config.setLocale(locale)
+
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
+
+    private fun applySavedDarkMode() {
+        val prefs = getSharedPreferences("ClosyPreferences", Context.MODE_PRIVATE)
+        val isDarkMode = prefs.getBoolean("dark_mode", false)
+
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
     }
 
     private fun checkServerConnection(): Boolean {

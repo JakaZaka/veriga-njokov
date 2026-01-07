@@ -57,6 +57,12 @@
             android:label="Simulated Sensors"
             android:parentActivityName=".MainActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/settings"
+            android:parentActivityName=".MainActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
