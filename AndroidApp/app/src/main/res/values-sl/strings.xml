@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Closy</string>
+
+    <!-- Main Screen -->
+    <string name="title_sensor_data_collection">Zbiranje senzorskih podatkov</string>
+    <string name="server_configuration">Konfiguracija strežnika</string>
+    <string name="server_url_hint">URL strežnika</string>
+    <string name="sensor_controls">Nadzor senzorjev</string>
+    <string name="status_title">Status</string>
+    <string name="status_ready">Pripravljen za zbiranje senzorskih podatkov</string>
+
+    <!-- Sensor Names -->
+    <string name="sensor_accelerometer">Pospeškomer</string>
+    <string name="sensor_gyroscope">Žiroskop</string>
+    <string name="sensor_light">Svetlobni senzor</string>
+    <string name="sensor_proximity">Bližina</string>
+    <string name="sensor_temperature">Temperatura</string>
+    <string name="sensor_gps">GPS lokacija</string>
+    <string name="sensor_camera">Kamera</string>
+    <string name="sensor_microphone">Mikrofon</string>
+
+    <!-- Sensor Status -->
+    <string name="status_inactive">Status: Neaktiven</string>
+    <string name="status_active">Status: Aktiven</string>
+    <string name="status_error">Status: Napaka</string>
+    <string name="status_not_available">Status: Ni na voljo</string>
+
+    <!-- Configuration -->
+    <string name="interval_label">Interval:</string>
+    <string name="interval_unit_seconds">sekunde</string>
+    <string name="interval_unit_minutes">minute</string>
+    <string name="interval_unit_hours">ure</string>
+
+    <!-- Messages -->
+    <string name="permissions_granted">Vsa dovoljenja odobrena</string>
+    <string name="permissions_denied">Nekatera dovoljenja zavrnjena. Aplikacija morda ne bo delovala pravilno.</string>
+    <string name="permissions_request">Prosimo, odobrite vsa dovoljenja za polno funkcionalnost</string>
+    <string name="sensor_started">Zagnan senzor %s</string>
+    <string name="sensor_stopped">Ustavljen senzor %s</string>
+    <string name="sensor_error_start">Napaka pri zagonu senzorja: %s</string>
+    <string name="sensor_error_stop">Napaka pri ustavljanju %s: %s</string>
+    <string name="interval_updated">Posodobljen interval %s na %d sekund</string>
+    <string name="interval_min_error">Interval mora biti najmanj 1 sekunda</string>
+    <string name="interval_invalid">Neveljavna vrednost intervala</string>
+    <string name="data_send_failed">Napaka pri pošiljanju podatkov: %s</string>
+
+    <!-- Buttons -->
+    <string name="button_start_all">Zaženi vse senzorje</string>
+    <string name="button_stop_all">Ustavi vse senzorje</string>
+    <string name="button_save_config">Shrani konfiguracijo</string>
+
+    <!-- Descriptions -->
+    <string name="accelerometer_desc">Meri pospešek naprave v m/s²</string>
+    <string name="gyroscope_desc">Meri rotacijo naprave v rad/s</string>
+    <string name="light_desc">Meri svetlobo okolice v lux</string>
+    <string name="proximity_desc">Meri razdaljo do bližnjih objektov v cm</string>
+    <string name="temperature_desc">Meri temperaturo okolice v °C</string>
+    <string name="gps_desc">Zagotavlja geografske koordinate</string>
+    <string name="camera_desc">Zajame slike za računalniški vid</string>
+    <string name="microphone_desc">Posname zvočne podatke</string>
+
+    <!-- Settings -->
+    <string name="settings">Nastavitve</string>
+    <string name="language">Jezik</string>
+    <string name="language_english">English (Angleščina)</string>
+    <string name="language_slovenian">Slovenščina</string>
+    <string name="appearance">Videz</string>
+    <string name="dark_mode">Temni način</string>
+    <string name="dark_mode_description">Omogoči temno temo v celotni aplikaciji</string>
+    <string name="notifications">Obvestila</string>
+    <string name="enable_notifications">Omogoči obvestila</string>
+    <string name="notifications_description">Prejemaj opozorila o dogodkih senzorjev in stanju sistema</string>
+    <string name="about">O aplikaciji</string>
+    <string name="app_description">Sistem za upravljanje senzorjev digitalnega dvojčka</string>
+</resources>
+

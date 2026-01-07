@@ -1,3 +1,75 @@
 <resources>
     <string name="app_name">Closy</string>
+
+    <!-- Main Screen -->
+    <string name="title_sensor_data_collection">Sensor Data Collection</string>
+    <string name="server_configuration">Server Configuration</string>
+    <string name="server_url_hint">Server URL</string>
+    <string name="sensor_controls">Sensor Controls</string>
+    <string name="status_title">Status</string>
+    <string name="status_ready">Ready to collect sensor data</string>
+
+    <!-- Sensor Names -->
+    <string name="sensor_accelerometer">Accelerometer</string>
+    <string name="sensor_gyroscope">Gyroscope</string>
+    <string name="sensor_light">Light Sensor</string>
+    <string name="sensor_proximity">Proximity</string>
+    <string name="sensor_temperature">Temperature</string>
+    <string name="sensor_gps">GPS Location</string>
+    <string name="sensor_camera">Camera</string>
+    <string name="sensor_microphone">Microphone</string>
+
+    <!-- Sensor Status -->
+    <string name="status_inactive">Status: Inactive</string>
+    <string name="status_active">Status: Active</string>
+    <string name="status_error">Status: Error</string>
+    <string name="status_not_available">Status: Not available</string>
+
+    <!-- Configuration -->
+    <string name="interval_label">Interval:</string>
+    <string name="interval_unit_seconds">seconds</string>
+    <string name="interval_unit_minutes">minutes</string>
+    <string name="interval_unit_hours">hours</string>
+
+    <!-- Messages -->
+    <string name="permissions_granted">All permissions granted</string>
+    <string name="permissions_denied">Some permissions denied. App may not function properly.</string>
+    <string name="permissions_request">Please grant all permissions for full functionality</string>
+    <string name="sensor_started">Started %s sensor</string>
+    <string name="sensor_stopped">Stopped %s sensor</string>
+    <string name="sensor_error_start">Error starting sensor: %s</string>
+    <string name="sensor_error_stop">Error stopping %s: %s</string>
+    <string name="interval_updated">Updated %s interval to %d seconds</string>
+    <string name="interval_min_error">Interval must be at least 1 second</string>
+    <string name="interval_invalid">Invalid interval value</string>
+    <string name="data_send_failed">Failed to send data: %s</string>
+
+    <!-- Buttons -->
+    <string name="button_start_all">Start All Sensors</string>
+    <string name="button_stop_all">Stop All Sensors</string>
+    <string name="button_save_config">Save Configuration</string>
+
+    <!-- Descriptions -->
+    <string name="accelerometer_desc">Measures device acceleration in m/s²</string>
+    <string name="gyroscope_desc">Measures device rotation in rad/s</string>
+    <string name="light_desc">Measures ambient light in lux</string>
+    <string name="proximity_desc">Measures distance to nearby objects in cm</string>
+    <string name="temperature_desc">Measures ambient temperature in °C</string>
+    <string name="gps_desc">Provides geographic coordinates</string>
+    <string name="camera_desc">Captures images for computer vision</string>
+    <string name="microphone_desc">Records audio data</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="language">Language</string>
+    <string name="language_english">English</string>
+    <string name="language_slovenian">Slovenščina (Slovenian)</string>
+    <string name="appearance">Appearance</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="dark_mode_description">Enable dark theme throughout the app</string>
+    <string name="notifications">Notifications</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="notifications_description">Receive alerts for sensor events and system status</string>
+    <string name="about">About</string>
+    <string name="app_description">Digital Twin Sensor Management System</string>
 </resources>
