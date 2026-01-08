@@ -36,6 +36,10 @@ Projekt je digitalni dvojček, ki je namenjen spremljanju oblačil, outfitov in 
   <img width="466" height="1109" alt="image" src="https://github.com/user-attachments/assets/5d1893b6-897b-4b5f-90d9-687d502b6453" />
   <img width="495" height="572" alt="image" src="https://github.com/user-attachments/assets/8ba9112a-8d66-4ba8-8ec4-c423f7dcedaf" />
 
+
+
+
+
 ### 2.2 Osnovni zemljevid in prikaz podatkov in podrobnih informacij na njemu
 - **Predmet:** RRI
 - **Odgovoren član:** Anđelija Lazarević
@@ -112,13 +116,7 @@ Naredila algoritem za rudarjenje blokov, ga paralelizirala z mpi tako da si poš
 - **Okvirni rok:** 15.1.2026
 - **Opis:** Uporabniku bo na zemljevidu omogočena izbira dneva in ure (npr. sreda ob 17. uri). Na podlagi do sedaj zbranih podatkov se bo pri posameznih trgovinah prikazalo predvideno število ljudi v izbranem časovnem obdobju z uporabo grafičnih simbolov.
 
-### 3.4 [Ime načrtovane funkcionalnosti 4]
-- **Predmet:** [Ime predmeta]
-- **Odgovoren član:** [Ime Priimek]
-- **Okvirni rok:** [Datum]
-- **Opis:** [Kratek opis kaj bo funkcionalnost počela]
-
-### 3.5 [Ime načrtovane funkcionalnosti 5]
+### 3.4 [Ime načrtovane funkcionalnosti 3]
 - **Predmet:** [Ime predmeta]
 - **Odgovoren član:** [Ime Priimek]
 - **Okvirni rok:** [Datum]
