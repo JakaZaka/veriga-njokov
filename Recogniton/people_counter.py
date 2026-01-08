@@ -3,6 +3,8 @@ import cv2
 import argparse
 from pathlib import Path
 
+
+
 PERSON_CLASS_ID = 0  # COCO dataset class ID for 'person'
 
 def count_people_in_img(image_path: str, conf: float = 0.25, save_annotated: bool = True) -> int:
