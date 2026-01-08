@@ -165,3 +165,21 @@ Model, ki zna prešteti število ljudi na sliki (torej v trgovini v našem prime
 - **Odgovoren član:** Andjelija Lazarević
 - **Okvirni rok:** 18.1.2026
 - **Opis:** Zaenkrat je narejen samo osnovni model. Potrebno ga je prilagoditi, da bo deloval za katerokoli sliko oblačila. Po možnosti tudi tako, da bo prepoznal barvo. Izdela se tudi spletna storitev pri tem predmetu.
+
+### 3.6 Dodajanje in urejanje podatkov o trgovinah
+- **Predmet:** RRI
+- **Odgovoren član:** Jaka Počkaj
+- **Okvirni rok:** 14.1.2026
+- **Opis:** Dodajanje novih trgovin ter urejanje obstoječih podatkov o trgovinah (ime, lokacija, kontaktni podatki). Podatki se bodo shranjevali v podatkovno bazo in pridobivali prek spletnih storitev (API), kar bo omogočalo sprotno posodabljanje in takojšen prikaz sprememb na zemljevidu.
+
+### 3.7 Prikazovanje izjemnih dogodkov v trgovinah
+- **Predmet:** RRI
+- **Odgovoren član:** Nela Copot
+- **Okvirni rok:** 16.1.2026
+- **Opis:** Na zemljevidu se bo pri posameznih trgovinah prikazoval poseben vizualni status v primeru izjemnih dogodkov. Če bo število ljudi v trgovini preseglo priporočeno ali dovoljeno mejo, se bo ikona trgovine obarvala rdeče. V primeru izjemnega zaprtja trgovine (npr. zaradi prenove ali izrednih razmer) bo ikona prikazana v sivi barvi. Tako bo uporabniku omogočen hiter in pregleden vpogled v trenutno stanje trgovin.
+
+### 3.8 Optimizacija izrisa zemljevida z lokalnim shranjevanjem ploščic
+- **Predmet:** RRI
+- **Odgovoren član:** Anđelija Lazarević
+- **Okvirni rok:** 10.1.2026
+- **Opis:** Za izboljšanje zmogljivosti bo implementirano lokalno shranjevanje pogosto uporabljenih rastrskih ploščic zemljevida. Ob izrisu zemljevida se bo preverilo, ali je posamezna ploščica že shranjena lokalno. Če ploščica ni prisotna, se bo pridobila prek API-ja in nato shranila za nadaljnjo uporabo. Ta pristop bo zmanjšal število ponovnih zahtevkov na strežnik in pospešil začetni ter ponovni izris zemljevida.
