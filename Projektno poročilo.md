@@ -12,10 +12,10 @@ Veriga Njokov
 - Jaka Počkaj
 
 ### Kratek opis projekta
-[Vnesite kratek opis projekta - kaj aplikacija počne, kakšen je njen namen, itd.]
+Projekt je digitalni dvojček, ki je namenjen spremljanju oblačil, outfitov in stanja modnih trgovin v mestu. Sistem omogoča beleženje uporabe oblačil, kombiniranje outfitov ter spremljanje razmer v trgovinah (npr. koliko ljudi je v posamezni trgovini).
 
 ### URL repozitorija
-[https://github.com/username/repository](https://github.com/username/repository)
+(https://github.com/JakaZaka/veriga-njokov)
 
 
 ## 2. Implementirane funkcionalnosti
@@ -62,10 +62,10 @@ Veriga Njokov
 ## 3. Načrtovane funkcionalnosti (še neimplementirane)
 
 ### 3.1 [Ime načrtovane funkcionalnosti 1]
-- **Predmet:** [Ime predmeta]
-- **Odgovoren član:** [Ime Priimek]
-- **Okvirni rok:** [Datum, npr. 15. 1. 2026]
-- **Opis:** [Kratek opis kaj bo funkcionalnost počela]
+- **Predmet:** PORA
+- **Odgovoren član:** Jaka Počkaj
+- **Okvirni rok:** 15. 1. 2026
+- **Opis:** Android aplikacija bo preko strežniškega dela, implementiranega pri predmetu Spletno programiranje, pošiljala zaznane in simulirane podatke na strežnik. Podatki bodo posredovani v obliki dogodkov, ki bodo vsebovali tip podatka, čas in lokacijo ter se bodo shranjevali v podatkovno bazo za nadaljnjo obdelavo v digitalnem dvojčk
 
 ### 3.2 [Ime načrtovane funkcionalnosti 2]
 - **Predmet:** [Ime predmeta]
