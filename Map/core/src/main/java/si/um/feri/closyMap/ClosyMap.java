@@ -47,6 +47,8 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     private Array<LocationDTO> storeLocations = new Array<>();
     private Array<UserDTO> users = new Array<>();
 
+    private int currentTileZoom = Constants.ZOOM;
+
     private LocationDTO selectedStore = null;
     private UserDTO selectedUser = null;
 
@@ -98,16 +100,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         ApiService.loadUsers(data -> users = data);
 
 
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
-        camera.position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f, 0);
-        camera.viewportWidth = Constants.MAP_WIDTH / 2f;
-        camera.viewportHeight = Constants.MAP_HEIGHT / 2f;
-        camera.zoom = 2f;
-        camera.update();
 
-        uiCamera = new OrthographicCamera();
-        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 
         touchPosition = new Vector3();
@@ -124,7 +117,12 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
                 float oldZoom = camera.zoom;
                 camera.zoom += amountY * 0.1f;
-                camera.zoom = MathUtils.clamp(camera.zoom, 0.5f, 2f);
+                float minZoomX = camera.viewportWidth  / Constants.MAP_WIDTH;
+                float minZoomY = camera.viewportHeight / Constants.MAP_HEIGHT;
+                float minZoom  = Math.max(minZoomX, minZoomY);
+
+                camera.zoom = MathUtils.clamp(camera.zoom, minZoom, 2f);
+
 
                 float ratio = camera.zoom / oldZoom;
                 camera.position.x += (mouse.x - camera.position.x) * (1 - ratio);
@@ -215,7 +213,56 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         layers.add(layer);
 
         tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
+        camera = new OrthographicCamera();
+        camera.setToOrtho(
+            false,
+            Gdx.graphics.getWidth(),
+            Gdx.graphics.getHeight()
+        );
+
+
+//        camera.position.set(
+//            Constants.MAP_WIDTH / 2f,
+//            Constants.MAP_HEIGHT / 2f,
+//            0
+//        );
+
+        camera.zoom = 1f;
+
+        Vector2 centerPixel = MapRasterTiles.getPixelPosition(
+            CENTER_GEOLOCATION.lat,
+            CENTER_GEOLOCATION.lng,
+            beginTile.x,
+            beginTile.y
+        );
+
+        camera.position.set(centerPixel.x, centerPixel.y, 0);
+        camera.update();
+
+        camera.update();
+
+
+        uiCamera = new OrthographicCamera();
+        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
+
+    private void updateTileZoomIfNeeded() {
+        int desiredZoom = currentTileZoom;
+
+        if (camera.zoom < 0.6f) {
+            desiredZoom = 16;
+        } else if (camera.zoom < 1.2f) {
+            desiredZoom = 15;
+        } else {
+            desiredZoom = 14;
+        }
+
+        if (desiredZoom != currentTileZoom) {
+            reloadMapTiles(desiredZoom);
+            currentTileZoom = desiredZoom;
+        }
+    }
+
 
     @Override
     public void render() {
@@ -228,7 +275,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
         popupAlpha = Math.min(1f, popupAlpha + Gdx.graphics.getDeltaTime() * 6f);
-
+        //updateTileZoomIfNeeded();
 
         drawMarkers();
         drawPopup();
@@ -298,6 +345,55 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
 
     }
+
+    //za zdaj ne uporabljam tega, mogoce bomo pol rabli
+    private void reloadMapTiles(int zoom) {
+        try {
+            ZoomXY centerTile = MapRasterTiles.getTileNumber(
+                CENTER_GEOLOCATION.lat,
+                CENTER_GEOLOCATION.lng,
+                zoom
+            );
+
+            mapTiles = MapRasterTiles.getRasterTileZone(centerTile, Constants.NUM_TILES);
+
+            beginTile = new ZoomXY(
+                zoom,
+                centerTile.x - ((Constants.NUM_TILES - 1) / 2),
+                centerTile.y - ((Constants.NUM_TILES - 1) / 2)
+            );
+
+            TiledMapTileLayer layer = new TiledMapTileLayer(
+                Constants.NUM_TILES,
+                Constants.NUM_TILES,
+                MapRasterTiles.TILE_SIZE,
+                MapRasterTiles.TILE_SIZE
+            );
+
+            int index = 0;
+            for (int j = Constants.NUM_TILES - 1; j >= 0; j--) {
+                for (int i = 0; i < Constants.NUM_TILES; i++) {
+                    TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                    cell.setTile(new StaticTiledMapTile(
+                        new TextureRegion(mapTiles[index++])
+                    ));
+                    layer.setCell(i, j, cell);
+                }
+            }
+
+            MapLayers layers = tiledMap.getLayers();
+
+            while (layers.getCount() > 0) {
+                layers.remove(0);
+            }
+
+            layers.add(layer);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void drawPopup() {
         if (selectedStore == null && selectedUser == null) return;
@@ -426,6 +522,9 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     @Override
     public void resize(int width, int height) {
         uiCamera.setToOrtho(false, width, height);
+        camera.viewportWidth = width;
+        camera.viewportHeight = height;
+        camera.update();
     }
 
 
@@ -455,7 +554,12 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
 
 
-        camera.zoom = MathUtils.clamp(camera.zoom, 0.5f, 2f);
+        float minZoomX = camera.viewportWidth  / Constants.MAP_WIDTH;
+        float minZoomY = camera.viewportHeight / Constants.MAP_HEIGHT;
+        float minZoom  = Math.max(minZoomX, minZoomY);
+
+        camera.zoom = MathUtils.clamp(camera.zoom, minZoom, 2f);
+
 
         float effectiveViewportWidth = camera.viewportWidth * camera.zoom;
         float effectiveViewportHeight = camera.viewportHeight * camera.zoom;
