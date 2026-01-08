@@ -18,9 +18,10 @@ class SimulationActivity : AppCompatActivity() {
     private lateinit var networkManager: NetworkManager
 
     private var currentConfig: SimulationConfig? = null
+    private var isSimulationRunning = false
 
     // UI components
-    private lateinit var simulationNameLabel: TextView
+    private lateinit var storeSpinner: Spinner
     private lateinit var rangeDisplay: TextView
     private lateinit var intervalDisplay: TextView
     private lateinit var locationDisplay: TextView
@@ -30,14 +31,20 @@ class SimulationActivity : AppCompatActivity() {
     private lateinit var minValueInput: TextInputEditText
     private lateinit var maxValueInput: TextInputEditText
     private lateinit var intervalInput: TextInputEditText
-    private lateinit var unitInput: TextInputEditText
-    private lateinit var locationInput: TextInputEditText
 
-    private lateinit var enableExtremeCheck: CheckBox
-    private lateinit var extremeThresholdInput: TextInputEditText
-    private lateinit var extremeConditionSpinner: Spinner
+    private lateinit var startStopButton: Button
 
-    private lateinit var activeSimulationsText: TextView
+    // Store data with locations
+    data class Store(val name: String, val address: String, val lat: Double, val lng: Double)
+
+    private val stores = listOf(
+        Store("H&M", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6459),
+        Store("Zara", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6461),
+        Store("C&A", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6463),
+        Store("New Yorker", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6465),
+        Store("Deichmann", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6467),
+        Store("dm", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6469)
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,20 +57,19 @@ class SimulationActivity : AppCompatActivity() {
 
         // Initialize managers
         val serverUrl = getSharedPreferences("ClosyPreferences", MODE_PRIVATE)
-            .getString("server_url", "http://your-server.com/api/sensor-data") ?: ""
+            .getString("server_url", "http://10.0.2.2:5000/api") ?: ""
         networkManager = NetworkManager(serverUrl)
         eventManager = EventManager(this, networkManager)
         simulationManager = SimulationManager(this, eventManager)
 
         initializeViews()
-        setupTemplateButtons()
-        setupExtremeConditionSpinner()
+        setupStoreSpinner()
         setupListeners()
-        updateActiveSimulationsList()
+        loadSavedState()
     }
 
     private fun initializeViews() {
-        simulationNameLabel = findViewById(R.id.simulationNameLabel)
+        storeSpinner = findViewById(R.id.storeSpinner)
         rangeDisplay = findViewById(R.id.rangeDisplay)
         intervalDisplay = findViewById(R.id.intervalDisplay)
         locationDisplay = findViewById(R.id.locationDisplay)
@@ -73,208 +79,175 @@ class SimulationActivity : AppCompatActivity() {
         minValueInput = findViewById(R.id.minValueInput)
         maxValueInput = findViewById(R.id.maxValueInput)
         intervalInput = findViewById(R.id.intervalInput)
-        unitInput = findViewById(R.id.unitInput)
-        locationInput = findViewById(R.id.locationInput)
 
-        enableExtremeCheck = findViewById(R.id.enableExtremeCheck)
-        extremeThresholdInput = findViewById(R.id.extremeThresholdInput)
-        extremeConditionSpinner = findViewById(R.id.extremeConditionSpinner)
-
-        activeSimulationsText = findViewById(R.id.activeSimulationsText)
+        startStopButton = findViewById(R.id.startStopButton)
     }
 
-    private fun setupTemplateButtons() {
-        findViewById<Button>(R.id.templateStoreCapacity).setOnClickListener {
-            loadTemplate(SimulationTemplates.getStoreCapacityTemplate())
-        }
-
-        findViewById<Button>(R.id.templateTemperature).setOnClickListener {
-            loadTemplate(SimulationTemplates.getTemperatureTemplate())
-        }
-
-        findViewById<Button>(R.id.templateHumidity).setOnClickListener {
-            loadTemplate(SimulationTemplates.getHumidityTemplate())
-        }
-
-        findViewById<Button>(R.id.templateStockLevel).setOnClickListener {
-            loadTemplate(SimulationTemplates.getStockLevelTemplate())
-        }
-    }
-
-    private fun setupExtremeConditionSpinner() {
-        val conditions = arrayOf("Večje od", "Manjše od", "Enako")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, conditions)
+    private fun setupStoreSpinner() {
+        val storeNames = stores.map { it.name }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, storeNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        extremeConditionSpinner.adapter = adapter
+        storeSpinner.adapter = adapter
+
+        storeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateDisplays()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     private fun setupListeners() {
         simulationToggle.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
+            if (isChecked && !isSimulationRunning) {
                 startSimulation()
-            } else {
-                stopCurrentSimulation()
+            } else if (!isChecked && isSimulationRunning) {
+                stopSimulation()
             }
-            updateStatusDisplay(isChecked)
         }
 
-        findViewById<Button>(R.id.saveButton).setOnClickListener {
-            saveConfiguration()
-        }
-
-        findViewById<Button>(R.id.stopAllButton).setOnClickListener {
-            stopAllSimulations()
+        startStopButton.setOnClickListener {
+            if (isSimulationRunning) {
+                stopSimulation()
+            } else {
+                startSimulation()
+            }
         }
 
         // Update displays when values change
         minValueInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
         maxValueInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
         intervalInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
-        locationInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
-    }
-
-    private fun loadTemplate(template: SimulationConfig) {
-        currentConfig = template
-
-        // Update name
-        simulationNameLabel.text = template.name
-
-        // Update inputs
-        minValueInput.setText(template.minValue.toString())
-        maxValueInput.setText(template.maxValue.toString())
-        intervalInput.setText(template.intervalMinutes.toString())
-        unitInput.setText(template.unit)
-
-        // Update location
-        val locationText = template.manualLocation?.address ?: "Trenutna lokacija"
-        locationInput.setText(locationText)
-
-        // Update extreme settings
-        enableExtremeCheck.isChecked = template.extremeThreshold != null
-        extremeThresholdInput.setText(template.extremeThreshold?.toString() ?: "")
-
-        when (template.extremeCondition) {
-            ExtremeCondition.GREATER_THAN -> extremeConditionSpinner.setSelection(0)
-            ExtremeCondition.LESS_THAN -> extremeConditionSpinner.setSelection(1)
-            ExtremeCondition.EQUALS -> extremeConditionSpinner.setSelection(2)
-            null -> extremeConditionSpinner.setSelection(0)
-        }
-
-        updateDisplays()
-        Toast.makeText(this, "Naložena predloga: ${template.name}", Toast.LENGTH_SHORT).show()
     }
 
     private fun updateDisplays() {
         try {
-            val minVal = minValueInput.text.toString().toDoubleOrNull() ?: 0.0
-            val maxVal = maxValueInput.text.toString().toDoubleOrNull() ?: 100.0
-            val interval = intervalInput.text.toString().toIntOrNull() ?: 10
-            val unit = unitInput.text.toString()
-            val location = locationInput.text.toString()
+            val minVal = minValueInput.text.toString().toIntOrNull() ?: 0
+            val maxVal = maxValueInput.text.toString().toIntOrNull() ?: 100
+            val interval = intervalInput.text.toString().toIntOrNull() ?: 5
+            val selectedStore = stores[storeSpinner.selectedItemPosition]
 
-            rangeDisplay.text = "From ${String.format("%.2f", minVal)} to ${String.format("%.2f", maxVal)}"
-            intervalDisplay.text = "Every $interval minutes"
-            locationDisplay.text = location
+            rangeDisplay.text = "📊 Od $minVal do $maxVal ljudi"
+            intervalDisplay.text = "⏱️ Vsakih $interval minut"
+            locationDisplay.text = "📍 ${selectedStore.name}, ${selectedStore.address}"
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun saveConfiguration() {
+    private fun startSimulation() {
         try {
             val minVal = minValueInput.text.toString().toDouble()
             val maxVal = maxValueInput.text.toString().toDouble()
             val interval = intervalInput.text.toString().toInt()
-            val unit = unitInput.text.toString()
-            val location = locationInput.text.toString()
+            val selectedStore = stores[storeSpinner.selectedItemPosition]
 
-            val extremeThreshold = if (enableExtremeCheck.isChecked) {
-                extremeThresholdInput.text.toString().toDoubleOrNull()
-            } else null
+            if (minVal >= maxVal) {
+                Toast.makeText(this, "Spodnja meja mora biti manjša od zgornje!", Toast.LENGTH_LONG).show()
+                simulationToggle.isChecked = false
+                return
+            }
 
-            val extremeCondition = if (enableExtremeCheck.isChecked) {
-                when (extremeConditionSpinner.selectedItemPosition) {
-                    0 -> ExtremeCondition.GREATER_THAN
-                    1 -> ExtremeCondition.LESS_THAN
-                    2 -> ExtremeCondition.EQUALS
-                    else -> ExtremeCondition.GREATER_THAN
-                }
-            } else null
+            if (interval <= 0) {
+                Toast.makeText(this, "Interval mora biti večji od 0!", Toast.LENGTH_LONG).show()
+                simulationToggle.isChecked = false
+                return
+            }
 
-            val template = currentConfig ?: SimulationTemplates.getStoreCapacityTemplate()
-
-            currentConfig = template.copy(
+            currentConfig = SimulationConfig(
+                id = "store_simulation",
+                name = "Število ljudi v trgovini ${selectedStore.name}",
+                topic = "store/${selectedStore.name.lowercase().replace(" ", "_")}/people_count",
+                eventType = EventType.USER_ACTION,
                 minValue = minVal,
                 maxValue = maxVal,
+                unit = "ljudi",
                 intervalMinutes = interval,
-                unit = unit,
                 manualLocation = ManualLocation(
-                    address = location,
-                    latitude = template.manualLocation?.latitude ?: 46.5547,
-                    longitude = template.manualLocation?.longitude ?: 15.6466
+                    address = "${selectedStore.name}, ${selectedStore.address}",
+                    latitude = selectedStore.lat,
+                    longitude = selectedStore.lng
                 ),
-                extremeThreshold = extremeThreshold,
-                extremeCondition = extremeCondition
+                valueType = ValueType.RANDOM,
+                descriptionTemplate = DescriptionTemplate.PEOPLE_COUNT,
+                enabled = true
             )
 
-            updateDisplays()
-            Toast.makeText(this, "Nastavitve shranjene", Toast.LENGTH_SHORT).show()
+            currentConfig?.let {
+                simulationManager.startSimulation(it)
+                isSimulationRunning = true
+                updateStatusDisplay(true)
+                startStopButton.text = "Ustavi simulacijo"
+                startStopButton.backgroundTintList = getColorStateList(android.R.color.holo_red_light)
+                saveState()
+                Toast.makeText(this, "✅ Simulacija zagnana za ${selectedStore.name}", Toast.LENGTH_SHORT).show()
+            }
         } catch (e: Exception) {
-            Toast.makeText(this, "Napaka pri shranjevanju: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun startSimulation() {
-        val config = currentConfig
-        if (config == null) {
-            Toast.makeText(this, "Najprej izberite predlogo", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Napaka: ${e.message}", Toast.LENGTH_LONG).show()
             simulationToggle.isChecked = false
-            return
         }
-
-        simulationManager.startSimulation(config)
-        Toast.makeText(this, "Simulacija zagnana: ${config.name}", Toast.LENGTH_SHORT).show()
-        updateActiveSimulationsList()
     }
 
-    private fun stopCurrentSimulation() {
+    private fun stopSimulation() {
         currentConfig?.let {
             simulationManager.stopSimulation(it.id)
-            Toast.makeText(this, "Simulacija ustavljena", Toast.LENGTH_SHORT).show()
-            updateActiveSimulationsList()
+            isSimulationRunning = false
+            updateStatusDisplay(false)
+            startStopButton.text = "Zaženi simulacijo"
+            startStopButton.backgroundTintList = getColorStateList(android.R.color.holo_green_light)
+            saveState()
+            Toast.makeText(this, "⏹️ Simulacija ustavljena", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun stopAllSimulations() {
-        simulationManager.stopAllSimulations()
         simulationToggle.isChecked = false
-        Toast.makeText(this, "Vse simulacije ustavljene", Toast.LENGTH_SHORT).show()
-        updateActiveSimulationsList()
     }
 
     private fun updateStatusDisplay(isEnabled: Boolean) {
         if (isEnabled) {
-            statusText.text = "Enabled"
+            statusText.text = "Omogočeno"
             statusText.setTextColor(getColor(android.R.color.holo_green_light))
         } else {
-            statusText.text = "Disabled"
+            statusText.text = "Onemogočeno"
             statusText.setTextColor(getColor(android.R.color.holo_red_light))
         }
     }
 
-    private fun updateActiveSimulationsList() {
-        val activeSimulations = simulationManager.getActiveSimulations()
-        if (activeSimulations.isEmpty()) {
-            activeSimulationsText.text = "Ni aktivnih simulacij"
-        } else {
-            activeSimulationsText.text = "Aktivne simulacije (${activeSimulations.size}):\n" +
-                    activeSimulations.joinToString("\n") { "• Simulacija" }
+    private fun saveState() {
+        val prefs = getSharedPreferences("SimulationPreferences", MODE_PRIVATE)
+        prefs.edit().apply {
+            putBoolean("is_running", isSimulationRunning)
+            putInt("store_index", storeSpinner.selectedItemPosition)
+            putString("min_value", minValueInput.text.toString())
+            putString("max_value", maxValueInput.text.toString())
+            putString("interval", intervalInput.text.toString())
+            apply()
+        }
+    }
+
+    private fun loadSavedState() {
+        val prefs = getSharedPreferences("SimulationPreferences", MODE_PRIVATE)
+        val wasRunning = prefs.getBoolean("is_running", false)
+        val storeIndex = prefs.getInt("store_index", 0)
+        val minValue = prefs.getString("min_value", "0") ?: "0"
+        val maxValue = prefs.getString("max_value", "100") ?: "100"
+        val interval = prefs.getString("interval", "5") ?: "5"
+
+        storeSpinner.setSelection(storeIndex)
+        minValueInput.setText(minValue)
+        maxValueInput.setText(maxValue)
+        intervalInput.setText(interval)
+        updateDisplays()
+
+        if (wasRunning) {
+            // Restart simulation
+            simulationToggle.isChecked = true
+            startSimulation()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         // Don't stop simulations on destroy - they should continue in background
+        // State is saved in saveState()
     }
 }
 
