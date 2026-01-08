@@ -44,6 +44,7 @@ class EventManager(
         description: String,
         metadata: Map<String, Any> = emptyMap(),
         customTopic: String? = null,
+        customLocation: LocationData? = null,
         callback: ((Boolean, String?) -> Unit)? = null
     ) {
         scope.launch {
@@ -53,7 +54,8 @@ class EventManager(
                     title = title,
                     description = description,
                     metadata = metadata,
-                    customTopic = customTopic
+                    customTopic = customTopic,
+                    customLocation = customLocation
                 )
 
                 // Add to history
@@ -82,13 +84,14 @@ class EventManager(
         title: String,
         description: String,
         metadata: Map<String, Any>,
-        customTopic: String?
+        customTopic: String?,
+        customLocation: LocationData? = null
     ): DigitalTwinEvent {
         return DigitalTwinEvent(
             eventId = UUID.randomUUID().toString(),
             timestamp = System.currentTimeMillis(),
             topic = customTopic ?: eventType.topic,
-            location = locationProvider.getCurrentLocation(),
+            location = customLocation ?: locationProvider.getCurrentLocation(),
             eventType = eventType.name,
             title = title,
             description = description,

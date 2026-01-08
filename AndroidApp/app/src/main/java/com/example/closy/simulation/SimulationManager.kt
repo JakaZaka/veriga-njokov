@@ -1,6 +1,7 @@
 package com.example.closy.simulation
 
 import android.content.Context
+import android.util.Log
 import com.example.closy.events.EventManager
 import com.example.closy.model.EventType
 import com.example.closy.model.LocationData
@@ -17,12 +18,18 @@ class SimulationManager(
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val activeSimulations = mutableMapOf<String, Job>()
 
+    companion object {
+        private const val TAG = "SimulationManager"
+    }
+
     /**
      * Start a simulation
      */
     fun startSimulation(config: SimulationConfig) {
         // Stop existing simulation with same ID if any
         stopSimulation(config.id)
+
+        Log.d(TAG, "Starting simulation: ${config.name}")
 
         val job = scope.launch {
             while (isActive) {
@@ -51,16 +58,31 @@ class SimulationManager(
                 // Add custom metadata
                 metadata.putAll(config.customMetadata)
 
+                // Convert manual location to LocationData if available
+                val eventLocation = config.manualLocation?.let {
+                    LocationData(
+                        latitude = it.latitude,
+                        longitude = it.longitude,
+                        altitude = null,
+                        accuracy = null
+                    )
+                }
+
+                Log.d(TAG, "Publishing event: $title, value: $value, location: ${eventLocation?.latitude}, ${eventLocation?.longitude}")
+
                 // Publish event
                 eventManager.publishEvent(
                     eventType = config.eventType,
                     title = title,
                     description = description,
                     metadata = metadata,
-                    customTopic = config.topic
+                    customTopic = config.topic,
+                    customLocation = eventLocation
                 ) { success, message ->
-                    if (!success) {
-                        println("Simulation publish failed: $message")
+                    if (success) {
+                        Log.d(TAG, "✅ Event published successfully: $title")
+                    } else {
+                        Log.e(TAG, "❌ Event publish failed: $message")
                     }
                 }
 
@@ -70,6 +92,7 @@ class SimulationManager(
         }
 
         activeSimulations[config.id] = job
+        Log.d(TAG, "Simulation started: ${config.name}, interval: ${config.intervalMinutes} minutes")
     }
 
     /**

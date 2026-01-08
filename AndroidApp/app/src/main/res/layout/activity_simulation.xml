@@ -49,7 +49,7 @@
                     android:layout_height="1dp" />
             </LinearLayout>
 
-            <!-- Template Selection -->
+            <!-- Store Selection -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -67,54 +67,29 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Predloge simulacij"
-                        android:textSize="18sp"
+                        android:text="👥 Simulacija števila ljudi v trgovini"
+                        android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        android:layout_marginBottom="12dp" />
+                        android:textColor="#FF6B35"
+                        android:layout_marginBottom="16dp" />
 
-                    <Button
-                        android:id="@+id/templateStoreCapacity"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="👥 Število ljudi v trgovini"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#FF6B35"
-                        style="@style/Widget.MaterialComponents.Button"
+                        android:text="Izberi trgovino"
+                        android:textColor="#AAAAAA"
                         android:layout_marginBottom="8dp" />
 
-                    <Button
-                        android:id="@+id/templateTemperature"
+                    <Spinner
+                        android:id="@+id/storeSpinner"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="🌡️ Temperatura (FERI primer)"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#FF6B35"
-                        style="@style/Widget.MaterialComponents.Button"
-                        android:layout_marginBottom="8dp" />
-
-                    <Button
-                        android:id="@+id/templateHumidity"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="💧 Vlažnost"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#FF6B35"
-                        style="@style/Widget.MaterialComponents.Button"
-                        android:layout_marginBottom="8dp" />
-
-                    <Button
-                        android:id="@+id/templateStockLevel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="📦 Zaloga artiklov"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#FF6B35"
-                        style="@style/Widget.MaterialComponents.Button" />
+                        android:layout_height="48dp"
+                        android:background="@android:drawable/btn_dropdown"
+                        android:backgroundTint="#FF6B35" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Simulation Configuration -->
+            <!-- Current Configuration Display -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -129,72 +104,47 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Name with icon -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/simulationNameLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:id="@+id/simulationNameLabel"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Temperature"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="#FF6B35" />
-                    </LinearLayout>
+                        android:text="Število ljudi v trgovini"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:layout_marginBottom="12dp" />
 
                     <!-- Range Display -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/rangeDisplay"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="📊 "
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:id="@+id/rangeDisplay"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="From -20.00 to 36.00"
-                            android:textSize="16sp"
-                            android:textColor="#FF6B35" />
-                    </LinearLayout>
+                        android:text="📊 Od 0 do 100 ljudi"
+                        android:textSize="16sp"
+                        android:textColor="#FF6B35"
+                        android:layout_marginBottom="4dp" />
 
                     <!-- Interval Display -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/intervalDisplay"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="⏱️ "
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:id="@+id/intervalDisplay"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Every 10 minutes"
-                            android:textSize="16sp"
-                            android:textColor="#FF6B35" />
-                    </LinearLayout>
+                        android:text="⏱️ Vsakih 5 minut"
+                        android:textSize="16sp"
+                        android:textColor="#FF6B35"
+                        android:layout_marginBottom="4dp" />
 
                     <!-- Location Display -->
+                    <TextView
+                        android:id="@+id/locationDisplay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📍 Izberi trgovino"
+                        android:textSize="16sp"
+                        android:textColor="#FF6B35"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Enable/Disable Toggle -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -202,33 +152,10 @@
                         android:gravity="center_vertical">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="📍 "
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:id="@+id/locationDisplay"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Koroška cesta 46, Maribor"
-                            android:textSize="16sp"
-                            android:textColor="#FF6B35" />
-                    </LinearLayout>
-
-                    <!-- Enable/Disable Toggle -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="16dp">
-
-                        <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Status"
+                            android:text="Status simulacije"
                             android:textSize="16sp"
                             android:textColor="#FFFFFF" />
 
@@ -236,9 +163,9 @@
                             android:id="@+id/statusText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Enabled"
+                            android:text="Onemogočeno"
                             android:textSize="16sp"
-                            android:textColor="#4CAF50"
+                            android:textColor="#F44336"
                             android:layout_marginEnd="16dp" />
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -250,7 +177,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Detailed Configuration -->
+            <!-- Settings Configuration -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -268,7 +195,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Podrobne nastavitve"
+                        android:text="Nastavitve simulacije"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="#FFFFFF"
@@ -278,7 +205,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Minimalna vrednost"
+                        android:hint="Spodnja meja (število ljudi)"
                         android:layout_marginBottom="8dp"
                         android:textColorHint="#AAAAAA"
                         app:boxStrokeColor="#FF6B35"
@@ -289,8 +216,8 @@
                             android:id="@+id/minValueInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberSigned|numberDecimal"
-                            android:text="-20.0"
+                            android:inputType="number"
+                            android:text="0"
                             android:textColor="#FFFFFF" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -298,7 +225,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Maksimalna vrednost"
+                        android:hint="Zgornja meja (število ljudi)"
                         android:layout_marginBottom="8dp"
                         android:textColorHint="#AAAAAA"
                         app:boxStrokeColor="#FF6B35"
@@ -309,8 +236,8 @@
                             android:id="@+id/maxValueInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberSigned|numberDecimal"
-                            android:text="36.0"
+                            android:inputType="number"
+                            android:text="100"
                             android:textColor="#FFFFFF" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -319,7 +246,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Interval (minute)"
-                        android:layout_marginBottom="8dp"
                         android:textColorHint="#AAAAAA"
                         app:boxStrokeColor="#FF6B35"
                         app:hintTextColor="#FF6B35"
@@ -330,181 +256,22 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="number"
-                            android:text="10"
-                            android:textColor="#FFFFFF" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Unit -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Enota"
-                        android:layout_marginBottom="8dp"
-                        android:textColorHint="#AAAAAA"
-                        app:boxStrokeColor="#FF6B35"
-                        app:hintTextColor="#FF6B35"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/unitInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text"
-                            android:text="°C"
-                            android:textColor="#FFFFFF" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Location Address -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Lokacija"
-                        android:textColorHint="#AAAAAA"
-                        app:boxStrokeColor="#FF6B35"
-                        app:hintTextColor="#FF6B35"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/locationInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text"
-                            android:text="Koroška cesta 46, Maribor"
+                            android:text="5"
                             android:textColor="#FFFFFF" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Extreme Event Configuration -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- Action Button -->
+            <Button
+                android:id="@+id/startStopButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="8dp"
-                app:cardBackgroundColor="#363636">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="⚠️ Ekstremni dogodki"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        android:layout_marginBottom="12dp" />
-
-                    <CheckBox
-                        android:id="@+id/enableExtremeCheck"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Omogoči avtomatsko obvestilo"
-                        android:textColor="#FFFFFF"
-                        android:layout_marginBottom="8dp" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Prag za opozorilo"
-                        android:layout_marginBottom="8dp"
-                        android:textColorHint="#AAAAAA"
-                        app:boxStrokeColor="#FF6B35"
-                        app:hintTextColor="#FF6B35"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/extremeThresholdInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberSigned|numberDecimal"
-                            android:text="50"
-                            android:textColor="#FFFFFF" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Pogoj"
-                        android:textColor="#AAAAAA"
-                        android:layout_marginBottom="4dp" />
-
-                    <Spinner
-                        android:id="@+id/extremeConditionSpinner"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="@android:drawable/btn_dropdown"
-                        android:backgroundTint="#FF6B35" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Active Simulations List -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="8dp"
-                app:cardBackgroundColor="#363636">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Aktivne simulacije"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:id="@+id/activeSimulationsText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Ni aktivnih simulacij"
-                        android:textSize="14sp"
-                        android:textColor="#AAAAAA" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Action Buttons -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <Button
-                    android:id="@+id/saveButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Shrani nastavitve"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#4CAF50"
-                    android:layout_marginEnd="8dp"
-                    style="@style/Widget.MaterialComponents.Button" />
-
-                <Button
-                    android:id="@+id/stopAllButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Ustavi vse"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#F44336"
-                    android:layout_marginStart="8dp"
-                    style="@style/Widget.MaterialComponents.Button" />
-            </LinearLayout>
+                android:text="Zaženi simulacijo"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#4CAF50"
+                android:textSize="16sp"
+                style="@style/Widget.MaterialComponents.Button" />
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
