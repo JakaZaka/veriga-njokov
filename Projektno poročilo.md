@@ -183,3 +183,15 @@ Model, ki zna prešteti število ljudi na sliki (torej v trgovini v našem prime
 - **Odgovoren član:** Anđelija Lazarević
 - **Okvirni rok:** 10.1.2026
 - **Opis:** Za izboljšanje zmogljivosti bo implementirano lokalno shranjevanje pogosto uporabljenih rastrskih ploščic zemljevida. Ob izrisu zemljevida se bo preverilo, ali je posamezna ploščica že shranjena lokalno. Če ploščica ni prisotna, se bo pridobila prek API-ja in nato shranila za nadaljnjo uporabo. Ta pristop bo zmanjšal število ponovnih zahtevkov na strežnik in pospešil začetni ter ponovni izris zemljevida.
+
+### 3.9 Izbira lokacije dogodka na zemljevidu
+- **Predmet:** PORA
+- **Odgovoren član:** Anđelija Lazarević
+- **Okvirni rok:** 15.1.2026
+- **Opis:** Android aplikacija bo omogočala izbiro lokacije dogodka neposredno na zemljevidu. Uporabnik bo lahko s klikom ali daljšim pritiskom na zemljevid določil lokacijo, ki se bo shranila kot koordinata dogodka. Izbrana lokacija bo uporabljena pri ročno vnesenih, zaznanih in simuliranih dogodkih ter bo skupaj z ostalimi podatki poslana na strežnik.
+
+### 3.10 Optimizacija izrisa zemljevida z lokalnim shranjevanjem ploščic
+- **Predmet:** PORA
+- **Odgovoren član:** Nela Copot
+- **Okvirni rok:** 15.1.2026
+- **Opis:** V Android aplikaciji bo implementirana logika za samodejno zaznavo ekstremnih dogodkov na podlagi vnaprej določenih pragov (npr. zelo visoka temperatura ali velika zasedenost trgovine). Ko bo zaznan ekstremni dogodek, bo aplikacija brez posredovanja uporabnika samodejno ustvarila in poslala dogodek na strežnik, skupaj s časom in lokacijo zaznave.
