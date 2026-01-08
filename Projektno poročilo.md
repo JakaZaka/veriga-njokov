@@ -94,6 +94,27 @@ Naredila algoritem za rudarjenje blokov, ga paralelizirala z mpi tako da si poš
 
 
 
+### 2.4 Nastavitve aplikacije
+- **Predmet:** PORA
+- **Odgovoren član:** Nela Copot
+- **Commit(i):** 
+  - https://github.com/JakaZaka/veriga-njokov/commit/a4f5f4f620e0f45247ad9b1a1526e43afc6a27d7
+- **Opis:** Dodan settings screen, z nastavitvami za onemogočanje obvestil, izbira jezika in izbira med dnevnim in nočnim načinom
+- **Screenshoti:**
+  <img width="381" height="638" alt="image" src="https://github.com/user-attachments/assets/66ed357a-d5f1-4e2b-82a2-16f531d46223" />
+
+
+
+### 2.4 Simuliranje senzorjev
+- **Predmet:** PORA
+- **Odgovoren član:** Anđelija Lazarević
+- **Commit(i):** 
+  - https://github.com/JakaZaka/veriga-njokov/commit/b674ba55cf20e22225c9a21a0b51646607138dec
+- **Opis:** Simuliranje števila ljudi v trgovini, podatek se na vsak interval časa preko zalednega dela spletne aplikacije shrani v podatkovno bazo.
+- **Screenshoti:**
+  <img width="373" height="742" alt="image" src="https://github.com/user-attachments/assets/9e955a7b-f812-4a19-a3e4-864f94d38b00" />
+
+
 ---
 
 ## 3. Načrtovane funkcionalnosti (še neimplementirane)
