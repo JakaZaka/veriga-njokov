@@ -76,29 +76,47 @@ Naredila algoritem za rudarjenje blokov, ga paralelizirala z mpi tako da si poš
 - **Screenshoti:**
 
   Med rudarjenjem:
-  ![Screenshot funkcionalnosti 2](images/screenshot1.png)
+  ![Screenshot funkcionalnosti 3](images/screenshot1.png)
   Po koncu rudanjenja:
 
 
-  ![Screenshot funkcionalnosti 2](images/screenshot2.png)
+  ![Screenshot funkcionalnosti 3](images/screenshot2.png)
   
   Na podlagi tega se bodo potem delale analize, pohitritve (poročilo pohitritev ipd. pri predmetu)
 
   Povezava z PORA aplikacijo:
 
   Po zagonu:
-  ![Screenshot funkcionalnosti 2](images/screenshot3.png)
+  ![Screenshot funkcionalnosti 3](images/screenshot3.png)
 
   Po poslanem JSON, ki opisuje izjemen dogodek:
-  ![Screenshot funkcionalnosti 2](images/screenshot4.png)
+  ![Screenshot funkcionalnosti 3](images/screenshot4.png)
 
 
+
+### 2.4 Štetje ljudi na sliki in prva verzija modela učenja za prepoznavo tipa oblačila
+- **Predmet:** URVRV (Uvod v računalniški vid in razpoznavo vzorcev)
+- **Odgovoren član:** Nela Copot
+- **Commit(i):** 
+  - [Commit 1](https://github.com/JakaZaka/veriga-njokov/commit/ecab4e7d8d1af0745c2a609a4554d92688b7b801)
+  - [Commit 2](https://github.com/JakaZaka/veriga-njokov/commit/bb4ed3219dc6054549a4521dd9def4350bea47db)
+
+- **Opis:**
+
+Model, ki zna prešteti število ljudi na sliki (torej v trgovini v našem primeru), narejen s pomočjo Yolov8n modela. Nato še začetek dela na modelu razpoznave kateri tip oblačila je na sliki (majica, hlače, čevlji...) s pomočjo Fashion-MNIST dataset, ki je del Pythonove tensorflow knjižnice.
+
+- **Screenshoti:**
+  Prvi model:
+  ![Screenshot funkcionalnosti 4](images/primer_1_annotated.jpg)
+
+  Osnova drugega modela:
+  ![Screenshot funkcionalnosti 4](images/screenshot5.png)
 
 ---
 
 ## 3. Načrtovane funkcionalnosti (še neimplementirane)
 
-### 3.1 [Ime načrtovane funkcionalnosti 1]
+### 3.1 PORA aplikacija
 - **Predmet:** PORA
 - **Odgovoren član:** Jaka Počkaj
 - **Okvirni rok:** 15. 1. 2026
@@ -116,8 +134,14 @@ Naredila algoritem za rudarjenje blokov, ga paralelizirala z mpi tako da si poš
 - **Okvirni rok:** 15.1.2026
 - **Opis:** Uporabniku bo na zemljevidu omogočena izbira dneva in ure (npr. sreda ob 17. uri). Na podlagi do sedaj zbranih podatkov se bo pri posameznih trgovinah prikazalo predvideno število ljudi v izbranem časovnem obdobju z uporabo grafičnih simbolov.
 
-### 3.4 [Ime načrtovane funkcionalnosti 3]
-- **Predmet:** [Ime predmeta]
-- **Odgovoren član:** [Ime Priimek]
-- **Okvirni rok:** [Datum]
-- **Opis:** [Kratek opis kaj bo funkcionalnost počela]
+### 3.4 Primerjava pohitritev in povezava s PORA - blockchain
+- **Predmet:** PIPR
+- **Odgovoren član:** Jaka Počkaj
+- **Okvirni rok:** 15.1.2026
+- **Opis:** Naredi se poročilo in podrobna analiza o faktorju pohitritve glede na število niti v blockchain-u z MPI. Poveže se s PORO. Izjemni dogodki se shranjujejo v blockchain.
+
+### 3.5 Dokonča se model za razpoznavo oblačil tako da dela na slikah, ki jih zajame uporabnik in izdelava spletne storitve
+- **Predmet:** URVRV
+- **Odgovoren član:** Andjelija Lazarević
+- **Okvirni rok:** 18.1.2026
+- **Opis:** Zaenkrat je narejen samo osnovni model. Potrebno ga je prilagoditi, da bo deloval za katerokoli sliko oblačila. Po možnosti tudi tako, da bo prepoznal barvo. Izdela se tudi spletna storitev pri tem predmetu.
