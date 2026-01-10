@@ -5,6 +5,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -30,6 +32,10 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisDialog;
+import com.kotcrab.vis.ui.widget.VisLabel;
 
 
 import java.io.IOException;
@@ -69,7 +75,6 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     private TiledMapRenderer tiledMapRenderer;
     private OrthographicCamera camera;
 
-    private OrthographicCamera uiCamera;
 
 
     private Texture[] mapTiles;
@@ -86,6 +91,11 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     // test marker
     private final Geolocation MARKER_GEOLOCATION = new Geolocation(46.559070, 15.638100);
 
+    //UI
+    private Stage uiStage;
+    private VisDialog infoDialog;
+
+
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();
@@ -95,6 +105,11 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         batch = new SpriteBatch();
         font = new BitmapFont(Gdx.files.internal("font/textFont.fnt"));
 
+        VisUI.load(VisUI.SkinScale.X2);
+
+        uiStage = new Stage(
+            new ExtendViewport(1280, 720)
+        );
 
         ApiService.loadStoreLocations(data -> storeLocations = data);
         ApiService.loadUsers(data -> users = data);
@@ -108,7 +123,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         InputMultiplexer multiplexer = new InputMultiplexer();
 
         multiplexer.addProcessor(new GestureDetector(this));
-
+        multiplexer.addProcessor(uiStage);
         multiplexer.addProcessor(new InputAdapter() {
             @Override
             public boolean scrolled(float amountX, float amountY) {
@@ -158,6 +173,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
                     if (pos.dst(world.x, world.y) < clickRadius) {
                         selectedStore = loc;
+                        showInfoPopup();
                         return true;
                     }
                 }
@@ -175,6 +191,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
                     if (pos.dst(world.x, world.y) < clickRadius) {
                         selectedUser = user;
+                        showInfoPopup();
                         return true;
                     }
                 }
@@ -241,9 +258,6 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
         camera.update();
 
-
-        uiCamera = new OrthographicCamera();
-        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     private void updateTileZoomIfNeeded() {
@@ -278,7 +292,8 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         //updateTileZoomIfNeeded();
 
         drawMarkers();
-        drawPopup();
+        uiStage.act(Gdx.graphics.getDeltaTime());
+        uiStage.draw();
 //        drawStores();
 //        drawUsers();
     }
@@ -395,67 +410,49 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     }
 
 
-    private void drawPopup() {
-        if (selectedStore == null && selectedUser == null) return;
+    private void showInfoPopup() {
+        if (infoDialog != null) {
+            infoDialog.remove();
+        }
 
-        float width =900;
-        float height = 250;
-        float padding = 25;
+        infoDialog = new VisDialog("Location info");
+        infoDialog.setModal(false);
+        infoDialog.setMovable(true);
+        infoDialog.setResizable(false);
 
-        float margin = 20f;
-
-        float x = margin;
-        float y = height + margin;
-
-
-
-        shapeRenderer.setProjectionMatrix(uiCamera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(1f, 0.84f, 0.8f, 0.95f*popupAlpha);
-        shapeRenderer.rect(x, y - height, width, height);
-        shapeRenderer.end();
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(1f, 1f, 1f, 0.4f*popupAlpha);
-        shapeRenderer.rect(x, y - height, width, height);
-        shapeRenderer.end();
-
-        font.setColor(1f, 1f, 1f, popupAlpha);
-        batch.setProjectionMatrix(uiCamera.combined);
-        batch.begin();
-
-        float textY = y - padding;
+        Table content = infoDialog.getContentTable();
+        content.defaults().pad(6).left();
 
         if (selectedStore != null) {
+            content.add(new VisLabel("Store:")).row();
+            content.add(new VisLabel(selectedStore.clothingStoreId.name)).row();
 
-            font.draw(batch, selectedStore.clothingStoreId.name, x + padding, textY);
-            textY -= 47;
+            content.add(new VisLabel("Website:")).row();
+            content.add(new VisLabel(selectedStore.clothingStoreId.website)).row();
 
-            font.draw(batch, "Website:", x + padding, textY);
-            textY -= 45;
-
-            font.draw(batch, selectedStore.clothingStoreId.website, x + padding, textY);
-            textY -= 45;
-
-            font.draw(batch, "Address:", x + padding, textY);
-            textY -= 45;
-
-            font.draw(batch, selectedStore.address, x + padding, textY);
+            content.add(new VisLabel("Address:")).row();
+            content.add(new VisLabel(selectedStore.address)).row();
         }
 
         if (selectedUser != null) {
-            font.draw(batch, selectedUser.username, x + padding, textY);
-            textY -= 47;
+            content.add(new VisLabel("User:")).row();
+            content.add(new VisLabel(selectedUser.username)).row();
 
-            font.draw(batch, "Email: " + selectedUser.email, x + padding, textY);
-            textY -= 45;
+            content.add(new VisLabel("Email:")).row();
+            content.add(new VisLabel(selectedUser.email)).row();
 
             if (selectedUser.location != null) {
-                font.draw(batch, "Address: " + selectedUser.location.address, x + padding, textY);
+                content.add(new VisLabel("Address:")).row();
+                content.add(new VisLabel(selectedUser.location.address)).row();
             }
         }
 
-        batch.end();
+        infoDialog.button("Close");
+        infoDialog.pack();
+        infoDialog.show(uiStage);
+
+
+        infoDialog.setPosition(20, 20);
     }
 
 
@@ -521,7 +518,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     }
     @Override
     public void resize(int width, int height) {
-        uiCamera.setToOrtho(false, width, height);
+        uiStage.getViewport().update(width, height, true);
         camera.viewportWidth = width;
         camera.viewportHeight = height;
         camera.update();

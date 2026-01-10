@@ -5,6 +5,7 @@ dependencies {
   api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
   implementation "org.json:json:20240303"
+  implementation "com.kotcrab.vis:vis-ui:1.5.3"
 
 
   if(enableGraalNative == 'true') {
