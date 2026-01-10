@@ -1,5 +1,7 @@
 package si.um.feri.closyMap.utils;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -102,7 +104,11 @@ public class MapRasterTiles {
         }
 
         for (int i = 0; i < size * size; i++) {
-            array[i] = getRasterTile(zoomXY.zoom, zoomXY.x + factorX[i], zoomXY.y + factorY[i]);
+            array[i] = getRasterTileCached(
+                zoomXY.zoom,
+                zoomXY.x + factorX[i],
+                zoomXY.y + factorY[i]
+            );
             System.out.println(zoomXY.zoom + "/" + (zoomXY.x + factorX[i]) + "/" + (zoomXY.y + factorY[i]));
         }
         return array;
@@ -306,4 +312,28 @@ public class MapRasterTiles {
             return null;
         }
     }
+
+    public static Texture getRasterTileCached(int zoom, int x, int y) throws IOException {
+
+        String path = "tiles/" + tilesetId + "/" + zoom + "/" + x + "/" + y + ".png";
+        FileHandle file = Gdx.files.local(path);
+
+        // tile že obstaja → naloži iz diska
+        if (file.exists()) {
+            System.out.println("Loaded tile from cache: " + path);
+            return new Texture(file);
+        }
+
+        // ne obstaja → prenesi iz API-ja
+        System.out.println("Downloading tile: " + path);
+        URL url = new URL(mapServiceUrl + tilesetId + "/" + zoom + "/" + x + "/" + y + format + token);
+        ByteArrayOutputStream bis = fetchTile(url);
+
+
+        file.parent().mkdirs();
+        file.writeBytes(bis.toByteArray(), false);
+
+        return new Texture(file);
+    }
+
 }
