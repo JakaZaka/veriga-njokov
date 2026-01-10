@@ -35,6 +35,7 @@ const enumRoutes = require('./routes/enumRoutes');
 const locationRoutes = require('./routes/locationRoutes'); 
 const adminRoutes = require('./routes/adminRoutes');
 const desktopAdminRoutes = require('./routes/desktopAdminRoutes');
+const sensorEventRoutes = require('./routes/sensorEventRoutes');
 
 
 var session = require('express-session');
@@ -64,6 +65,7 @@ app.use('/api/weather', weatherRoutes);
 app.use('/api/stores', clothingStoreRoutes); 
 app.use('/api/enums', enumRoutes); 
 app.use('/api/locations', locationRoutes);
+app.use('/api/events', sensorEventRoutes);
 /* Start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
