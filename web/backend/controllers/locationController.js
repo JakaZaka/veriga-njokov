@@ -111,21 +111,56 @@ const createLocation = async (req, res) => {
 // @route   PUT /api/stores/:id
 // @access  Private/Admin
 const updateLocation = async (req, res) => {
+  console.log('updateLocation HIT', req.params.id, req.body);
   try {
     const location = await Location.findById(req.params.id);
-
     if (!location) {
-      return res.status(404).json({ message: 'Clothing store not found' });
+      return res.status(404).json({ message: 'Location not found' });
     }
 
-    // Update fields
-    Object.keys(req.body).forEach((key) => {
-      location[key] = req.body[key];
-    });
+    // Merge NEW values with OLD values
+    const newAddress = req.body.address ?? location.address;
+    const newCity    = req.body.city    ?? location.city;
+    const newCountry = req.body.country ?? location.country;
+
+    // Assign text fields
+    location.address = newAddress;
+    location.city = newCity;
+    location.country = newCountry;
+
+    // ALWAYS re-geocode if any location field changed
+    if (req.body.address || req.body.city || req.body.country) {
+      const fullAddress = `${newAddress}, ${newCity}, ${newCountry}`;
+
+      console.log('[GEOCODE] Updating location:', fullAddress);
+
+      const geoRes = await geocoder.geocode(fullAddress);
+
+      if (!geoRes || geoRes.length === 0) {
+        return res.status(400).json({
+          message: 'Failed to geocode updated address'
+        });
+      }
+
+      location.coordinates = {
+        type: 'Point',
+        coordinates: [
+          geoRes[0].longitude,
+          geoRes[0].latitude
+        ]
+      };
+
+      console.log('[GEOCODE] New coords:',
+        geoRes[0].latitude,
+        geoRes[0].longitude
+      );
+    }
 
     const updatedLocation = await location.save();
     res.json(updatedLocation);
+
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: error.message });
   }
 };
