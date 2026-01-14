@@ -5,8 +5,12 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -36,6 +40,9 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.kotcrab.vis.ui.widget.VisTextField;
 
 
 import java.io.IOException;
@@ -95,6 +102,9 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     private Stage uiStage;
     private VisDialog infoDialog;
 
+    private VisTable storePanel;
+    private boolean storePanelVisible = false;
+
 
     @Override
     public void create() {
@@ -105,13 +115,19 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         batch = new SpriteBatch();
         font = new BitmapFont(Gdx.files.internal("font/textFont.fnt"));
 
-        VisUI.load(VisUI.SkinScale.X2);
+        VisUI.load(VisUI.SkinScale.X1);
 
         uiStage = new Stage(
             new ExtendViewport(1280, 720)
         );
+        createToggleStoreButton();
 
-        ApiService.loadStoreLocations(data -> storeLocations = data);
+        ApiService.loadStoreLocations(data -> {
+            storeLocations = data;
+
+            if (storePanel != null) storePanel.remove();
+            createStorePanel();
+        });
         ApiService.loadUsers(data -> users = data);
 
 
@@ -151,16 +167,38 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
+                Actor hit = uiStage.hit(screenX, uiStage.getViewport().getScreenHeight() - screenY, true);
+                if (hit != null) {
+                    return false;
+                }
+
                 Vector3 world = new Vector3(screenX, screenY, 0);
                 camera.unproject(world);
+
+                if (infoDialog != null) {
+                    infoDialog.remove();
+                    infoDialog = null;
+                }
+
                 popupPos.set(world.x + 20, world.y + 20);
                 popupAlpha = 0f;
 
 
-                selectedStore = null;
-                selectedUser = null;
+                //selectedStore = null;
+                //selectedUser = null;
 
                 float clickRadius = 45f * camera.zoom;
+
+                if (storePanelVisible) {
+                    toggleStorePanel();
+                }
+                if(selectedStore != null){
+                    selectedStore = null;
+                }
+                if (selectedUser != null){
+                    selectedUser = null;
+                }
+
 
                 // STORES
                 for (LocationDTO loc : storeLocations) {
@@ -173,6 +211,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
                     if (pos.dst(world.x, world.y) < clickRadius) {
                         selectedStore = loc;
+                        selectedUser = null;
                         showInfoPopup();
                         return true;
                     }
@@ -190,6 +229,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
                     );
 
                     if (pos.dst(world.x, world.y) < clickRadius) {
+                        selectedStore = null;
                         selectedUser = user;
                         showInfoPopup();
                         return true;
@@ -310,6 +350,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
             beginTile.y
         );
 
+
         batch.draw(
             currentLocationIcon,
             marker.x - iconSize / 2,
@@ -324,10 +365,21 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
         // STORES
         for (LocationDTO loc : storeLocations) {
+            if (loc.coordinates == null || loc.coordinates.coordinates == null) {
+                System.out.println("❌ STORE WITHOUT COORDINATES: " + loc._id);
+                continue;
+            }
             float lon = loc.coordinates.coordinates[0];
             float lat = loc.coordinates.coordinates[1];
 
             Vector2 pos = MapRasterTiles.getPixelPosition(lat, lon, beginTile.x, beginTile.y);
+//            Gdx.app.log(
+//                "MAP",
+//                "STORE: " + loc.clothingStoreId.name +
+//                    " lat=" + lat +
+//                    " lon=" + lon +
+//                    " pixel=" + pos
+//            );
 
             batch.draw(
                 storeIcon,
@@ -522,6 +574,16 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         camera.viewportWidth = width;
         camera.viewportHeight = height;
         camera.update();
+
+        if (storePanel == null) return;
+
+        Actor content = storePanel.getChildren().first();
+
+        if (storePanelVisible) {
+            content.setPosition(width - content.getWidth(), height - content.getHeight());
+        } else {
+            content.setPosition(width, height - content.getHeight());
+        }
     }
 
 
@@ -564,6 +626,260 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth / 2f, Constants.MAP_WIDTH - effectiveViewportWidth / 2f);
         camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight / 2f, Constants.MAP_HEIGHT - effectiveViewportHeight / 2f);
     }
+
+    private void createToggleStoreButton() {
+        VisTextButton toggleButton = new VisTextButton("Stores");
+
+        Table root = new Table();
+        root.setFillParent(true);
+        root.top().left().pad(16);
+
+        root.add(toggleButton).width(120).height(40);
+
+
+        toggleButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                toggleStorePanel();
+            }
+        });
+
+        uiStage.addActor(root);
+    }
+
+    private void createStorePanel() {
+        // Root overlay (NE IMA backgrounda!)
+        storePanel = new VisTable();
+        storePanel.setFillParent(true);
+        storePanel.setVisible(false);
+        storePanel.top().right();
+
+        float panelWidth = 220;
+
+        // Pravi panel z backgroundom
+        VisTable content = new VisTable(true);
+        content.setBackground("window");
+        content.top().pad(10);
+        content.setWidth(panelWidth);
+
+        content.setTransform(true);
+        float stageWidth = uiStage.getViewport().getWorldWidth();
+        float stageHeight = uiStage.getViewport().getWorldHeight();
+        float panelHeight = content.getPrefHeight();
+
+        content.pack();
+        content.setPosition(stageWidth, stageHeight - panelHeight);
+
+
+        VisLabel title = new VisLabel("Stores");
+        content.add(title).left().row();
+        content.addSeparator().pad(6).row();
+
+        for (LocationDTO loc : storeLocations) {
+            VisTable row = new VisTable();
+            row.left().pad(6);
+
+            VisLabel name = new VisLabel(loc.clothingStoreId.name);
+            name.setFontScale(1.05f);
+
+            VisLabel address = new VisLabel(loc.address);
+            address.setColor(Color.LIGHT_GRAY);
+            address.setWrap(true);
+
+            row.add(name).left().row();
+            row.add(address).width(panelWidth - 40).left().row();
+
+            row.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    selectedStore = loc;
+                    showEditStoreDialog(loc);
+                }
+            });
+
+            content.add(row).growX().padBottom(8).row();
+        }
+
+        content.addSeparator().pad(10).row();
+
+        VisTextButton addButton = new VisTextButton("+ Add store");
+        addButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showAddStoreDialog();
+            }
+        });
+
+        content.add(addButton).growX();
+
+        // content dodamo v root
+        storePanel.add(content).top().right();
+
+        uiStage.addActor(storePanel);
+    }
+
+
+    private void toggleStorePanel() {
+        Actor content = storePanel.getChildren().first();
+
+        float panelWidth = content.getWidth();
+        float panelHeight = content.getHeight();
+
+        float stageWidth = uiStage.getViewport().getWorldWidth();
+        float stageHeight = uiStage.getViewport().getWorldHeight();
+
+        float targetY = stageHeight - panelHeight;
+
+        content.clearActions();
+
+        if (storePanelVisible) {
+            // zapiranje – ven zgoraj desno
+            content.addAction(
+                Actions.moveTo(stageWidth, targetY, 0.25f)
+            );
+        } else {
+            // odpiranje – zgoraj desno
+            storePanel.setVisible(true);
+            content.addAction(
+                Actions.moveTo(stageWidth - panelWidth, targetY, 0.25f)
+            );
+        }
+
+        storePanelVisible = !storePanelVisible;
+    }
+
+    private void showAddStoreDialog() {
+
+        VisTextField nameField = new VisTextField();
+        VisTextField websiteField = new VisTextField();
+        VisTextField addressField = new VisTextField();
+        VisTextField cityField = new VisTextField();
+        VisTextField countryField = new VisTextField();
+
+        VisDialog dialog = new VisDialog("Add store") {
+
+            @Override
+            protected void result(Object object) {
+                if (Boolean.TRUE.equals(object)) {
+
+                    ApiService.addNewStore(
+                        nameField.getText(),
+                        websiteField.getText(),
+                        addressField.getText(),
+                        cityField.getText(),
+                        countryField.getText(),
+                        () -> {
+                            ApiService.loadStoreLocations(data -> {
+                                storeLocations = data;
+
+                                if (storePanel != null) storePanel.remove();
+                                createStorePanel();
+
+                                refreshMap();
+                            });
+                        }
+                    );
+                }
+            }
+        };
+
+
+
+        Table t = dialog.getContentTable();
+        t.defaults().pad(4).left();
+
+        t.add("Name"); t.add(nameField).growX().row();
+        t.add("Website"); t.add(websiteField).growX().row();
+        t.add("Address"); t.add(addressField).growX().row();
+        t.add("City"); t.add(cityField).growX().row();
+        t.add("Country"); t.add(countryField).growX().row();
+
+        dialog.button("Cancel", false);
+        dialog.button("Save", true);
+
+        dialog.show(uiStage);
+    }
+
+    private void refreshMap() {
+        // libGDX renders every frame automatically.
+        // Updating storeLocations is enough.
+        // This method exists for clarity + future extensions.
+        Gdx.app.postRunnable(() -> {
+            // no-op on purpose
+        });
+    }
+
+    private void showEditStoreDialog(LocationDTO loc) {
+        VisTextField nameField =
+            new VisTextField(loc.clothingStoreId.name);
+
+        VisTextField websiteField =
+            new VisTextField(loc.clothingStoreId.website);
+
+        VisTextField addressField =
+            new VisTextField(loc.address);
+
+        VisTextField cityField =
+            new VisTextField(loc.city);
+
+        VisTextField countryField =
+            new VisTextField(loc.country);
+
+        VisDialog dialog = new VisDialog("Edit store") {
+
+            @Override
+            protected void result(Object object) {
+                if (!Boolean.TRUE.equals(object)) return;
+
+                // update ClothingStore
+                ApiService.updateStore(
+                    loc.clothingStoreId._id,
+                    nameField.getText(),
+                    websiteField.getText(),
+                    () -> {
+
+                        // update Location
+                        ApiService.updateLocation(
+                            loc._id,
+                            addressField.getText(),
+                            cityField.getText(),
+                            countryField.getText(),
+                            () -> {
+
+                                // reload everything
+                                ApiService.loadStoreLocations(data -> {
+                                    storeLocations = data;
+
+                                    if (storePanel != null)
+                                        storePanel.remove();
+
+                                    createStorePanel();
+                                    storePanelVisible = true;
+                                });
+                            }
+                        );
+                    }
+                );
+            }
+        };
+
+        Table t = dialog.getContentTable();
+        t.defaults().pad(4).left();
+
+        t.add("Name");     t.add(nameField).growX().row();
+        t.add("Website");  t.add(websiteField).growX().row();
+        t.add("Address");  t.add(addressField).growX().row();
+        t.add("City");     t.add(cityField).growX().row();
+        t.add("Country");  t.add(countryField).growX().row();
+
+        dialog.button("Cancel", false);
+        dialog.button("Save", true);
+
+        dialog.show(uiStage);
+    }
+
+
+
 
 //    private void drawStores() {
 //        shapeRenderer.setProjectionMatrix(camera.combined);
