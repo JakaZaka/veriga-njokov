@@ -10,7 +10,7 @@ example = 4000
 img = x_test[example] / 255.0
 img = np.expand_dims(img, axis=0)
 
-probs = model.predict(img, verbose = 0)[0]
+probs = model.predict(img, verbose=0)[0]
 prediction = int(np.argmax(probs))
 
 print("Predicted:", prediction, LABELS[prediction])

@@ -20,12 +20,14 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-LABEL_CLASS_NAMES = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+LABEL_CLASS_NAMES = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag',
+                     'Ankle boot']
 
-def show_sample_grid(x, y, n=20, title="Sample images"): # prikaz n vzorcev
-    plt.figure(figsize=(15,5))
+
+def show_sample_grid(x, y, n=20, title="Sample images"):  # prikaz n vzorcev
+    plt.figure(figsize=(15, 5))
     for i in range(n):
-        plt.subplot(2, n//2, i+1)
+        plt.subplot(2, n // 2, i + 1)
         plt.imshow(x[i], cmap=plt.cm.binary)
         plt.xticks([])
         plt.yticks([])
@@ -37,32 +39,33 @@ def show_sample_grid(x, y, n=20, title="Sample images"): # prikaz n vzorcev
 
 def build_model():
     model = tf.keras.Sequential([
-        tf.keras.layers.Flatten(input_shape=(28,28)), 
+        tf.keras.layers.Flatten(input_shape=(28, 28)),
         # fashion-MNIST slike so 28x28
-        #flatten-am v 1D vektor
-        
+        # flatten-am v 1D vektor
+
         tf.keras.layers.Dense(128, activation="relu"),
-        #polno povezana plast, 128 nevronov
-        #relu... nelinearna aktivacijska funkcija, da model lahko nauci kompleksnih vzorcev
+        # polno povezana plast, 128 nevronov
+        # relu... nelinearna aktivacijska funkcija, da model lahko nauci kompleksnih vzorcev
 
         tf.keras.layers.Dense(10)
-        #izhodna plast, 10 nevronov (za 10 razredov oblačil)
-        #brez softmax, izhodi so logits (nenormalizirane ocene)
+        # izhodna plast, 10 nevronov (za 10 razredov oblačil)
+        # brez softmax, izhodi so logits (nenormalizirane ocene)
     ])
     return model
+
 
 def show_predictions_grid(x_test, y_test, predictions, n=30):
     """
     prikaz n testnih slik: pravilno/napacno + dejansko
     """
-    plt.figure(figsize=(15,10))
+    plt.figure(figsize=(15, 10))
     for i in range(n):
-        image = x_test[i] # testna slika
-        actual = int(y_test[i]) # dejanski razred
-        predicted = int(np.argmax(predictions[i])) #argmax... indeks max vrednosti... napovedani razred
+        image = x_test[i]  # testna slika
+        actual = int(y_test[i])  # dejanski razred
+        predicted = int(np.argmax(predictions[i]))  # argmax... indeks max vrednosti... napovedani razred
         # predictions[i] vektor verjetnosti za vse razrede (size: 10)
 
-        plt.subplot(5, n//5, i+1)
+        plt.subplot(5, n // 5, i + 1)
         plt.tight_layout()
         plt.xticks([])
         plt.yticks([])
@@ -84,7 +87,7 @@ def plot_training_history(history):
     hist = history.history
     epochs = range(1, len(hist["loss"]) + 1)
 
-    plt.figure(figsize=(12,5))
+    plt.figure(figsize=(12, 5))
 
     # LOSS
     plt.subplot(1, 2, 1)
@@ -106,7 +109,6 @@ def plot_training_history(history):
 
     plt.tight_layout()
     plt.show()
-
 
 
 def main():
@@ -140,7 +142,7 @@ def main():
     print("Shape of test labels:", y_test.shape)
     print("Pixel range (train):", x_train.min(), "to", x_train.max())
 
-    plt.imshow(x_train[0]) # prva slika iz train seta
+    plt.imshow(x_train[0])  # prva slika iz train seta
     plt.title("Raw image (before normalization)")
     plt.colorbar()
     plt.show()
@@ -157,14 +159,16 @@ def main():
     model = build_model()
 
     # compilation modela
-    model.compile(optimizer="adam", loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=["accuracy"])
+    model.compile(optimizer="adam", loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  metrics=["accuracy"])
     # loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True) ... labels so cela st.
-                                                                        #  ... from_logits=True izhodne vredosti so logits
-                                                                        #  ... uporabljen bo softmax znotraj loss funkcije
+    #  ... from_logits=True izhodne vredosti so logits
+    #  ... uporabljen bo softmax znotraj loss funkcije
     # metrics=["accuracy"] ... sproti bo porocal tocnost
 
     # training modela
-    history = model.fit(x_train, y_train, epochs=args.epochs, batch_size=args.batch_size, validation_split=0.1, verbose=1)
+    history = model.fit(x_train, y_train, epochs=args.epochs, batch_size=args.batch_size, validation_split=0.1,
+                        verbose=1)
     """
     validation_split=0.1 vzame 10% trening podatkov za validacijo:
     uči na ~54,000 slikah
@@ -179,8 +183,8 @@ def main():
     # porocilo o tocnosti na test setu... na novo racun
 
     # napovedi
-    prediction_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()]) # za prikaz verjetnosti rabim softmax
-    predictions = prediction_model.predict(x_test, verbose=0) # oblika: (10000, 10)
+    prediction_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])  # za prikaz verjetnosti rabim softmax
+    predictions = prediction_model.predict(x_test, verbose=0)  # oblika: (10000, 10)
 
     # primer: prva slika
     first_pred = int(np.argmax(predictions[0]))
@@ -195,15 +199,9 @@ def main():
     # shranjevanje modela
     if args.save_model:
         out_path = "saved_model_clothes_classification.keras"
-        prediction_model.save(out_path) # prediction_model, ker ima softmax
+        prediction_model.save(out_path)  # prediction_model, ker ima softmax
         print(f"\nSAVED MODEL TO: {out_path}")
+
 
 if __name__ == "__main__":
     main()
-    
-
-
-
-        
-
-
