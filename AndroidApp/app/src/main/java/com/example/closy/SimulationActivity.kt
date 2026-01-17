@@ -1,8 +1,10 @@
 package com.example.closy
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.closy.events.EventManager
 import com.example.closy.model.EventType
@@ -19,6 +21,22 @@ class SimulationActivity : AppCompatActivity() {
     private var currentConfig: SimulationConfig? = null
     private var isSimulationRunning = false
 
+    // Activity result launcher for map location picker
+    private val mapLocationPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            result.data?.let { data ->
+                val latitude = data.getDoubleExtra("latitude", 46.5547)
+                val longitude = data.getDoubleExtra("longitude", 15.6459)
+                latitudeInput.setText(latitude.toString())
+                longitudeInput.setText(longitude.toString())
+                updateDisplays()
+                Toast.makeText(this, "Lokacija posodobljena", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     // UI components
     private lateinit var storeSpinner: Spinner
     private lateinit var rangeDisplay: TextView
@@ -29,8 +47,11 @@ class SimulationActivity : AppCompatActivity() {
     private lateinit var minValueInput: TextInputEditText
     private lateinit var maxValueInput: TextInputEditText
     private lateinit var intervalInput: TextInputEditText
+    private lateinit var latitudeInput: TextInputEditText
+    private lateinit var longitudeInput: TextInputEditText
 
     private lateinit var startStopButton: Button
+    private lateinit var selectOnMapButton: Button
 
     // Store data with locations
     data class Store(val name: String, val address: String, val lat: Double, val lng: Double)
@@ -76,8 +97,11 @@ class SimulationActivity : AppCompatActivity() {
         minValueInput = findViewById(R.id.minValueInput)
         maxValueInput = findViewById(R.id.maxValueInput)
         intervalInput = findViewById(R.id.intervalInput)
+        latitudeInput = findViewById(R.id.latitudeInput)
+        longitudeInput = findViewById(R.id.longitudeInput)
 
         startStopButton = findViewById(R.id.startStopButton)
+        selectOnMapButton = findViewById(R.id.selectOnMapButton)
     }
 
     private fun setupStoreSpinner() {
@@ -88,6 +112,10 @@ class SimulationActivity : AppCompatActivity() {
 
         storeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                // Set location inputs to selected store's location
+                val selectedStore = stores[position]
+                latitudeInput.setText(selectedStore.lat.toString())
+                longitudeInput.setText(selectedStore.lng.toString())
                 updateDisplays()
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -104,10 +132,16 @@ class SimulationActivity : AppCompatActivity() {
             }
         }
 
+        selectOnMapButton.setOnClickListener {
+            openMapLocationPicker()
+        }
+
         // Update displays when values change
         minValueInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
         maxValueInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
         intervalInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
+        latitudeInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
+        longitudeInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
     }
 
     private fun updateDisplays() {
@@ -130,6 +164,8 @@ class SimulationActivity : AppCompatActivity() {
             val minVal = minValueInput.text.toString().toDouble()
             val maxVal = maxValueInput.text.toString().toDouble()
             val interval = intervalInput.text.toString().toInt()
+            val latitude = latitudeInput.text.toString().toDouble()
+            val longitude = longitudeInput.text.toString().toDouble()
             val selectedStore = stores[storeSpinner.selectedItemPosition]
 
             if (minVal >= maxVal) {
@@ -153,8 +189,8 @@ class SimulationActivity : AppCompatActivity() {
                 intervalMinutes = interval,
                 manualLocation = ManualLocation(
                     address = "${selectedStore.name}, ${selectedStore.address}",
-                    latitude = selectedStore.lat,
-                    longitude = selectedStore.lng
+                    latitude = latitude,
+                    longitude = longitude
                 ),
                 valueType = ValueType.RANDOM,
                 descriptionTemplate = DescriptionTemplate.PEOPLE_COUNT,
@@ -227,6 +263,17 @@ class SimulationActivity : AppCompatActivity() {
             // Restart simulation
             startSimulation()
         }
+    }
+
+    private fun openMapLocationPicker() {
+        val currentLat = latitudeInput.text.toString().toDoubleOrNull() ?: 46.5547
+        val currentLng = longitudeInput.text.toString().toDoubleOrNull() ?: 15.6459
+
+        val intent = Intent(this, MapLocationPickerActivity::class.java).apply {
+            putExtra("latitude", currentLat)
+            putExtra("longitude", currentLng)
+        }
+        mapLocationPickerLauncher.launch(intent)
     }
 
     override fun onDestroy() {
