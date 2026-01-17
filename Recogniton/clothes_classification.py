@@ -20,8 +20,10 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-LABEL_CLASS_NAMES = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag',
+LABEL_CLASS_NAMES = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker',
                      'Ankle boot']
+
+BAG_LABEL = 8
 
 
 def show_sample_grid(x, y, n=20, title="Sample images"):  # prikaz n vzorcev
@@ -47,8 +49,8 @@ def build_model():
         # polno povezana plast, 128 nevronov
         # relu... nelinearna aktivacijska funkcija, da model lahko nauci kompleksnih vzorcev
 
-        tf.keras.layers.Dense(10)
-        # izhodna plast, 10 nevronov (za 10 razredov oblačil)
+        tf.keras.layers.Dense(9)
+        # izhodna plast, 9 nevronov (za 9 razredov oblačil)
         # brez softmax, izhodi so logits (nenormalizirane ocene)
     ])
     return model
@@ -111,6 +113,15 @@ def plot_training_history(history):
     plt.show()
 
 
+def remove_class_and_remap(x, y, remove_label=8):
+    mask = (y != remove_label)
+    x2 = x[mask]
+    y2 = y[mask].copy()
+
+    y2[y2 > remove_label] -= 1
+    return x2, y2
+
+
 def main():
     parser = argparse.ArgumentParser(description="Clothes classifyer from Fashion-MNIST dataset")
     parser.add_argument("--epochs", type=int, default=10, help="num of training epochs")
@@ -122,6 +133,14 @@ def main():
 
     fashion_mnist = tf.keras.datasets.fashion_mnist
     (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+
+    (x_train, y_train) = remove_class_and_remap(x_train, y_train, BAG_LABEL)
+    (x_test, y_test) = remove_class_and_remap(x_test, y_test, BAG_LABEL)
+
+    print("After removing Bag:")
+    print("Train shapes:", x_train.shape, y_train.shape, "labels:", np.unique(y_train))
+    print("Test  shapes:", x_test.shape, y_test.shape, "labels:", np.unique(y_test))
+
     """
         x_train: (60000, 28, 28)
 

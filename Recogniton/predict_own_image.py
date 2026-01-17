@@ -20,7 +20,7 @@ import os
 import glob
 
 LABELS = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
-          'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+          'Sandal', 'Shirt', 'Sneaker', 'Ankle boot']
 
 
 def preprocess_image(image_path, show_steps=False):
@@ -89,12 +89,12 @@ def preprocess_image(image_path, show_steps=False):
     return img_normalized
 
 
-def predict_single_image(model, image_path, show=False):
+def predict_single_image(model, image_path, show=False, show_steps=False):
     """
     Napove razred oblačila na posamezni sliki
     """
     # Predobdela sliko
-    img = preprocess_image(image_path, show_steps=show)
+    img = preprocess_image(image_path, show_steps=show_steps)
 
     # Dodaj batch dimenzijo: (28, 28) -> (1, 28, 28)
     img_batch = np.expand_dims(img, axis=0)
@@ -130,8 +130,9 @@ def predict_single_image(model, image_path, show=False):
         plt.axis('off')
 
         plt.subplot(1, 3, 3)
-        plt.barh(range(10), probs)
-        plt.yticks(range(10), LABELS)
+        n = len(LABELS)
+        plt.barh(range(n), probs)
+        plt.yticks(range(n), LABELS)
         plt.xlabel('Probability')
         plt.title(f'Prediction: {LABELS[prediction]}')
         plt.tight_layout()
@@ -151,6 +152,7 @@ def predict_batch(model, image_folder, show_grid=False):
     for ext in extensions:
         image_paths.extend(glob.glob(os.path.join(image_folder, ext)))
         image_paths.extend(glob.glob(os.path.join(image_folder, ext.upper())))
+    image_paths = sorted(set(image_paths))  # odstrani duplikate in po vrsti
 
     if not image_paths:
         print(f"Ni najdenih slik v mapi: {image_folder}")
@@ -180,20 +182,20 @@ def predict_batch(model, image_folder, show_grid=False):
 
     # Mreža slik (opcijsko)
     if show_grid and results:
-        n = min(len(results), 12)
-        cols = 4
+        n = len(results)
+        cols = 6
         rows = (n + cols - 1) // cols
 
         plt.figure(figsize=(15, rows * 3))
-        for i, r in enumerate(results[:n]):
+        for i, r in enumerate(results):
             plt.subplot(rows, cols, i + 1)
             img = Image.open(r['path'])
             plt.imshow(img)
             plt.title(f"{LABELS[r['prediction']]}\n{r['confidence']:.1%}", fontsize=9)
             plt.axis('off')
+
         plt.tight_layout()
         plt.show()
-
     return results
 
 
@@ -242,12 +244,8 @@ def main():
         # mapa - batch obdelava
         predict_batch(model, args.input, show_grid=args.show)
     elif os.path.isfile(args.input):
-        # posamezna slika
-        if args.show_steps:
-            # Prikaz korakov predobdelave
-            img = preprocess_image(args.input, show_steps=True)
 
-        predict_single_image(model, args.input, show=args.show)
+        predict_single_image(model, args.input, show=args.show, show_steps=args.show_steps)
     else:
         print(f"✗ Napaka: '{args.input}' ni veljavna datoteka ali mapa")
 
