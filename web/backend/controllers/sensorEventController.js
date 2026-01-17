@@ -10,6 +10,7 @@ const createEvent = async (req, res) => {
       eventId, event_id,
       timestamp, 
       topic, 
+      storeId, store_id,
       location, 
       eventType, event_type,
       title, 
@@ -20,6 +21,7 @@ const createEvent = async (req, res) => {
     // Use whichever format client sent
     const finalEventId = eventId || event_id;
     const finalEventType = eventType || event_type;
+    const finalStoreId = storeId || store_id;
 
     // Convert timestamp from milliseconds to Date if needed
     const eventDate = timestamp ? new Date(timestamp) : new Date();
@@ -28,6 +30,7 @@ const createEvent = async (req, res) => {
       eventId: finalEventId,
       timestamp: eventDate,
       topic,
+      storeId: finalStoreId,
       location,
       eventType: finalEventType,
       title,
@@ -47,7 +50,18 @@ const createEvent = async (req, res) => {
 // @access  Public
 const getEvents = async (req, res) => {
   try {
-    const events = await SensorEvent.find().sort({ timestamp: -1 });
+    const { storeId, store_id } = req.query;
+    
+    // Build filter
+    const filter = {};
+    const finalStoreId = storeId || store_id;
+    if (finalStoreId) {
+      filter.storeId = finalStoreId;
+    }
+    
+    const events = await SensorEvent.find(filter)
+      .populate('storeId', 'name website')
+      .sort({ timestamp: -1 });
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });
