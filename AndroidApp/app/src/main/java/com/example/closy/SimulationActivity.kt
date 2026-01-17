@@ -53,16 +53,19 @@ class SimulationActivity : AppCompatActivity() {
     private lateinit var startStopButton: Button
     private lateinit var selectOnMapButton: Button
 
-    // Store data with locations
-    data class Store(val name: String, val address: String, val lat: Double, val lng: Double)
+    // Store data with locations and MongoDB IDs
+    data class Store(
+        val name: String,
+        val address: String,
+        val lat: Double,
+        val lng: Double,
+        val storeId: String? = null  // MongoDB ObjectID, null for "Drugo"
+    )
 
     private val stores = listOf(
-        Store("H&M", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6459),
-        Store("Zara", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6461),
-        Store("C&A", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6463),
-        Store("New Yorker", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6465),
-        Store("Deichmann", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6467),
-        Store("dm", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6469)
+        Store("H&M", "Vetrinjska ulica 22, Maribor", 46.5589617, 15.6479913, "683c82e19ebb2e3b6cd224b3"),
+        Store("ZARA", "Pobreška cesta 18, Maribor", 46.5534787, 15.6531013, "6830fc0250fe3e4f4364aef7"),
+        Store("Drugo", "Maribor", 46.5576, 15.6456, null)  // No store_id for "Drugo"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -194,7 +197,8 @@ class SimulationActivity : AppCompatActivity() {
                 ),
                 valueType = ValueType.RANDOM,
                 descriptionTemplate = DescriptionTemplate.PEOPLE_COUNT,
-                enabled = true
+                enabled = true,
+                storeId = selectedStore.storeId  // Include store_id (null for "Drugo")
             )
 
             currentConfig?.let {

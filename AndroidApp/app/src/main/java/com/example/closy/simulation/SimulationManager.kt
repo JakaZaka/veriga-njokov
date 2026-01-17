@@ -77,7 +77,8 @@ class SimulationManager(
                     description = description,
                     metadata = metadata,
                     customTopic = config.topic,
-                    customLocation = eventLocation
+                    customLocation = eventLocation,
+                    storeId = config.storeId  // Include store_id from config
                 ) { success, message ->
                     if (success) {
                         Log.d(TAG, "✅ Event published successfully: $title")
@@ -215,7 +216,8 @@ data class SimulationConfig(
     val extremeThreshold: Double? = null,
     val extremeCondition: ExtremeCondition? = null,
     val customMetadata: Map<String, Any> = emptyMap(),
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
+    val storeId: String? = null  // MongoDB ObjectID for linking to ClothingStore
 )
 
 /**

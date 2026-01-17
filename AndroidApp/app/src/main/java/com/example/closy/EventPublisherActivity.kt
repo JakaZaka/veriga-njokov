@@ -16,7 +16,8 @@ import com.google.gson.Gson
  */
 data class Store(
     val name: String,
-    val location: LocationData
+    val location: LocationData,
+    val storeId: String? = null  // MongoDB ObjectID, null for "Drugo"
 )
 
 /**
@@ -40,15 +41,9 @@ class EventPublisherActivity : AppCompatActivity() {
 
     // Store locations in Maribor
     private val stores = listOf(
-        Store("H&M", LocationData(46.5576, 15.6456, null, null)),  // Europark Maribor
-        Store("Zara", LocationData(46.5578, 15.6458, null, null)),  // Europark Maribor
-        Store("Pull&Bear", LocationData(46.5574, 15.6454, null, null)),  // Europark Maribor
-        Store("Bershka", LocationData(46.5580, 15.6460, null, null)),  // Europark Maribor
-        Store("Mango", LocationData(46.5572, 15.6452, null, null)),  // Europark Maribor
-        Store("Reserved", LocationData(46.5582, 15.6462, null, null)),  // Europark Maribor
-        Store("C&A", LocationData(46.5570, 15.6450, null, null)),  // Europark Maribor
-        Store("New Yorker", LocationData(46.5584, 15.6464, null, null)),  // Europark Maribor
-        Store("Drugo", LocationData(46.5576, 15.6456, null, null))  // Default Europark location
+        Store("H&M", LocationData(46.5589617, 15.6479913, null, null), "683c82e19ebb2e3b6cd224b3"),
+        Store("ZARA", LocationData(46.5534787, 15.6531013, null, null), "6830fc0250fe3e4f4364aef7"),
+        Store("Drugo", LocationData(46.5576, 15.6456, null, null), null)  // No store_id for "Drugo"
     )
 
     private var selectedStoreLocation: LocationData? = null
@@ -160,7 +155,8 @@ class EventPublisherActivity : AppCompatActivity() {
 
 
     private fun publishEvent() {
-        val selectedStore = storeSpinner.selectedItem.toString()
+        val selectedStoreIndex = storeSpinner.selectedItemPosition
+        val selectedStore = stores[selectedStoreIndex]
         val selectedCategory = eventTypeSpinner.selectedItem.toString()
 
         val title = titleInput.text.toString()
@@ -174,21 +170,22 @@ class EventPublisherActivity : AppCompatActivity() {
 
         // Prepare metadata
         val metadata = mutableMapOf<String, Any>(
-            "store" to selectedStore,
+            "store" to selectedStore.name,
             "category" to selectedCategory
         )
 
         // Publish event
         publishButton.isEnabled = false
 
-        // Use CUSTOM_EVENT type for extreme events with store location
+        // Use CUSTOM_EVENT type for extreme events with store location and store_id
         eventManager.publishEvent(
             eventType = EventType.CUSTOM_EVENT,
             title = title,
             description = description.ifEmpty { title },
             metadata = metadata,
             customTopic = "store/extreme/event",
-            customLocation = selectedStoreLocation
+            customLocation = selectedStoreLocation,
+            storeId = selectedStore.storeId  // Will be null for "Drugo"
         ) { success, message ->
             runOnUiThread {
                 publishButton.isEnabled = true
