@@ -65,6 +65,9 @@ dependencies {
     // WorkManager for background tasks
     implementation(libs.androidx.work.runtime)
 
+    // OSMDroid for OpenStreetMap
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
