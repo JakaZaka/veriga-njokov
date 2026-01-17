@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -49,6 +50,7 @@ import java.io.IOException;
 
 import si.um.feri.closyMap.dataBaseUtils.ApiService;
 import si.um.feri.closyMap.dataBaseUtils.LocationDTO;
+import si.um.feri.closyMap.dataBaseUtils.StoreOccupancyDTO;
 import si.um.feri.closyMap.dataBaseUtils.UserDTO;
 import si.um.feri.closyMap.utils.Constants;
 import si.um.feri.closyMap.utils.Geolocation;
@@ -105,6 +107,13 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     private VisTable storePanel;
     private boolean storePanelVisible = false;
 
+    private ObjectMap<String, StoreOccupancyDTO> occupancyMap =
+        new ObjectMap<>();
+
+    private float occupancyTimer = 0f;
+
+    private static final int MAX_PEOPLE = 70;
+
 
     @Override
     public void create() {
@@ -125,10 +134,20 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         ApiService.loadStoreLocations(data -> {
             storeLocations = data;
 
+            generateFakeOccupancy();
+
             if (storePanel != null) storePanel.remove();
             createStorePanel();
         });
         ApiService.loadUsers(data -> users = data);
+
+//        ApiService.loadStoreOccupancy(data -> {
+//            occupancyMap.clear();
+//
+//            for (StoreOccupancyDTO occ : data) {
+//                occupancyMap.put(occ.storeId, occ);
+//            }
+//        });
 
 
 
@@ -331,17 +350,42 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         popupAlpha = Math.min(1f, popupAlpha + Gdx.graphics.getDeltaTime() * 6f);
         //updateTileZoomIfNeeded();
 
+        occupancyTimer += Gdx.graphics.getDeltaTime();
+
+        if (occupancyTimer > 20f) {
+            generateFakeOccupancy();
+            occupancyTimer = 0f;
+        }
+
+
         drawMarkers();
         uiStage.act(Gdx.graphics.getDeltaTime());
         uiStage.draw();
-//        drawStores();
-//        drawUsers();
     }
 
     private void drawMarkers() {
         batch.setProjectionMatrix(camera.combined);
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (LocationDTO loc : storeLocations) {
+            StoreOccupancyDTO occ = occupancyMap.get(loc._id);
+            if (occ == null || loc.coordinates == null) continue;
+
+            Vector2 pos = MapRasterTiles.getPixelPosition(
+                loc.coordinates.coordinates[1],
+                loc.coordinates.coordinates[0],
+                beginTile.x,
+                beginTile.y
+            );
+
+            drawOccupancyRing(pos, occ.peopleCount);
+        }
+
+        shapeRenderer.end();
         batch.begin();
-        float iconSize = 82f;
+        float baseIconSize = 31f;
+        float scale = MathUtils.clamp(1f / camera.zoom, 0.01f, 1.4f);
+        float iconSize = baseIconSize / scale;
 
         Vector2 marker = MapRasterTiles.getPixelPosition(
             MARKER_GEOLOCATION.lat,
@@ -360,9 +404,6 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         );
 
 
-
-
-
         // STORES
         for (LocationDTO loc : storeLocations) {
             if (loc.coordinates == null || loc.coordinates.coordinates == null) {
@@ -373,13 +414,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
             float lat = loc.coordinates.coordinates[1];
 
             Vector2 pos = MapRasterTiles.getPixelPosition(lat, lon, beginTile.x, beginTile.y);
-//            Gdx.app.log(
-//                "MAP",
-//                "STORE: " + loc.clothingStoreId.name +
-//                    " lat=" + lat +
-//                    " lon=" + lon +
-//                    " pixel=" + pos
-//            );
+
 
             batch.draw(
                 storeIcon,
@@ -413,7 +448,53 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     }
 
-    //za zdaj ne uporabljam tega, mogoce bomo pol rabli
+    private void drawOccupancyRing(Vector2 center, int people) {
+        float fill = MathUtils.clamp(people / (float) MAX_PEOPLE, 0f, 1f);
+
+        float scale = MathUtils.clamp(1f / camera.zoom, 0.3f, 1.4f);
+        float radius = 28f / scale;
+        float thickness = 5f / scale;
+        int segments = 60;
+
+        float startAngle = -90f;
+        //float sweepAngle = 360f * fill;
+
+        shapeRenderer.setColor(new Color(0.7f, 0.7f, 0.7f, 0.4f));
+
+        for (int i = 0; i < segments; i++) {
+            float angle1 = startAngle + (i * 360f / segments);
+            float angle2 = startAngle + ((i + 1) * 360f / segments);
+
+            float x1 = center.x + MathUtils.cosDeg(angle1) * radius;
+            float y1 = center.y + MathUtils.sinDeg(angle1) * radius;
+
+            float x2 = center.x + MathUtils.cosDeg(angle2) * radius;
+            float y2 = center.y + MathUtils.sinDeg(angle2) * radius;
+
+            shapeRenderer.rectLine(x1, y1, x2, y2, thickness);
+        }
+
+        Color color = getOccupancyColor(fill);
+
+        int filledSegments = MathUtils.round(segments * fill);
+        shapeRenderer.setColor(color);
+
+        for (int i = 0; i < filledSegments; i++) {
+            float angle1 = startAngle + (i * 360f / segments);
+            float angle2 = startAngle + ((i + 1) * 360f / segments);
+
+            float x1 = center.x + MathUtils.cosDeg(angle1) * radius;
+            float y1 = center.y + MathUtils.sinDeg(angle1) * radius;
+
+            float x2 = center.x + MathUtils.cosDeg(angle2) * radius;
+            float y2 = center.y + MathUtils.sinDeg(angle2) * radius;
+
+            shapeRenderer.rectLine(x1, y1, x2, y2, thickness);
+        }
+    }
+
+
+
     private void reloadMapTiles(int zoom) {
         try {
             ZoomXY centerTile = MapRasterTiles.getTileNumber(
@@ -629,13 +710,11 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     private void createToggleStoreButton() {
         VisTextButton toggleButton = new VisTextButton("Stores");
-
         Table root = new Table();
         root.setFillParent(true);
         root.top().left().pad(16);
 
         root.add(toggleButton).width(120).height(40);
-
 
         toggleButton.addListener(new ClickListener() {
             @Override
@@ -717,7 +796,6 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
         uiStage.addActor(storePanel);
     }
-
 
     private void toggleStorePanel() {
         Actor content = storePanel.getChildren().first();
@@ -881,41 +959,45 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
 
 
-//    private void drawStores() {
-//        shapeRenderer.setProjectionMatrix(camera.combined);
-//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-//
-//        shapeRenderer.setColor(Color.BLUE);
-//
-//        for (LocationDTO loc : storeLocations) {
-//            float lon = loc.coordinates.coordinates[0];
-//            float lat = loc.coordinates.coordinates[1];
-//
-//            Vector2 pos = MapRasterTiles.getPixelPosition(lat, lon, beginTile.x, beginTile.y);
-//            shapeRenderer.circle(pos.x, pos.y, 8);
-//        }
-//
-//        shapeRenderer.end();
-//    }
-//
-//    private void drawUsers() {
-//        shapeRenderer.setProjectionMatrix(camera.combined);
-//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-//
-//        shapeRenderer.setColor(Color.GREEN);
-//
-//        for (UserDTO user : users) {
-//            if (user.location == null || user.location.coordinates == null) continue;
-//
-//            float lon = user.location.coordinates.coordinates[0];
-//            float lat = user.location.coordinates.coordinates[1];
-//
-//            Vector2 pos = MapRasterTiles.getPixelPosition(lat, lon, beginTile.x, beginTile.y);
-//            shapeRenderer.circle(pos.x, pos.y, 5);
-//        }
-//
-//        shapeRenderer.end();
-//    }
+    private Color getOccupancyColor(float fill) {
+        fill = MathUtils.clamp(fill, 0f, 1f);
 
+
+        if (fill < 0.5f) {
+            // green -> orange
+            float t = fill / 0.5f;
+            return new Color(
+                MathUtils.lerp(0f, 1f, t),   // R
+                MathUtils.lerp(1f, 0.65f, t),// G
+                0f,                          // B
+                0.9f
+            );
+        } else {
+            // orange -> red
+            float t = (fill - 0.5f) / 0.5f;
+            return new Color(
+                1f,                          // R
+                MathUtils.lerp(0.65f, 0f, t),// G
+                0f,                          // B
+                0.9f
+            );
+        }
+    }
+
+
+    private void generateFakeOccupancy() {
+        occupancyMap.clear();
+
+        for (LocationDTO loc : storeLocations) {
+            StoreOccupancyDTO occ = new StoreOccupancyDTO();
+            occ.storeId = loc._id;
+
+            // realistične fake vrednosti
+            occ.peopleCount = MathUtils.random(5, 80);
+
+            occupancyMap.put(occ.storeId, occ);
+        }
+    }
+    
 
 }
