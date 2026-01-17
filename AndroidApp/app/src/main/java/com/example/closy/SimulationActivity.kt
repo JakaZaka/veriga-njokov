@@ -8,7 +8,6 @@ import com.example.closy.events.EventManager
 import com.example.closy.model.EventType
 import com.example.closy.network.NetworkManager
 import com.example.closy.simulation.*
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 
 class SimulationActivity : AppCompatActivity() {
@@ -26,7 +25,6 @@ class SimulationActivity : AppCompatActivity() {
     private lateinit var intervalDisplay: TextView
     private lateinit var locationDisplay: TextView
     private lateinit var statusText: TextView
-    private lateinit var simulationToggle: SwitchMaterial
 
     private lateinit var minValueInput: TextInputEditText
     private lateinit var maxValueInput: TextInputEditText
@@ -74,7 +72,6 @@ class SimulationActivity : AppCompatActivity() {
         intervalDisplay = findViewById(R.id.intervalDisplay)
         locationDisplay = findViewById(R.id.locationDisplay)
         statusText = findViewById(R.id.statusText)
-        simulationToggle = findViewById(R.id.simulationToggle)
 
         minValueInput = findViewById(R.id.minValueInput)
         maxValueInput = findViewById(R.id.maxValueInput)
@@ -98,13 +95,6 @@ class SimulationActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        simulationToggle.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked && !isSimulationRunning) {
-                startSimulation()
-            } else if (!isChecked && isSimulationRunning) {
-                stopSimulation()
-            }
-        }
 
         startStopButton.setOnClickListener {
             if (isSimulationRunning) {
@@ -144,13 +134,11 @@ class SimulationActivity : AppCompatActivity() {
 
             if (minVal >= maxVal) {
                 Toast.makeText(this, "Spodnja meja mora biti manjša od zgornje!", Toast.LENGTH_LONG).show()
-                simulationToggle.isChecked = false
                 return
             }
 
             if (interval <= 0) {
                 Toast.makeText(this, "Interval mora biti večji od 0!", Toast.LENGTH_LONG).show()
-                simulationToggle.isChecked = false
                 return
             }
 
@@ -184,7 +172,6 @@ class SimulationActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Toast.makeText(this, "Napaka: ${e.message}", Toast.LENGTH_LONG).show()
-            simulationToggle.isChecked = false
         }
     }
 
@@ -198,7 +185,6 @@ class SimulationActivity : AppCompatActivity() {
             saveState()
             Toast.makeText(this, "⏹️ Simulacija ustavljena", Toast.LENGTH_SHORT).show()
         }
-        simulationToggle.isChecked = false
     }
 
     private fun updateStatusDisplay(isEnabled: Boolean) {
@@ -239,7 +225,6 @@ class SimulationActivity : AppCompatActivity() {
 
         if (wasRunning) {
             // Restart simulation
-            simulationToggle.isChecked = true
             startSimulation()
         }
     }
