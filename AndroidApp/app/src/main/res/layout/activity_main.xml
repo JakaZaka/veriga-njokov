@@ -314,7 +314,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Manual Events Button -->
+            <!-- Extreme Events Button -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/eventsCard"
                 android:layout_width="match_parent"
@@ -336,7 +336,7 @@
                     <TextView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:text="✍️"
+                        android:text="⚠️"
                         android:textSize="32sp"
                         android:gravity="center"
                         android:layout_marginEnd="16dp" />
@@ -350,7 +350,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Manual Events"
+                            android:text="Extreme Events"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="?android:attr/textColorPrimary" />
@@ -358,7 +358,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Publish Digital Twin events"
+                            android:text="Report extreme store events"
                             android:textSize="14sp"
                             android:textColor="?android:attr/textColorSecondary" />
                     </LinearLayout>

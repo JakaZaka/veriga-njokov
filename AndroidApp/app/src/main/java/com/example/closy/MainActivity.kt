@@ -23,7 +23,7 @@ import java.util.Locale
  * - Navigation to main features:
  *   - Sensors Management
  *   - Simulated Sensors
- *   - Manual Events
+ *   - Extreme Events
  *   - History
  */
 class MainActivity : AppCompatActivity() {

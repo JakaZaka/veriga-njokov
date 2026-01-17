@@ -1,16 +1,23 @@
 package com.example.closy
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.closy.events.EventManager
-import com.example.closy.model.EventTemplates
 import com.example.closy.model.EventType
+import com.example.closy.model.LocationData
 import com.example.closy.network.NetworkManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
+
+/**
+ * Store data with location in Maribor
+ */
+data class Store(
+    val name: String,
+    val location: LocationData
+)
 
 /**
  * Activity for publishing Digital Twin Events
@@ -21,20 +28,31 @@ class EventPublisherActivity : AppCompatActivity() {
     private lateinit var networkManager: NetworkManager
 
     // UI components
+    private lateinit var storeSpinner: Spinner
     private lateinit var eventTypeSpinner: Spinner
-    private lateinit var topicInput: TextInputEditText
     private lateinit var titleInput: TextInputEditText
     private lateinit var descriptionInput: TextInputEditText
-    private lateinit var metadataContainer: LinearLayout
-    private lateinit var addMetadataButton: Button
     private lateinit var locationText: TextView
     private lateinit var publishButton: Button
     private lateinit var clearButton: Button
     private lateinit var viewHistoryButton: Button
     private lateinit var eventHistoryText: TextView
 
-    // Metadata fields (key-value pairs)
-    private val metadataFields = mutableListOf<Pair<EditText, EditText>>()
+    // Store locations in Maribor
+    private val stores = listOf(
+        Store("H&M", LocationData(46.5576, 15.6456, null, null)),  // Europark Maribor
+        Store("Zara", LocationData(46.5578, 15.6458, null, null)),  // Europark Maribor
+        Store("Pull&Bear", LocationData(46.5574, 15.6454, null, null)),  // Europark Maribor
+        Store("Bershka", LocationData(46.5580, 15.6460, null, null)),  // Europark Maribor
+        Store("Mango", LocationData(46.5572, 15.6452, null, null)),  // Europark Maribor
+        Store("Reserved", LocationData(46.5582, 15.6462, null, null)),  // Europark Maribor
+        Store("C&A", LocationData(46.5570, 15.6450, null, null)),  // Europark Maribor
+        Store("New Yorker", LocationData(46.5584, 15.6464, null, null)),  // Europark Maribor
+        Store("Drugo", LocationData(46.5576, 15.6456, null, null))  // Default Europark location
+    )
+
+    private var selectedStoreLocation: LocationData? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +71,8 @@ class EventPublisherActivity : AppCompatActivity() {
 
         // Initialize UI
         initializeViews()
-        setupEventTypeSpinner()
+        setupStoreSpinner()
+        setupEventCategorySpinner()
         setupListeners()
         updateLocationDisplay()
 
@@ -66,12 +85,10 @@ class EventPublisherActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
+        storeSpinner = findViewById(R.id.storeSpinner)
         eventTypeSpinner = findViewById(R.id.eventTypeSpinner)
-        topicInput = findViewById(R.id.topicInput)
         titleInput = findViewById(R.id.titleInput)
         descriptionInput = findViewById(R.id.descriptionInput)
-        metadataContainer = findViewById(R.id.metadataContainer)
-        addMetadataButton = findViewById(R.id.addMetadataButton)
         locationText = findViewById(R.id.locationText)
         publishButton = findViewById(R.id.publishButton)
         clearButton = findViewById(R.id.clearButton)
@@ -79,47 +96,55 @@ class EventPublisherActivity : AppCompatActivity() {
         eventHistoryText = findViewById(R.id.eventHistoryText)
     }
 
-    private fun setupEventTypeSpinner() {
-        val eventTypes = EventType.values()
+    private fun setupStoreSpinner() {
         val adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
-            eventTypes.map { it.displayName }
+            stores.map { it.name }
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        storeSpinner.adapter = adapter
+
+        // Set listener to update location when store is selected
+        storeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedStoreLocation = stores[position].location
+                updateLocationDisplay()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedStoreLocation = null
+            }
+        }
+
+        // Set initial location
+        if (stores.isNotEmpty()) {
+            selectedStoreLocation = stores[0].location
+        }
+    }
+
+    private fun setupEventCategorySpinner() {
+        val categories = listOf(
+            "Zaprtje trgovine",
+            "Velika gneča",
+            "Prazne police / Razprodano",
+            "Tehnična težava",
+            "Varnostni incident",
+            "Izredna razprodaja",
+            "VIP dogodek",
+            "Drugo"
+        )
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            categories
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         eventTypeSpinner.adapter = adapter
-
-        // Load template when event type changes
-        eventTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                loadEventTemplate(eventTypes[position])
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-    }
-
-    private fun loadEventTemplate(eventType: EventType) {
-        val template = EventTemplates.getTemplate(eventType)
-        template?.let {
-            topicInput.setText(it.eventType.topic)
-            titleInput.setText(it.title)
-            descriptionInput.setText(it.descriptionTemplate)
-
-            // Clear and load default metadata
-            metadataContainer.removeAllViews()
-            metadataFields.clear()
-
-            it.defaultMetadata.forEach { (key, value) ->
-                addMetadataField(key, value.toString())
-            }
-        }
     }
 
     private fun setupListeners() {
-        addMetadataButton.setOnClickListener {
-            addMetadataField("", "")
-        }
-
         publishButton.setOnClickListener {
             publishEvent()
         }
@@ -133,93 +158,42 @@ class EventPublisherActivity : AppCompatActivity() {
         }
     }
 
-    private fun addMetadataField(key: String = "", value: String = "") {
-        val fieldLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-
-        val keyInput = EditText(this).apply {
-            hint = "Ključ"
-            setText(key)
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-            )
-        }
-
-        val valueInput = EditText(this).apply {
-            hint = "Vrednost"
-            setText(value)
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-            )
-        }
-
-        val removeButton = Button(this).apply {
-            text = "✕"
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            setOnClickListener {
-                metadataContainer.removeView(fieldLayout)
-                metadataFields.remove(Pair(keyInput, valueInput))
-            }
-        }
-
-        fieldLayout.addView(keyInput)
-        fieldLayout.addView(valueInput)
-        fieldLayout.addView(removeButton)
-
-        metadataContainer.addView(fieldLayout)
-        metadataFields.add(Pair(keyInput, valueInput))
-    }
 
     private fun publishEvent() {
-        val selectedPosition = eventTypeSpinner.selectedItemPosition
-        val eventType = EventType.values()[selectedPosition]
+        val selectedStore = storeSpinner.selectedItem.toString()
+        val selectedCategory = eventTypeSpinner.selectedItem.toString()
 
-        val topic = topicInput.text.toString()
         val title = titleInput.text.toString()
         val description = descriptionInput.text.toString()
 
         // Validate input
         if (title.isEmpty()) {
-            Toast.makeText(this, "Naslov je obvezen", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Sporočilo je obvezno", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Collect metadata
-        val metadata = mutableMapOf<String, Any>()
-        metadataFields.forEach { (keyInput, valueInput) ->
-            val key = keyInput.text.toString()
-            val value = valueInput.text.toString()
-            if (key.isNotEmpty()) {
-                // Try to parse as number, otherwise keep as string
-                metadata[key] = value.toDoubleOrNull() ?: value
-            }
-        }
+        // Prepare metadata
+        val metadata = mutableMapOf<String, Any>(
+            "store" to selectedStore,
+            "category" to selectedCategory
+        )
 
         // Publish event
         publishButton.isEnabled = false
+
+        // Use CUSTOM_EVENT type for extreme events with store location
         eventManager.publishEvent(
-            eventType = eventType,
+            eventType = EventType.CUSTOM_EVENT,
             title = title,
-            description = description,
+            description = description.ifEmpty { title },
             metadata = metadata,
-            customTopic = if (topic.isNotEmpty()) topic else null
+            customTopic = "store/extreme/event",
+            customLocation = selectedStoreLocation
         ) { success, message ->
             runOnUiThread {
                 publishButton.isEnabled = true
                 if (success) {
-                    Toast.makeText(this, "Dogodek uspešno objavljen!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Dogodek uspešno poslan!", Toast.LENGTH_SHORT).show()
                     clearForm()
                 } else {
                     Toast.makeText(this, "Napaka: $message", Toast.LENGTH_LONG).show()
@@ -231,36 +205,15 @@ class EventPublisherActivity : AppCompatActivity() {
     private fun clearForm() {
         titleInput.setText("")
         descriptionInput.setText("")
-        metadataContainer.removeAllViews()
-        metadataFields.clear()
-
-        // Reload template
-        val selectedPosition = eventTypeSpinner.selectedItemPosition
-        loadEventTemplate(EventType.values()[selectedPosition])
     }
 
     private fun updateLocationDisplay() {
-        // Update location every 5 seconds
-        Thread {
-            while (!isFinishing) {
-                try {
-                    Thread.sleep(5000)
-                    runOnUiThread {
-                        val location = eventManager.getEventHistory(limit = 1)
-                            .firstOrNull()?.location
-
-                        if (location != null) {
-                            locationText.text = "Lat: ${String.format("%.4f", location.latitude)}, " +
-                                    "Lng: ${String.format("%.4f", location.longitude)}"
-                        } else {
-                            locationText.text = "Lokacija ni na voljo"
-                        }
-                    }
-                } catch (e: InterruptedException) {
-                    break
-                }
-            }
-        }.start()
+        selectedStoreLocation?.let { location ->
+            locationText.text = "Lat: ${String.format("%.4f", location.latitude)}, " +
+                    "Lng: ${String.format("%.4f", location.longitude)}"
+        } ?: run {
+            locationText.text = "Izberite trgovino"
+        }
     }
 
     private fun updateEventHistory() {
