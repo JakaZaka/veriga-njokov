@@ -20,23 +20,6 @@ data class SensorData(
 )
 
 /**
- * Location data captured with each sensor reading
- */
-data class LocationData(
-    @SerializedName("latitude")
-    val latitude: Double,
-
-    @SerializedName("longitude")
-    val longitude: Double,
-
-    @SerializedName("altitude")
-    val altitude: Double?,
-
-    @SerializedName("accuracy")
-    val accuracy: Float?
-)
-
-/**
  * Accelerometer sensor data
  */
 data class AccelerometerData(
@@ -114,4 +97,3 @@ enum class SensorType {
     CAMERA,
     GPS
 }
-

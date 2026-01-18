@@ -136,5 +136,37 @@ class NetworkManager(private val serverUrl: String) {
             callback(false, "Exception: ${e.message}")
         }
     }
-}
 
+    /**
+     * Send GPS location data to server (for LocationHistory)
+     */
+    fun sendLocationData(locationData: com.example.closy.model.LocationData, callback: (Boolean, String?) -> Unit) {
+        try {
+            val json = gson.toJson(mapOf(
+                "timestamp" to System.currentTimeMillis(),
+                "location" to locationData
+            ))
+            println("[NetworkManager] Sending location to $baseUrl/api/location-history: $json")
+            val body = json.toRequestBody(JSON)
+
+            val url = "$baseUrl/api/location-history"
+            val request = Request.Builder()
+                .url(url)
+                .post(body)
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    println("[NetworkManager] Location sent successfully: ${response.body?.string()}")
+                    callback(true, response.body?.string())
+                } else {
+                    println("[NetworkManager] Failed to send location: ${response.code} - ${response.message}")
+                    callback(false, "Error: ${response.code} - ${response.message}")
+                }
+            }
+        } catch (e: Exception) {
+            println("[NetworkManager] Exception: ${e.message}")
+            callback(false, "Exception: ${e.message}")
+        }
+    }
+}

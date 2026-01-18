@@ -1,5 +1,6 @@
 package com.example.closy.utils
 
+import com.example.closy.model.LocationData
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -42,4 +43,12 @@ interface ClothingApiService {
         @Path("id") id: String,
         @Body item: ClothingItem
     ): Response<CreateClothingResponse>
+
+    /**
+     * Pošlji lokacijo na strežnik
+     */
+    @POST("api/location-history")
+    suspend fun sendLocation(
+        @Body locationData: LocationData
+    ): Response<Void>
 }

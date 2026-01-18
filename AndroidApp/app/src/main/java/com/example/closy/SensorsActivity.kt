@@ -60,7 +60,7 @@ class SensorsActivity : AppCompatActivity() {
 
         // Get server URL from shared preferences
         val serverUrl = getSharedPreferences("ClosyPreferences", MODE_PRIVATE)
-            .getString("server_url", "http://your-server.com/api/sensor-data") ?: ""
+            .getString("server_url", "http://10.0.2.2:5000/api") ?: "http://10.0.2.2:5000/api"
 
         // Initialize managers
         networkManager = NetworkManager(serverUrl)
@@ -240,4 +240,3 @@ class SensorsActivity : AppCompatActivity() {
         val lastTimestampText: TextView
     )
 }
-
