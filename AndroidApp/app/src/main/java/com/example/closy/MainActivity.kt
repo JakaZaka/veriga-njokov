@@ -103,16 +103,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-
-        // History Card (Optional - placeholder for now)
-        findViewById<MaterialCardView>(R.id.historyCard).setOnClickListener {
-            // TODO: Implement history screen
-            android.widget.Toast.makeText(
-                this,
-                "History feature coming soon",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
-        }
+        // Removed historyCard navigation
     }
 
     private fun loadServerUrl() {
@@ -209,4 +200,3 @@ class MainActivity : AppCompatActivity() {
         return 0
     }
 }
-

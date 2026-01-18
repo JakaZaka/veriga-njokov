@@ -1,6 +1,7 @@
 package com.example.closy
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -81,55 +82,32 @@ class SensorsActivity : AppCompatActivity() {
 
         for ((cardId, sensorType, name) in sensorConfigs) {
             val card = findViewById<View>(cardId)
-            val sensorName = card.findViewById<TextView>(R.id.sensorNameText)
-            val sensorSwitch = card.findViewById<SwitchMaterial>(R.id.sensorSwitch)
-            val intervalSpinner = card.findViewById<Spinner>(R.id.intervalSpinner)
-            val statusText = card.findViewById<TextView>(R.id.sensorStatusText)
-            val lastValueText = card.findViewById<TextView>(R.id.lastValueText)
-            val lastTimestampText = card.findViewById<TextView>(R.id.lastTimestampText)
-
-            sensorName.text = name
-
-            // Setup interval spinner
-            setupIntervalSpinner(intervalSpinner)
-
-            // Store views
-            sensorViews[sensorType] = SensorCardViews(
-                sensorSwitch,
-                intervalSpinner,
-                statusText,
-                lastValueText,
-                lastTimestampText
-            )
-
-            // Check sensor availability
-            val isAvailable = sensorDataManager.isSensorAvailable(sensorType)
-            if (!isAvailable) {
-                sensorSwitch.isEnabled = false
-                statusText.text = "Not available on this device"
-                statusText.setTextColor(getColor(android.R.color.darker_gray))
-            } else {
-                statusText.text = "Ready"
-                statusText.setTextColor(getColor(android.R.color.darker_gray))
-            }
-
-            // Setup switch listener
-            sensorSwitch.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
-                    startSensor(sensorType)
-                } else {
-                    stopSensor(sensorType)
+            if (sensorType == SensorType.GPS) {
+                val sensorName = card.findViewById<TextView>(R.id.sensorNameText)
+                val sensorSwitch = card.findViewById<SwitchMaterial>(R.id.sensorSwitch)
+                val intervalSpinner = card.findViewById<Spinner>(R.id.intervalSpinner)
+                sensorName.text = name
+                setupIntervalSpinner(intervalSpinner)
+                sensorViews[sensorType] = SensorCardViews(sensorSwitch, intervalSpinner, null, null, null)
+                val isAvailable = sensorDataManager.isSensorAvailable(sensorType)
+                sensorSwitch.isEnabled = isAvailable
+                sensorSwitch.setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) startSensor(sensorType) else stopSensor(sensorType)
                 }
-            }
-
-            // Setup interval change listener
-            intervalSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    if (sensorSwitch.isChecked) {
-                        updateSensorInterval(sensorType, position)
+                intervalSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                        if (sensorSwitch.isChecked) updateSensorInterval(sensorType, position)
                     }
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
                 }
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            } else if (sensorType == SensorType.CAMERA) {
+                val sensorName = card.findViewById<TextView>(R.id.sensorNameText)
+                val openCameraButton = card.findViewById<Button>(R.id.openCameraButton)
+                sensorName.text = name
+                openCameraButton.setOnClickListener {
+                    val intent = Intent(this, CameraActivity::class.java)
+                    startActivity(intent)
+                }
             }
         }
     }
@@ -170,28 +148,34 @@ class SensorsActivity : AppCompatActivity() {
     private fun initializeSensors() {
         sensorViews.forEach { (sensorType, views) ->
             val isAvailable = sensorDataManager.isSensorAvailable(sensorType)
-            if (isAvailable) {
-                views.statusText.text = "Ready"
-                views.statusText.setTextColor(getColor(android.R.color.darker_gray))
+            views.statusText?.let {
+                if (isAvailable) {
+                    it.text = "Ready"
+                    it.setTextColor(getColor(android.R.color.darker_gray))
+                }
             }
         }
     }
 
     private fun startSensor(sensorType: SensorType) {
         val views = sensorViews[sensorType] ?: return
-        val intervalSeconds = getIntervalSeconds(views.intervalSpinner.selectedItemPosition)
+        val intervalSeconds = views.intervalSpinner.selectedItemPosition.let { getIntervalSeconds(it) }
 
         try {
             sensorDataManager.updateSensorConfig(sensorType, intervalSeconds)
             sensorDataManager.startSensor(sensorType)
 
-            views.statusText.text = "● Active"
-            views.statusText.setTextColor(getColor(android.R.color.holo_green_dark))
+            views.statusText?.let {
+                it.text = "● Active"
+                it.setTextColor(getColor(android.R.color.holo_green_dark))
+            }
 
             Toast.makeText(this, "${sensorType.name} started", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            views.statusText.text = "Error: ${e.message}"
-            views.statusText.setTextColor(getColor(android.R.color.holo_red_dark))
+            views.statusText?.let {
+                it.text = "Error: ${e.message}"
+                it.setTextColor(getColor(android.R.color.holo_red_dark))
+            }
             views.sensorSwitch.isChecked = false
             Toast.makeText(this, "Error starting sensor: ${e.message}", Toast.LENGTH_SHORT).show()
         }
@@ -202,8 +186,10 @@ class SensorsActivity : AppCompatActivity() {
 
         try {
             sensorDataManager.stopSensor(sensorType)
-            views.statusText.text = "Inactive"
-            views.statusText.setTextColor(getColor(android.R.color.darker_gray))
+            views.statusText?.let {
+                it.text = "Inactive"
+                it.setTextColor(getColor(android.R.color.darker_gray))
+            }
             Toast.makeText(this, "${sensorType.name} stopped", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(this, "Error stopping sensor: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -235,8 +221,8 @@ class SensorsActivity : AppCompatActivity() {
     private data class SensorCardViews(
         val sensorSwitch: SwitchMaterial,
         val intervalSpinner: Spinner,
-        val statusText: TextView,
-        val lastValueText: TextView,
-        val lastTimestampText: TextView
+        val statusText: TextView?,
+        val lastValueText: TextView?,
+        val lastTimestampText: TextView?
     )
 }

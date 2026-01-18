@@ -3,6 +3,11 @@ package com.example.closy
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Base64
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -15,7 +20,14 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import com.example.closy.sensors.LocationProvider
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -42,9 +54,16 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var photoPreviewCard: View
     private lateinit var photoPathText: TextView
+    private lateinit var periodicButton: MaterialButton
+    private lateinit var intervalSpinner: Spinner
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
+    private var periodicJob: Job? = null
+    private var periodicIntervalSeconds = 10 // default interval
+    private lateinit var locationProvider: LocationProvider
+    private val client = OkHttpClient()
+    private val JSON = "application/json; charset=utf-8".toMediaType()
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
@@ -67,6 +86,8 @@ class CameraActivity : AppCompatActivity() {
         statusText = findViewById(R.id.statusText)
         photoPreviewCard = findViewById(R.id.photoPreviewCard)
         photoPathText = findViewById(R.id.photoPathText)
+        periodicButton = findViewById(R.id.periodicButton)
+        intervalSpinner = findViewById(R.id.intervalSpinner)
 
         // Initialize camera executor
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -83,6 +104,27 @@ class CameraActivity : AppCompatActivity() {
         // Setup capture button
         captureButton.setOnClickListener {
             takePhoto()
+        }
+
+        // Setup interval spinner
+        setupIntervalSpinner(intervalSpinner)
+        intervalSpinner.setSelection(2) // Default to 10s
+        intervalSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                periodicIntervalSeconds = getIntervalSeconds(position)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        locationProvider = LocationProvider(this)
+        periodicButton.setOnClickListener {
+            if (periodicJob == null) {
+                startPeriodicCapture()
+                periodicButton.text = "Stop Periodic Capture"
+            } else {
+                stopPeriodicCapture()
+                periodicButton.text = "Start Periodic Capture"
+            }
         }
     }
 
@@ -140,33 +182,30 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun takePhoto() {
+    private fun takePhoto(periodic: Boolean = false) {
         val imageCapture = imageCapture ?: return
-
-        // Ustvarimo začasno datoteko
         val photoFile = File(
             externalMediaDirs.firstOrNull(),
             SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
                 .format(System.currentTimeMillis()) + ".jpg"
         )
-
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
-
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
                     cropImageToSquare(photoFile)
-
+                    if (periodic) {
+                        processAndSendImage(photoFile)
+                    } else {
+                        // Always send image to backend, even for manual photo
+                        processAndSendImage(photoFile)
+                    }
                     runOnUiThread {
-                        Toast.makeText(baseContext, "Kvadratna slika shranjena", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(baseContext, "Kvadratna slika shranjena", Toast.LENGTH_SHORT).show()
                     }
                 }
-
                 override fun onError(exc: ImageCaptureException) {
                     Log.e("Camera", "Photo capture failed: ${exc.message}", exc)
                 }
@@ -197,6 +236,95 @@ class CameraActivity : AppCompatActivity() {
         squareBitmap.recycle()
     }
 
+    private fun startPeriodicCapture() {
+        locationProvider.startLocationUpdates()
+        periodicJob = CoroutineScope(Dispatchers.Default).launch {
+            while (isActive) {
+                withContext(Dispatchers.Main) {
+                    takePhoto(periodic = true)
+                }
+                delay(periodicIntervalSeconds * 1000L)
+            }
+        }
+    }
+
+    private fun stopPeriodicCapture() {
+        periodicJob?.cancel()
+        periodicJob = null
+        locationProvider.stopLocationUpdates()
+    }
+
+    private fun processAndSendImage(file: File) {
+        // Resize to 640x480, convert to JPEG, encode to Base64
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        val resized = Bitmap.createScaledBitmap(bitmap, 640, 480, true)
+        val baos = ByteArrayOutputStream()
+        resized.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+        val imageBytes = baos.toByteArray()
+        val imageBase64 = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
+        bitmap.recycle()
+        resized.recycle()
+        // Get location
+        val location = locationProvider.getCurrentLocation()
+        // Get deviceId
+        val deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        // Prepare JSON
+        val json = buildJsonPayload(imageBase64, location, deviceId)
+        // Send to backend
+        sendImageToBackend(json)
+    }
+
+    private fun buildJsonPayload(imageBase64: String, location: com.example.closy.model.LocationData?, deviceId: String): String {
+        val locJson = if (location != null) {
+            """{"latitude":${location.latitude},"longitude":${location.longitude},"altitude":${location.altitude?:0},"accuracy":${location.accuracy?:0}}"""
+        } else {
+            "null"
+        }
+        val timestamp = System.currentTimeMillis()
+        return """{"timestamp":$timestamp,"location":$locJson,"imageBase64":"$imageBase64","deviceId":"$deviceId"}"""
+    }
+
+    private fun sendImageToBackend(json: String) {
+        val prefs = getSharedPreferences("ClosyPreferences", MODE_PRIVATE)
+        val serverUrl = prefs.getString("server_url", "http://10.0.2.2:5000/api") ?: "http://10.0.2.2:5000/api"
+        val url = serverUrl.replace("/api.*$".toRegex(), "/api/camera-images")
+        val body = json.toRequestBody(JSON)
+        val request = Request.Builder().url(url).post(body).build()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        Log.i("Camera", "Image sent successfully: ${response.body?.string()}")
+                    } else {
+                        Log.e("Camera", "Failed to send image: ${response.code} - ${response.message}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("Camera", "Exception sending image: ${e.message}")
+            }
+        }
+    }
+
+    private fun setupIntervalSpinner(spinner: Spinner) {
+        val intervals = arrayOf("1s", "5s", "10s", "30s", "1m", "5m", "10m")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, intervals)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+    }
+
+    private fun getIntervalSeconds(position: Int): Int {
+        return when (position) {
+            0 -> 1      // 1s
+            1 -> 5      // 5s
+            2 -> 10     // 10s
+            3 -> 30     // 30s
+            4 -> 60     // 1m
+            5 -> 300    // 5m
+            6 -> 600    // 10m
+            else -> 10
+        }
+    }
+
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
@@ -224,6 +352,7 @@ class CameraActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        stopPeriodicCapture()
     }
 
     override fun onSupportNavigateUp(): Boolean {

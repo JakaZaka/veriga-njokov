@@ -42,11 +42,11 @@
             </LinearLayout>
 
             <!-- GPS Card -->
-            <include layout="@layout/sensor_card_item"
+            <include layout="@layout/sensor_card_location"
                 android:id="@+id/gpsCard" />
 
             <!-- Camera Card -->
-            <include layout="@layout/sensor_card_item"
+            <include layout="@layout/sensor_card_camera"
                 android:id="@+id/cameraCard" />
 
 
@@ -54,4 +54,3 @@
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

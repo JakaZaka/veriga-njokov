@@ -24,6 +24,7 @@ app.get('/', (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads/camera', express.static(path.join(__dirname, 'uploads/camera')));
 
 // routes
 const userRoutes = require('./routes/userRoutes');
@@ -39,6 +40,7 @@ const sensorEventRoutes = require('./routes/sensorEventRoutes');
 const extremeEventRoutes = require('./routes/extremeEventRoutes');
 const locationHistoryRoutes = require('./routes/locationHistoryRoutes');
 const clothingRoutes = require('./routes/clothingRoutes');
+const cameraImageRoutes = require('./routes/cameraImageRoutes');
 
 
 process.env.PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:5001';
@@ -75,6 +77,7 @@ app.use('/api/events', sensorEventRoutes);
 app.use('/api/extreme-events', extremeEventRoutes);
 app.use('/api/location-history', locationHistoryRoutes);
 app.use('/api/clothing', clothingRoutes);
+app.use('/api/camera-images', cameraImageRoutes);
 /* Start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
