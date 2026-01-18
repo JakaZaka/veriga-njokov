@@ -23,6 +23,10 @@ class NetworkManager(private val serverUrl: String) {
     private val gson = Gson()
     private val JSON = "application/json; charset=utf-8".toMediaType()
 
+    // Extract base URL (remove /api/sensor-data if present)
+    private val baseUrl: String = serverUrl.replace("/api/sensor-data", "").replace("/api", "")
+    private val eventsUrl: String = "$baseUrl/api/events"
+
     /**
      * Send sensor data to server
      */
@@ -81,19 +85,29 @@ class NetworkManager(private val serverUrl: String) {
             val json = gson.toJson(event)
             val body = json.toRequestBody(JSON)
 
+            println("NetworkManager: Sending event to: $eventsUrl")
+            println("NetworkManager: Event JSON: $json")
+
             val request = Request.Builder()
-                .url("$serverUrl/events")
+                .url(eventsUrl)
                 .post(body)
                 .build()
 
             client.newCall(request).execute().use { response ->
+                println("NetworkManager: Response code: ${response.code}")
                 if (response.isSuccessful) {
-                    callback(true, response.body?.string())
+                    val responseBody = response.body?.string()
+                    println("NetworkManager: Success response: $responseBody")
+                    callback(true, responseBody)
                 } else {
-                    callback(false, "Error: ${response.code} - ${response.message}")
+                    val errorBody = response.body?.string()
+                    println("NetworkManager: Error response: $errorBody")
+                    callback(false, "Error: ${response.code} - ${response.message} - $errorBody")
                 }
             }
         } catch (e: Exception) {
+            println("NetworkManager: Exception: ${e.message}")
+            e.printStackTrace()
             callback(false, "Exception: ${e.message}")
         }
     }
@@ -107,7 +121,7 @@ class NetworkManager(private val serverUrl: String) {
             val body = json.toRequestBody(JSON)
 
             val request = Request.Builder()
-                .url("$serverUrl/events/batch")
+                .url("$eventsUrl/batch")
                 .post(body)
                 .build()
 

@@ -60,6 +60,9 @@ class EventManager(
                     storeId = storeId
                 )
 
+                println("EventManager: Created event with store_id: ${event.storeId}")
+                println("EventManager: Event location: ${event.location}")
+
                 // Add to history
                 addToHistory(event)
 
@@ -73,6 +76,8 @@ class EventManager(
                     }
                 }
             } catch (e: Exception) {
+                println("EventManager: Error publishing event: ${e.message}")
+                e.printStackTrace()
                 callback?.invoke(false, "Error publishing event: ${e.message}")
             }
         }

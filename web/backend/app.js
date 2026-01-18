@@ -36,6 +36,7 @@ const locationRoutes = require('./routes/locationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const desktopAdminRoutes = require('./routes/desktopAdminRoutes');
 const sensorEventRoutes = require('./routes/sensorEventRoutes');
+const extremeEventRoutes = require('./routes/extremeEventRoutes');
 const clothingRoutes = require('./routes/clothingRoutes');
 
 
@@ -70,6 +71,7 @@ app.use('/api/stores', clothingStoreRoutes);
 app.use('/api/enums', enumRoutes); 
 app.use('/api/locations', locationRoutes);
 app.use('/api/events', sensorEventRoutes);
+app.use('/api/extreme-events', extremeEventRoutes);
 app.use('/api/clothing', clothingRoutes);
 /* Start server
 const PORT = process.env.PORT || 8000;
