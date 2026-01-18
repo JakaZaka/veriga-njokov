@@ -103,11 +103,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Camera Card
-        findViewById<MaterialCardView>(R.id.cameraCard).setOnClickListener {
-            val intent = Intent(this, CameraActivity::class.java)
-            startActivity(intent)
-        }
 
         // History Card (Optional - placeholder for now)
         findViewById<MaterialCardView>(R.id.historyCard).setOnClickListener {

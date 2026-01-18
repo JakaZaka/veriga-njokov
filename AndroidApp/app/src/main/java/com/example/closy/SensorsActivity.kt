@@ -28,7 +28,6 @@ class SensorsActivity : AppCompatActivity() {
     // Required permissions
     private val requiredPermissions = arrayOf(
         Manifest.permission.CAMERA,
-        Manifest.permission.RECORD_AUDIO,
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
@@ -76,13 +75,8 @@ class SensorsActivity : AppCompatActivity() {
 
     private fun setupSensorCards() {
         val sensorConfigs = listOf(
-            Triple(R.id.accelerometerCard, SensorType.ACCELEROMETER, "Accelerometer"),
-            Triple(R.id.gyroscopeCard, SensorType.GYROSCOPE, "Gyroscope"),
-            Triple(R.id.lightCard, SensorType.LIGHT, "Light Sensor"),
-            Triple(R.id.proximityCard, SensorType.PROXIMITY, "Proximity"),
             Triple(R.id.gpsCard, SensorType.GPS, "GPS Location"),
-            Triple(R.id.cameraCard, SensorType.CAMERA, "Camera"),
-            Triple(R.id.microphoneCard, SensorType.MICROPHONE, "Microphone")
+            Triple(R.id.cameraCard, SensorType.CAMERA, "Camera")
         )
 
         for ((cardId, sensorType, name) in sensorConfigs) {

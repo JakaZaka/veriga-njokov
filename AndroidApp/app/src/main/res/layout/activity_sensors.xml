@@ -41,22 +41,6 @@
                     android:layout_marginStart="8dp" />
             </LinearLayout>
 
-            <!-- Accelerometer Card -->
-            <include layout="@layout/sensor_card_item"
-                android:id="@+id/accelerometerCard" />
-
-            <!-- Gyroscope Card -->
-            <include layout="@layout/sensor_card_item"
-                android:id="@+id/gyroscopeCard" />
-
-            <!-- Light Sensor Card -->
-            <include layout="@layout/sensor_card_item"
-                android:id="@+id/lightCard" />
-
-            <!-- Proximity Sensor Card -->
-            <include layout="@layout/sensor_card_item"
-                android:id="@+id/proximityCard" />
-
             <!-- GPS Card -->
             <include layout="@layout/sensor_card_item"
                 android:id="@+id/gpsCard" />
@@ -65,9 +49,6 @@
             <include layout="@layout/sensor_card_item"
                 android:id="@+id/cameraCard" />
 
-            <!-- Microphone Card -->
-            <include layout="@layout/sensor_card_item"
-                android:id="@+id/microphoneCard" />
 
         </LinearLayout>
     </ScrollView>
