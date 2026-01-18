@@ -3,88 +3,117 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="?android:attr/windowBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <!-- Title -->
+        <!-- Header -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add Clothing Item"
-            android:textSize="24sp"
+            android:text="Add New Clothing"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginBottom="24dp"/>
 
-        <!-- Camera/Gallery Buttons -->
+        <!-- Photo Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnCamera"
+                        style="@style/Widget.MaterialComponents.Button.Icon"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:text="Camera"
+                        app:icon="@android:drawable/ic_menu_camera"
+                        android:layout_marginEnd="8dp"/>
+
+                    <Button
+                        android:id="@+id/btnGallery"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:text="Gallery"
+                        app:icon="@android:drawable/ic_menu_gallery"/>
+                </LinearLayout>
+
+                <!-- KVADRATNA SLIKA: Uporaba ConstraintLayout znotraj za razmerje 1:1 -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp">
+
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- AI Info Section -->
         <LinearLayout
+            android:id="@+id/tvAIInfoContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
 
-            <Button
-                android:id="@+id/btnCamera"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tvAIConfidence"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="📷 Camera"
-                android:layout_marginEnd="8dp"/>
+                android:textColor="@android:color/holo_green_dark"
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
-            <Button
-                android:id="@+id/btnGallery"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tvAlternatives"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="🖼️ Gallery"/>
+                android:textSize="12sp"
+                android:alpha="0.7"
+                android:visibility="gone"/>
         </LinearLayout>
-
-        <!-- Image Preview -->
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="16dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            android:background="@android:color/darker_gray"/>
-
-        <!-- Progress Bar -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"/>
-
-        <!-- AI Results -->
-        <TextView
-            android:id="@+id/tvAIConfidence"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@android:color/holo_green_dark"
-            android:visibility="gone"/>
-
-        <TextView
-            android:id="@+id/tvAlternatives"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:visibility="gone"/>
-
-        <TextView
-            android:id="@+id/tvDetectedColors"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:visibility="gone"/>
 
         <!-- Form Container -->
         <LinearLayout
@@ -92,159 +121,155 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="16dp"
             android:visibility="gone">
 
             <!-- Name -->
-            <TextView
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Name *"
-                android:textStyle="bold"/>
+                android:layout_marginBottom="16dp"
+                android:hint="Item Name *">
 
-            <EditText
-                android:id="@+id/etName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="e.g. Black T-shirt"
-                android:layout_marginBottom="16dp"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Category -->
-            <TextView
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Category *"
-                android:textStyle="bold"/>
+                android:layout_marginBottom="16dp"
+                android:hint="Category">
 
-            <Spinner
-                android:id="@+id/categorySpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"/>
+                <AutoCompleteTextView
+                    android:id="@+id/categoryAutoComplete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Sub-category -->
-            <TextView
+            <!-- Sub-Category -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Sub-category"
-                android:textStyle="bold"/>
+                android:layout_marginBottom="16dp"
+                android:hint="Sub-category (e.g. Hoodie, V-neck)">
 
-            <EditText
-                android:id="@+id/etSubCategory"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="e.g. v-neck"
-                android:layout_marginBottom="16dp"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSubCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Color -->
-            <TextView
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Color"
-                android:textStyle="bold"/>
+                android:layout_marginBottom="16dp"
+                android:hint="Primary Color">
 
-            <Spinner
-                android:id="@+id/colorSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"/>
-
-            <!-- Size -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Size"
-                android:textStyle="bold"/>
-
-            <Spinner
-                android:id="@+id/sizeSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"/>
+                <AutoCompleteTextView
+                    android:id="@+id/colorAutoComplete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Season -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Season"
-                android:textStyle="bold"/>
+                android:text="Ideal Season"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="4dp"/>
 
-            <LinearLayout
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/seasonChipGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginBottom="16dp"
+                app:chipSpacingHorizontal="8dp">
 
-                <CheckBox
-                    android:id="@+id/cbSpring"
-                    android:layout_width="0dp"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSpring"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Spring"/>
+                    android:text="Spring 🌱" />
 
-                <CheckBox
-                    android:id="@+id/cbSummer"
-                    android:layout_width="0dp"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSummer"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Summer"/>
+                    android:text="Summer ☀️" />
 
-                <CheckBox
-                    android:id="@+id/cbFall"
-                    android:layout_width="0dp"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFall"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Fall"/>
+                    android:text="Fall 🍂" />
 
-                <CheckBox
-                    android:id="@+id/cbWinter"
-                    android:layout_width="0dp"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipWinter"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Winter"/>
-            </LinearLayout>
+                    android:text="Winter ❄️" />
+            </com.google.android.material.chip.ChipGroup>
 
             <!-- Notes -->
-            <TextView
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Notes"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginBottom="24dp"
+                android:hint="Notes">
 
-            <EditText
-                android:id="@+id/etNotes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Additional notes..."
-                android:minLines="3"
-                android:gravity="top"
-                android:layout_marginBottom="16dp"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:inputType="textMultiLine" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Action Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="16dp">
+                android:layout_marginBottom="32dp">
 
                 <Button
                     android:id="@+id/btnCancel"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="55dp"
                     android:layout_weight="1"
                     android:text="Cancel"
                     android:layout_marginEnd="8dp"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                    app:cornerRadius="8dp"/>
 
                 <Button
                     android:id="@+id/btnSave"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="55dp"
                     android:layout_weight="1"
-                    android:text="Save"/>
+                    android:text="Save Item"
+                    app:cornerRadius="8dp"/>
             </LinearLayout>
-
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>
