@@ -20,6 +20,6 @@ yarn-error.log
 .env.*
 *.env
 web/backend/.env
+web/docker-compose.yml
 
 DesktopApp.zip
-h
