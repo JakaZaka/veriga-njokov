@@ -5,7 +5,7 @@ services:
       - "5000:5000"
     command: npm start
     environment:
-      - MONGO_URI=mongodb+srv://closy:naj@veriganjokov.tiar0wm.mongodb.net/?retryWrites=true&w=majority&appName=VerigaNjokov
+      - MONGO_URI=mongodb+srv://closy:closy@veriganjokov.tiar0wm.mongodb.net/?retryWrites=true&w=majority&appName=VerigaNjokov
       - JWT_SECRET=your_jwt_secret
     depends_on:
       - mongo
