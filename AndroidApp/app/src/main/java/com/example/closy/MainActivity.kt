@@ -91,6 +91,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // Add Clothing Card - Nova pot do vašega modula za oblačila
+        findViewById<MaterialCardView>(R.id.addClothingCard)?.setOnClickListener {
+            val intent = Intent(this, AddClothingActivity::class.java)
+            startActivity(intent)
+        }
+
         // Events Card
         findViewById<MaterialCardView>(R.id.eventsCard).setOnClickListener {
             val intent = Intent(this, EventPublisherActivity::class.java)
@@ -116,7 +122,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadServerUrl() {
         val prefs = getSharedPreferences("ClosyPreferences", MODE_PRIVATE)
-        val savedUrl = prefs.getString("server_url", "http://your-server.com/api/sensor-data")
+
+        val defaultUrl = "http://${BuildConfig.SERVER_IP}:5000/api"
+
+        val savedUrl = prefs.getString("server_url", defaultUrl)
         serverUrlInput.setText(savedUrl)
     }
 
