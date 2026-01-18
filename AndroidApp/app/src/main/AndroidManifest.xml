@@ -64,6 +64,7 @@
             android:label="@string/settings"
             android:parentActivityName=".MainActivity"
             android:exported="false" />
+
     </application>
 
 </manifest>

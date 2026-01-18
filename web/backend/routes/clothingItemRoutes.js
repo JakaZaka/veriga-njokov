@@ -13,9 +13,15 @@ const {
   toggleWantToGet,
   transferItem
 } = require('../controllers/clothingItemController');
-const { protect } = require('../middleware/authMiddleware');
 
+
+const { protect } = require('../middleware/authMiddleware');
 const router = express.Router();
+
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 //router.use(protect);
 

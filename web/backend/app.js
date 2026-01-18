@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // routes
 const userRoutes = require('./routes/userRoutes');
-const clothingItemRoutes = require('./routes/clothingItemRoutes');
+//const clothingItemRoutes = require('./routes/clothingItemRoutes');
 const outfitRoutes = require('./routes/outfitRoutes');
 const weatherRoutes = require('./routes/weatherRoutes');
 const clothingStoreRoutes = require('./routes/clothingStoreRoutes');
@@ -36,6 +36,10 @@ const locationRoutes = require('./routes/locationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const desktopAdminRoutes = require('./routes/desktopAdminRoutes');
 const sensorEventRoutes = require('./routes/sensorEventRoutes');
+const clothingRoutes = require('./routes/clothingRoutes');
+
+
+process.env.PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:5001';
 
 
 var session = require('express-session');
@@ -59,13 +63,14 @@ app.use('/api/desktop-admin', desktopAdminRoutes);
 
 // API routes
 app.use('/api/users', userRoutes);
-app.use('/api/clothing', clothingItemRoutes);
+//app.use('/api/clothing', clothingItemRoutes);
 app.use('/api/outfits', outfitRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/stores', clothingStoreRoutes); 
 app.use('/api/enums', enumRoutes); 
 app.use('/api/locations', locationRoutes);
 app.use('/api/events', sensorEventRoutes);
+app.use('/api/clothing', clothingRoutes);
 /* Start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
