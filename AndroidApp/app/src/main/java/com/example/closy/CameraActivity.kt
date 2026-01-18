@@ -23,6 +23,14 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import android.view.View
 import android.widget.TextView
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Log
+import android.util.Rational
+import androidx.camera.core.UseCaseGroup
+import androidx.camera.core.ViewPort
+import java.io.FileOutputStream
 
 /**
  * Camera Activity - Allows users to take photos
@@ -95,7 +103,18 @@ class CameraActivity : AppCompatActivity() {
 
                 // Image capture
                 imageCapture = ImageCapture.Builder()
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                     .build()
+
+                val viewPort =
+                    ViewPort.Builder(Rational(1, 1), previewView.display.rotation).build()
+
+                val useCaseGroup = UseCaseGroup.Builder()
+                    .addUseCase(preview)
+                    .addUseCase(imageCapture!!)
+                    .setViewPort(viewPort)
+                    .build()
+
 
                 // Select back camera as default
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -112,6 +131,7 @@ class CameraActivity : AppCompatActivity() {
                 captureButton.isEnabled = true
 
             } catch (exc: Exception) {
+                Log.e("Camera", "Use case binding failed", exc)
                 statusText.isVisible = true
                 statusText.text = "Camera initialization failed: ${exc.message}"
                 captureButton.isEnabled = false
@@ -121,49 +141,60 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun takePhoto() {
-        // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
 
-        // Create time-stamped output file to hold the image
+        // Ustvarimo začasno datoteko
         val photoFile = File(
             externalMediaDirs.firstOrNull(),
             SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
                 .format(System.currentTimeMillis()) + ".jpg"
         )
 
-        // Create output options object which contains file + metadata
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-        // Set up image capture listener, which is triggered after photo has been taken
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exc: ImageCaptureException) {
-                    Toast.makeText(
-                        baseContext,
-                        "Photo capture failed: ${exc.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    photoPreviewCard.isVisible = true
-                    photoPathText.text = "Saved to: ${photoFile.absolutePath}"
+                    val savedUri = Uri.fromFile(photoFile)
+                    cropImageToSquare(photoFile)
 
-                    Toast.makeText(
-                        baseContext,
-                        "Photo saved successfully!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    runOnUiThread {
+                        Toast.makeText(baseContext, "Kvadratna slika shranjena", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
 
-                    // Hide the success message after 3 seconds
-                    photoPreviewCard.postDelayed({
-                        photoPreviewCard.isVisible = false
-                    }, 3000)
+                override fun onError(exc: ImageCaptureException) {
+                    Log.e("Camera", "Photo capture failed: ${exc.message}", exc)
                 }
             }
         )
+    }
+
+    private fun cropImageToSquare(file: File) {
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+        // Določimo krajšo stranico
+        val size = if (bitmap.width < bitmap.height) bitmap.width else bitmap.height
+
+        // Izračunamo sredino
+        val x = (bitmap.width - size) / 2
+        val y = (bitmap.height - size) / 2
+
+        // Ustvarimo kvadratno bitmapo
+        val squareBitmap = Bitmap.createBitmap(bitmap, x, y, size, size)
+
+        // Shranimo nazaj v isto datoteko
+        val out = FileOutputStream(file)
+        squareBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+        out.flush()
+        out.close()
+
+        bitmap.recycle()
+        squareBitmap.recycle()
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
