@@ -106,99 +106,102 @@ const classifyClothing = async (req, res) => {
  * 4. Omogoči uporabniku da prepiše katerikoli parameter
  * 5. Shrani v MongoDB
  */
+/**
+ * Ustvari clothing item Z AI klasifikacijo
+ */
+
 const createClothingItemWithAI = async (req, res) => {
-  try {
-    // Preveri če je image
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'Image is required'
-      });
-    }
-
-    // 1. Pokliči Python API za klasifikacijo
-    let aiResults = null;
     try {
-      const form = new FormData();
-      form.append('image', fs.createReadStream(req.file.path));
-
-      const pythonResponse = await axios.post(
-        `${PYTHON_API_URL}/api/classify`,
-        form,
-        {
-          headers: form.getHeaders(),
-          timeout: 30000
+        if (!req.file) {
+        return res.status(400).json({ success: false, message: 'Image is required' });
         }
-      );
 
-      aiResults = pythonResponse.data.data;
-    } catch (aiError) {
-      console.error('AI classification failed:', aiError.message);
-      // Nadaljuj brez AI rezultatov
+        // --- KLJUČNI POPRAVEK ZA SEASON ---
+        let { season } = req.body;
+        
+        // Če sezona pride iz Androida kot string "spring,summer", jo pretvori v ["spring", "summer"]
+        if (season && typeof season === 'string') {
+        season = season.split(',').map(s => s.trim());
+        } else if (!season) {
+        season = ['all'];
+        }
+        // ----------------------------------
+
+        // 1. Pokliči Python API za klasifikacijo
+        let aiResults = null;
+        try {
+        const form = new FormData();
+        form.append('image', fs.createReadStream(req.file.path));
+
+        const pythonResponse = await axios.post(
+            `${PYTHON_API_URL}/api/classify`,
+            form,
+            {
+            headers: form.getHeaders(),
+            timeout: 30000
+            }
+        );
+        aiResults = pythonResponse.data.data;
+        } catch (aiError) {
+        console.error('AI classification failed:', aiError.message);
+        }
+
+        // 2. Pripravi podatke za clothing item
+        const clothingData = {
+        name: req.body.name || (aiResults ? 
+            `${aiResults.primaryColor} ${aiResults.classification}` : 
+            'Untitled'),
+        
+        category: req.body.category || (aiResults?.category || 'other'),
+        subCategory: req.body.subCategory || (aiResults?.subCategory || ''),
+        color: req.body.color || (aiResults?.primaryColor || ''),
+        
+        // Uporabi obdelano spremenljivko season
+        season: season,
+        
+        size: req.body.size || '',
+        imageUrl: "/images/" + req.file.filename,
+        notes: req.body.notes || '',
+        user: req.user?._id || req.session.userId,
+        
+        metadata: {
+            aiClassification: aiResults ? {
+            classification: aiResults.classification,
+            confidence: aiResults.confidence,
+            colors: aiResults.colors,
+            top5: aiResults.top5,
+            timestamp: new Date()
+            } : null,
+            userOverride: {
+            category: req.body.category !== undefined,
+            subCategory: req.body.subCategory !== undefined,
+            color: req.body.color !== undefined
+            }
+        }
+        };
+
+        const clothingItem = new ClothingItem(clothingData);
+        const savedItem = await clothingItem.save();
+
+        res.status(201).json({
+        success: true,
+        data: {
+            clothingItem: savedItem,
+            aiResults: aiResults
+        }
+        });
+
+    } catch (error) {
+        console.error('Error creating clothing item:', error);
+        res.status(500).json({
+        success: false,
+        message: 'Failed to create clothing item',
+        error: error.message
+        });
     }
-
-    // 2. Pripravi podatke za clothing item
-    // Uporabi AI rezultate kot default, omogoči override iz req.body
-    const clothingData = {
-      name: req.body.name || (aiResults ? 
-        `${aiResults.primaryColor} ${aiResults.classification}` : 
-        'Untitled'),
-      
-      category: req.body.category || (aiResults?.category || 'other'),
-      
-      subCategory: req.body.subCategory || (aiResults?.subCategory || ''),
-      
-      color: req.body.color || (aiResults?.primaryColor || ''),
-      
-      season: req.body.season || ['all'],
-      
-      size: req.body.size || '',
-      
-      imageUrl: "/images/" + req.file.filename,
-      
-      notes: req.body.notes || '',
-      
-      user: req.user?._id || req.session.userId,
-      
-      // Shrani AI rezultate v metadata
-      metadata: {
-        aiClassification: aiResults ? {
-          classification: aiResults.classification,
-          confidence: aiResults.confidence,
-          colors: aiResults.colors,
-          top5: aiResults.top5,
-          timestamp: new Date()
-        } : null,
-        userOverride: {
-          category: req.body.category !== undefined,
-          subCategory: req.body.subCategory !== undefined,
-          color: req.body.color !== undefined
-        }
-      }
-    };
-
-    // 3. Ustvari clothing item
-    const clothingItem = new ClothingItem(clothingData);
-    const savedItem = await clothingItem.save();
-
-    // 4. Vrni rezultat
-    res.status(201).json({
-      success: true,
-      data: {
-        clothingItem: savedItem,
-        aiResults: aiResults // Vrni tudi AI rezultate za prikaz v UI
-      }
-    });
-
-  } catch (error) {
-    console.error('Error creating clothing item:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create clothing item',
-      error: error.message
-    });
-  }
 };
+
+ 
 
 /**
  * Posodobi clothing item

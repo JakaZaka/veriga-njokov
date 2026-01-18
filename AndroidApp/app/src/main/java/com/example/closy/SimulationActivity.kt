@@ -55,13 +55,20 @@ class SimulationActivity : AppCompatActivity() {
             finish()
         }
 
-        // Initialize managers
+        // 1. Določimo privzeti URL z uporabo vašega dinamičnega SERVER_IP
+        // Gradle zdaj samodejno vstavi vaš Wi-Fi IP naslov tukaj
+        val defaultUrl = "http://${BuildConfig.SERVER_IP}:5000/api"
+
+        // 2. Preberemo shranjen URL iz nastavitev, če obstaja, sicer uporabimo privzetega
         val serverUrl = getSharedPreferences("ClosyPreferences", MODE_PRIVATE)
-            .getString("server_url", "http://10.0.2.2:5000/api") ?: ""
+            .getString("server_url", defaultUrl) ?: defaultUrl
+
+        // 3. Inicializiramo managerje s pravilnim URL-jem
         networkManager = NetworkManager(serverUrl)
         eventManager = EventManager(this, networkManager)
         simulationManager = SimulationManager(this, eventManager)
 
+        // 4. Nastavimo preostali del UI
         initializeViews()
         setupStoreSpinner()
         setupListeners()

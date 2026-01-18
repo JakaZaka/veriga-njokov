@@ -11,7 +11,7 @@ interface ClothingApiService {
      * Klasificiraj sliko (samo AI, ne shrani)
      */
     @Multipart
-    @POST("api/clothing/classify")
+    @POST("api/classify")
     suspend fun classifyClothing(
         @Part image: MultipartBody.Part
     ): Response<ClassificationResponse>

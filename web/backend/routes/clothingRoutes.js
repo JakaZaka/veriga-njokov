@@ -63,7 +63,7 @@ router.post('/classify', upload.single('image'), classifyClothing);
  * @desc    Ustvari clothing item z AI klasifikacijo
  * @access  Protected
  */
-router.post('/create-with-ai', protect, upload.single('image'), createClothingItemWithAI);
+router.post('/create-with-ai', upload.single('image'), createClothingItemWithAI);
 
 /**
  * @route   GET /api/clothing/health

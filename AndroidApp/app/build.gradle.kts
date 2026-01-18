@@ -1,6 +1,30 @@
+import java.net.Inet4Address
+import java.net.NetworkInterface
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+}
+
+fun getLocalIp(): String {
+    try {
+        val interfaces = NetworkInterface.getNetworkInterfaces()
+        for (inter in interfaces) {
+            val addresses = inter.inetAddresses
+            for (addr in addresses) {
+                if (!addr.isLoopbackAddress && addr is Inet4Address) {
+                    val ip = addr.hostAddress
+                    // Vrne prvi IP, ki ni localhost (običajno 192.168.x.x)
+                    if (ip.startsWith("192.") || ip.startsWith("10.") || ip.startsWith("172.")) {
+                        return ip
+                    }
+                }
+            }
+        }
+    } catch (e: Exception) {
+        return "10.0.2.2" // Emulator default
+    }
+    return "10.0.2.2"
 }
 
 android {
@@ -13,6 +37,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        val ip = getLocalIp()
+        buildConfigField("String", "SERVER_IP", "\"$ip\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,6 +61,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
