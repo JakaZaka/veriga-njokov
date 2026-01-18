@@ -306,9 +306,9 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun setupIntervalSpinner(spinner: Spinner) {
-        val intervals = arrayOf("1s", "5s", "10s", "30s", "1m", "5m", "10m")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, intervals)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val intervals = arrayOf("1s", "5s", "10s", "30s", "1m", "5m", "10m", "1h", "12h", "24h")
+        val adapter = ArrayAdapter(this, R.layout.spinner_item_white, intervals)
+        adapter.setDropDownViewResource(R.layout.spinner_item_white)
         spinner.adapter = adapter
     }
 
@@ -321,6 +321,9 @@ class CameraActivity : AppCompatActivity() {
             4 -> 60     // 1m
             5 -> 300    // 5m
             6 -> 600    // 10m
+            7 -> 3600   // 1h
+            8 -> 43200  // 12h
+            9 -> 86400  // 24h
             else -> 10
         }
     }
