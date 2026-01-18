@@ -84,6 +84,17 @@
 
 
 
+        <activity
+            android:name=".CameraActivity"
+            android:label="Camera"
+            android:parentActivityName=".MainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MapLocationPickerActivity"
+            android:label="Select Location"
+            android:parentActivityName=".SimulationActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

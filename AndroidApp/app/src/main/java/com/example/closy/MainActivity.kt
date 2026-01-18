@@ -23,7 +23,7 @@ import java.util.Locale
  * - Navigation to main features:
  *   - Sensors Management
  *   - Simulated Sensors
- *   - Manual Events
+ *   - Extreme Events
  *   - History
  */
 class MainActivity : AppCompatActivity() {
@@ -100,6 +100,12 @@ class MainActivity : AppCompatActivity() {
         // Events Card
         findViewById<MaterialCardView>(R.id.eventsCard).setOnClickListener {
             val intent = Intent(this, EventPublisherActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Camera Card
+        findViewById<MaterialCardView>(R.id.cameraCard).setOnClickListener {
+            val intent = Intent(this, CameraActivity::class.java)
             startActivity(intent)
         }
 

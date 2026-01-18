@@ -16,6 +16,11 @@ const sensorEventSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    storeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ClothingStore',
+      required: false,
+    },
     location: {
       latitude: {
         type: Number,

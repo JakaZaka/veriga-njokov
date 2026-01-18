@@ -1,14 +1,15 @@
 package com.example.closy
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.closy.events.EventManager
 import com.example.closy.model.EventType
 import com.example.closy.network.NetworkManager
 import com.example.closy.simulation.*
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 
 class SimulationActivity : AppCompatActivity() {
@@ -20,30 +21,51 @@ class SimulationActivity : AppCompatActivity() {
     private var currentConfig: SimulationConfig? = null
     private var isSimulationRunning = false
 
+    // Activity result launcher for map location picker
+    private val mapLocationPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            result.data?.let { data ->
+                val latitude = data.getDoubleExtra("latitude", 46.5547)
+                val longitude = data.getDoubleExtra("longitude", 15.6459)
+                latitudeInput.setText(latitude.toString())
+                longitudeInput.setText(longitude.toString())
+                updateDisplays()
+                Toast.makeText(this, "Lokacija posodobljena", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     // UI components
     private lateinit var storeSpinner: Spinner
     private lateinit var rangeDisplay: TextView
     private lateinit var intervalDisplay: TextView
     private lateinit var locationDisplay: TextView
     private lateinit var statusText: TextView
-    private lateinit var simulationToggle: SwitchMaterial
 
     private lateinit var minValueInput: TextInputEditText
     private lateinit var maxValueInput: TextInputEditText
     private lateinit var intervalInput: TextInputEditText
+    private lateinit var latitudeInput: TextInputEditText
+    private lateinit var longitudeInput: TextInputEditText
 
     private lateinit var startStopButton: Button
+    private lateinit var selectOnMapButton: Button
 
-    // Store data with locations
-    data class Store(val name: String, val address: String, val lat: Double, val lng: Double)
+    // Store data with locations and MongoDB IDs
+    data class Store(
+        val name: String,
+        val address: String,
+        val lat: Double,
+        val lng: Double,
+        val storeId: String? = null  // MongoDB ObjectID, null for "Drugo"
+    )
 
     private val stores = listOf(
-        Store("H&M", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6459),
-        Store("Zara", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6461),
-        Store("C&A", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6463),
-        Store("New Yorker", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6465),
-        Store("Deichmann", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6467),
-        Store("dm", "Gosposvetska cesta 5, Maribor", 46.5547, 15.6469)
+        Store("H&M", "Vetrinjska ulica 22, Maribor", 46.5589617, 15.6479913, "683c82e19ebb2e3b6cd224b3"),
+        Store("ZARA", "Pobreška cesta 18, Maribor", 46.5534787, 15.6531013, "6830fc0250fe3e4f4364aef7"),
+        Store("Drugo", "Maribor", 46.5576, 15.6456, null)  // No store_id for "Drugo"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,13 +103,15 @@ class SimulationActivity : AppCompatActivity() {
         intervalDisplay = findViewById(R.id.intervalDisplay)
         locationDisplay = findViewById(R.id.locationDisplay)
         statusText = findViewById(R.id.statusText)
-        simulationToggle = findViewById(R.id.simulationToggle)
 
         minValueInput = findViewById(R.id.minValueInput)
         maxValueInput = findViewById(R.id.maxValueInput)
         intervalInput = findViewById(R.id.intervalInput)
+        latitudeInput = findViewById(R.id.latitudeInput)
+        longitudeInput = findViewById(R.id.longitudeInput)
 
         startStopButton = findViewById(R.id.startStopButton)
+        selectOnMapButton = findViewById(R.id.selectOnMapButton)
     }
 
     private fun setupStoreSpinner() {
@@ -98,6 +122,10 @@ class SimulationActivity : AppCompatActivity() {
 
         storeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                // Set location inputs to selected store's location
+                val selectedStore = stores[position]
+                latitudeInput.setText(selectedStore.lat.toString())
+                longitudeInput.setText(selectedStore.lng.toString())
                 updateDisplays()
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -105,13 +133,6 @@ class SimulationActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        simulationToggle.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked && !isSimulationRunning) {
-                startSimulation()
-            } else if (!isChecked && isSimulationRunning) {
-                stopSimulation()
-            }
-        }
 
         startStopButton.setOnClickListener {
             if (isSimulationRunning) {
@@ -121,10 +142,16 @@ class SimulationActivity : AppCompatActivity() {
             }
         }
 
+        selectOnMapButton.setOnClickListener {
+            openMapLocationPicker()
+        }
+
         // Update displays when values change
         minValueInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
         maxValueInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
         intervalInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
+        latitudeInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
+        longitudeInput.setOnFocusChangeListener { _, _ -> updateDisplays() }
     }
 
     private fun updateDisplays() {
@@ -147,17 +174,17 @@ class SimulationActivity : AppCompatActivity() {
             val minVal = minValueInput.text.toString().toDouble()
             val maxVal = maxValueInput.text.toString().toDouble()
             val interval = intervalInput.text.toString().toInt()
+            val latitude = latitudeInput.text.toString().toDouble()
+            val longitude = longitudeInput.text.toString().toDouble()
             val selectedStore = stores[storeSpinner.selectedItemPosition]
 
             if (minVal >= maxVal) {
                 Toast.makeText(this, "Spodnja meja mora biti manjša od zgornje!", Toast.LENGTH_LONG).show()
-                simulationToggle.isChecked = false
                 return
             }
 
             if (interval <= 0) {
                 Toast.makeText(this, "Interval mora biti večji od 0!", Toast.LENGTH_LONG).show()
-                simulationToggle.isChecked = false
                 return
             }
 
@@ -172,12 +199,13 @@ class SimulationActivity : AppCompatActivity() {
                 intervalMinutes = interval,
                 manualLocation = ManualLocation(
                     address = "${selectedStore.name}, ${selectedStore.address}",
-                    latitude = selectedStore.lat,
-                    longitude = selectedStore.lng
+                    latitude = latitude,
+                    longitude = longitude
                 ),
                 valueType = ValueType.RANDOM,
                 descriptionTemplate = DescriptionTemplate.PEOPLE_COUNT,
-                enabled = true
+                enabled = true,
+                storeId = selectedStore.storeId  // Include store_id (null for "Drugo")
             )
 
             currentConfig?.let {
@@ -191,7 +219,6 @@ class SimulationActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Toast.makeText(this, "Napaka: ${e.message}", Toast.LENGTH_LONG).show()
-            simulationToggle.isChecked = false
         }
     }
 
@@ -205,7 +232,6 @@ class SimulationActivity : AppCompatActivity() {
             saveState()
             Toast.makeText(this, "⏹️ Simulacija ustavljena", Toast.LENGTH_SHORT).show()
         }
-        simulationToggle.isChecked = false
     }
 
     private fun updateStatusDisplay(isEnabled: Boolean) {
@@ -246,9 +272,19 @@ class SimulationActivity : AppCompatActivity() {
 
         if (wasRunning) {
             // Restart simulation
-            simulationToggle.isChecked = true
             startSimulation()
         }
+    }
+
+    private fun openMapLocationPicker() {
+        val currentLat = latitudeInput.text.toString().toDoubleOrNull() ?: 46.5547
+        val currentLng = longitudeInput.text.toString().toDoubleOrNull() ?: 15.6459
+
+        val intent = Intent(this, MapLocationPickerActivity::class.java).apply {
+            putExtra("latitude", currentLat)
+            putExtra("longitude", currentLng)
+        }
+        mapLocationPickerLauncher.launch(intent)
     }
 
     override fun onDestroy() {

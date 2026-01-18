@@ -28,7 +28,10 @@ data class DigitalTwinEvent(
     val description: String,
 
     @SerializedName("metadata")
-    val metadata: Map<String, Any> = emptyMap()
+    val metadata: Map<String, Any> = emptyMap(),
+
+    @SerializedName("store_id")
+    val storeId: String? = null  // Optional MongoDB ObjectID for linking to ClothingStore
 )
 
 /**
