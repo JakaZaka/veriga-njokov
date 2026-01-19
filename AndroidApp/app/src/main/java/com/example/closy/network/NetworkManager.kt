@@ -23,6 +23,10 @@ class NetworkManager(private val serverUrl: String) {
     private val gson = Gson()
     private val JSON = "application/json; charset=utf-8".toMediaType()
 
+    // Extract base URL (remove /api/sensor-data if present)
+    private val baseUrl: String = serverUrl.replace("/api/sensor-data", "").replace("/api", "")
+    private val eventsUrl: String = "$baseUrl/api/events"
+
     /**
      * Send sensor data to server
      */
@@ -81,8 +85,43 @@ class NetworkManager(private val serverUrl: String) {
             val json = gson.toJson(event)
             val body = json.toRequestBody(JSON)
 
+            println("NetworkManager: Sending event to: $eventsUrl")
+            println("NetworkManager: Event JSON: $json")
+
             val request = Request.Builder()
-                .url("$serverUrl/events")
+                .url(eventsUrl)
+                .post(body)
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                println("NetworkManager: Response code: ${response.code}")
+                if (response.isSuccessful) {
+                    val responseBody = response.body?.string()
+                    println("NetworkManager: Success response: $responseBody")
+                    callback(true, responseBody)
+                } else {
+                    val errorBody = response.body?.string()
+                    println("NetworkManager: Error response: $errorBody")
+                    callback(false, "Error: ${response.code} - ${response.message} - $errorBody")
+                }
+            }
+        } catch (e: Exception) {
+            println("NetworkManager: Exception: ${e.message}")
+            e.printStackTrace()
+            callback(false, "Exception: ${e.message}")
+        }
+    }
+
+    /**
+     * Send batch of events to server
+     */
+    fun sendBatchEvents(events: List<DigitalTwinEvent>, callback: (Boolean, String?) -> Unit) {
+        try {
+            val json = gson.toJson(events)
+            val body = json.toRequestBody(JSON)
+
+            val request = Request.Builder()
+                .url("$eventsUrl/batch")
                 .post(body)
                 .build()
 
@@ -99,28 +138,35 @@ class NetworkManager(private val serverUrl: String) {
     }
 
     /**
-     * Send batch of events to server
+     * Send GPS location data to server (for LocationHistory)
      */
-    fun sendBatchEvents(events: List<DigitalTwinEvent>, callback: (Boolean, String?) -> Unit) {
+    fun sendLocationData(locationData: com.example.closy.model.LocationData, callback: (Boolean, String?) -> Unit) {
         try {
-            val json = gson.toJson(events)
+            val json = gson.toJson(mapOf(
+                "timestamp" to System.currentTimeMillis(),
+                "location" to locationData
+            ))
+            println("[NetworkManager] Sending location to $baseUrl/api/location-history: $json")
             val body = json.toRequestBody(JSON)
 
+            val url = "$baseUrl/api/location-history"
             val request = Request.Builder()
-                .url("$serverUrl/events/batch")
+                .url(url)
                 .post(body)
                 .build()
 
             client.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
+                    println("[NetworkManager] Location sent successfully: ${response.body?.string()}")
                     callback(true, response.body?.string())
                 } else {
+                    println("[NetworkManager] Failed to send location: ${response.code} - ${response.message}")
                     callback(false, "Error: ${response.code} - ${response.message}")
                 }
             }
         } catch (e: Exception) {
+            println("[NetworkManager] Exception: ${e.message}")
             callback(false, "Exception: ${e.message}")
         }
     }
 }
-

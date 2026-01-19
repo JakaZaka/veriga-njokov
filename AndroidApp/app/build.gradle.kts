@@ -1,6 +1,30 @@
+import java.net.Inet4Address
+import java.net.NetworkInterface
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+}
+
+fun getLocalIp(): String {
+    try {
+        val interfaces = NetworkInterface.getNetworkInterfaces()
+        for (inter in interfaces) {
+            val addresses = inter.inetAddresses
+            for (addr in addresses) {
+                if (!addr.isLoopbackAddress && addr is Inet4Address) {
+                    val ip = addr.hostAddress
+                    // Vrne prvi IP, ki ni localhost (običajno 192.168.x.x)
+                    if (ip.startsWith("192.") || ip.startsWith("10.") || ip.startsWith("172.")) {
+                        return ip
+                    }
+                }
+            }
+        }
+    } catch (e: Exception) {
+        return "10.0.2.2" // Emulator default
+    }
+    return "10.0.2.2"
 }
 
 android {
@@ -13,6 +37,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        val ip = getLocalIp()
+        buildConfigField("String", "SERVER_IP", "\"$ip\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,6 +61,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -48,6 +75,7 @@ dependencies {
 
     // OkHttp for network communication
     implementation(libs.okhttp)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     // Gson for JSON serialization
     implementation(libs.gson)
@@ -71,4 +99,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
 }

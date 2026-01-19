@@ -36,6 +36,9 @@ class SensorDataManager(
     // Jobs for periodic data collection
     private val sensorJobs = ConcurrentHashMap<SensorType, Job>()
 
+    // Job za periodično pošiljanje GPS lokacije
+    private var gpsLocationJob: Job? = null
+
     init {
         // Initialize sensor configurations
         SensorType.values().forEach { type ->
@@ -168,14 +171,39 @@ class SensorDataManager(
             }
             SensorType.GPS -> {
                 locationProvider.startLocationUpdates()
+                // Začni periodično pošiljanje GPS lokacije na backend
+                gpsLocationJob?.cancel()
+                gpsLocationJob = CoroutineScope(Dispatchers.Default).launch {
+                    println("[GPS] Coroutine started, config.isEnabled = ${config.isEnabled}")
+                    while (isActive && config.isEnabled) {
+                        val location = locationProvider.getCurrentLocation()
+                        println("[GPS] getCurrentLocation() = $location")
+                        location?.let {
+                            withContext(Dispatchers.IO) {
+                                println("[GPS] Sending location to backend: $it")
+                                networkManager.sendLocationData(it) { success, message ->
+                                    if (success) {
+                                        println("[GPS] Location sent successfully: $message")
+                                    } else {
+                                        println("[GPS] Failed to send GPS location: $message")
+                                    }
+                                }
+                            }
+                        }
+                        delay(config.samplingIntervalSeconds * 1000L)
+                    }
+                    println("[GPS] Coroutine ended")
+                }
             }
             else -> {
                 // Camera and Microphone handled separately
             }
         }
 
-        // Start periodic data upload
-        startPeriodicUpload(sensorType)
+        // Start periodic data upload (za ostale senzorje)
+        if (sensorType != SensorType.GPS) {
+            startPeriodicUpload(sensorType)
+        }
     }
 
     /**
@@ -191,13 +219,19 @@ class SensorDataManager(
             SensorType.LIGHT -> sensorManager.unregisterListener(lightListener)
             SensorType.PROXIMITY -> sensorManager.unregisterListener(proximityListener)
             SensorType.TEMPERATURE -> sensorManager.unregisterListener(temperatureListener)
-            SensorType.GPS -> locationProvider.stopLocationUpdates()
+            SensorType.GPS -> {
+                locationProvider.stopLocationUpdates()
+                gpsLocationJob?.cancel()
+                gpsLocationJob = null
+            }
             else -> {}
         }
 
-        // Cancel periodic upload job
-        sensorJobs[sensorType]?.cancel()
-        sensorJobs.remove(sensorType)
+        // Cancel periodic upload job (za ostale senzorje)
+        if (sensorType != SensorType.GPS) {
+            sensorJobs[sensorType]?.cancel()
+            sensorJobs.remove(sensorType)
+        }
     }
 
     /**

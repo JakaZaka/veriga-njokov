@@ -58,9 +58,13 @@ class EventPublisherActivity : AppCompatActivity() {
             finish()
         }
 
-        // Initialize network and event manager
+        // Initialize network and event manager - use same approach as SimulationActivity
+        val defaultUrl = "http://${BuildConfig.SERVER_IP}:5000/api"
         val serverUrl = getSharedPreferences("ClosyPreferences", MODE_PRIVATE)
-            .getString("server_url", "http://your-server.com/api/sensor-data") ?: ""
+            .getString("server_url", defaultUrl) ?: defaultUrl
+
+        println("EventPublisher: Using server URL: $serverUrl")
+
         networkManager = NetworkManager(serverUrl)
         eventManager = EventManager(this, networkManager)
 
@@ -171,8 +175,16 @@ class EventPublisherActivity : AppCompatActivity() {
         // Prepare metadata
         val metadata = mutableMapOf<String, Any>(
             "store" to selectedStore.name,
-            "category" to selectedCategory
+            "category" to selectedCategory,
+            "is_extreme" to true,  // Mark as extreme event
+            "source" to "manual"   // User-created extreme event
         )
+
+        println("EventPublisher: Publishing event")
+        println("EventPublisher: Store: ${selectedStore.name}, StoreId: ${selectedStore.storeId}")
+        println("EventPublisher: Location: ${selectedStore.location}")
+        println("EventPublisher: Title: $title")
+        println("EventPublisher: Category: $selectedCategory")
 
         // Publish event
         publishButton.isEnabled = false
@@ -194,6 +206,7 @@ class EventPublisherActivity : AppCompatActivity() {
                     clearForm()
                 } else {
                     Toast.makeText(this, "Napaka: $message", Toast.LENGTH_LONG).show()
+                    println("EventPublisher: Error - $message")
                 }
             }
         }

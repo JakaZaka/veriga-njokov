@@ -84,13 +84,8 @@ class CameraManager(private val context: Context) {
             return
         }
 
-        // Create output file
-        val photoDir = File(context.filesDir, "photos")
-        if (!photoDir.exists()) {
-            photoDir.mkdirs()
-        }
+        val photoDir = File(context.filesDir, "photos").apply { if (!exists()) mkdirs() }
         val photoFile = File(photoDir, "photo_${System.currentTimeMillis()}.jpg")
-
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
         imageCapture.takePicture(
@@ -98,16 +93,25 @@ class CameraManager(private val context: Context) {
             cameraExecutor,
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    // Get image dimensions
-                    val options = BitmapFactory.Options().apply {
-                        inJustDecodeBounds = true
+                    // --- TUKAJ DODAMO OBREZOVANJE NA KVADRAT ---
+                    val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+
+                    // Izračunamo dimenzije za kvadrat (vzrejam sredinski del)
+                    val size = if (bitmap.width < bitmap.height) bitmap.width else bitmap.height
+                    val x = (bitmap.width - size) / 2
+                    val y = (bitmap.height - size) / 2
+
+                    val squareBitmap = Bitmap.createBitmap(bitmap, x, y, size, size)
+
+                    // Shranimo obrezano sliko nazaj čez original
+                    FileOutputStream(photoFile).use { out ->
+                        squareBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
                     }
-                    BitmapFactory.decodeFile(photoFile.absolutePath, options)
 
                     val cameraData = CameraData(
                         imagePath = photoFile.absolutePath,
-                        width = options.outWidth,
-                        height = options.outHeight
+                        width = size,
+                        height = size
                     )
                     callback(cameraData)
                 }

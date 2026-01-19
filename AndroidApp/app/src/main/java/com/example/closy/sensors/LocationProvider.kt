@@ -78,9 +78,8 @@ class LocationProvider(private val context: Context) {
                 latitude = it.latitude,
                 longitude = it.longitude,
                 altitude = if (it.hasAltitude()) it.altitude else null,
-                accuracy = if (it.hasAccuracy()) it.accuracy else null
+                accuracy = if (it.hasAccuracy()) it.accuracy.toDouble() else null
             )
         }
     }
 }
-
