@@ -1,27 +1,15 @@
 package si.um.feri.closyMap;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
-import com.badlogic.gdx.utils.ScreenUtils;
-
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
@@ -34,18 +22,20 @@ import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ScreenUtils;
-
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.VisDialog;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisSlider;
-import com.kotcrab.vis.ui.widget.VisTable;
-import com.kotcrab.vis.ui.widget.VisTextButton;
-import com.kotcrab.vis.ui.widget.VisTextField;
+
+import si.um.feri.closyMap.ui.*;
+
 
 
 import java.io.IOException;
@@ -68,8 +58,6 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     private LocationDTO selectedStore = null;
     private UserDTO selectedUser = null;
-
-    private BitmapFont font;
 
     private ShapeRenderer shapeRenderer;
 
@@ -104,9 +92,10 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     //UI
     private Stage uiStage;
-    private VisDialog infoDialog;
+    private BitmapFont uiFont;
+    private ModernUI ui;
 
-    private VisTable storePanel;
+
     private boolean storePanelVisible = false;
 
     private ObjectMap<String, StoreOccupancyDTO> occupancyMap =
@@ -124,7 +113,6 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     private boolean simulationMode = false;
 
-    private VisTable timePanel;
     private boolean timePanelVisible = false;
 
     private boolean playMode = false;
@@ -134,13 +122,17 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     private int playDay = 1;   // 1–7
     private int playHour = 0;  // 0–23
-    private VisLabel timeStatusLabel;
-
-    private VisSlider timeSlider;
     private boolean sliderDragging = false;
 
-    private VisTextButton playButton;
-    private VisTextButton pauseButton;
+
+    private Table storePanel;
+    private Table timePanel;
+    private Label timeStatusLabel;
+    private Slider timeSlider;
+    private TextButton playButton;
+    private TextButton pauseButton;
+    private Table infoPopup;
+
 
 
 
@@ -153,18 +145,19 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         storeIcon = new Texture("store.png");
         currentLocationIcon = new Texture("currentLocation.png");
         batch = new SpriteBatch();
-        font = new BitmapFont(Gdx.files.internal("font/textFont.fnt"));
 
-
-        VisUI.load(VisUI.SkinScale.X1);
 
         uiStage = new Stage(
             new ExtendViewport(1280, 720)
         );
+
+        uiFont = new BitmapFont(Gdx.files.internal("font/uiText.fnt"));
+        ui = new ModernUI(uiFont);
+
         createToggleStoreButton();
 
 
-        timeSlider = new VisSlider(0, 7 * 24 - 1, 1, false);
+        timeSlider = ui.slider(0, 7 * 24 - 1, 1);
         timeSlider.setWidth(320);
         timeSlider.setVisible(false);
 
@@ -192,22 +185,18 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
 
 
-        VisTable statusChip = new VisTable(true);
-        statusChip.setBackground("window"); // VisUI stil
-        statusChip.pad(10, 16, 10, 16);
+        Table statusChip = ui.panel();
+        statusChip.pad(10, 20, 10, 20);
 
-        timeStatusLabel = new VisLabel("");
+        timeStatusLabel = ui.label("");
         timeStatusLabel.setAlignment(Align.center);
-        timeStatusLabel.setFontScale(1.1f);
-        timeStatusLabel.setColor(Color.WHITE);
 
-        statusChip.add(timeStatusLabel).center();
+        statusChip.add(timeStatusLabel);
 
         Table statusWrapper = new Table();
         statusWrapper.setFillParent(true);
         statusWrapper.top().padTop(12);
-
-        statusWrapper.add(statusChip).center();
+        statusWrapper.add(statusChip);
 
         uiStage.addActor(statusWrapper);
 
@@ -226,20 +215,13 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         ApiService.loadStoreLocations(data -> {
             storeLocations = data;
 
-            generateFakeOccupancy();
+            loadLiveOccupancy();
 
             if (storePanel != null) storePanel.remove();
             createStorePanel();
         });
         ApiService.loadUsers(data -> users = data);
 
-//        ApiService.loadStoreOccupancy(data -> {
-//            occupancyMap.clear();
-//
-//            for (StoreOccupancyDTO occ : data) {
-//                occupancyMap.put(occ.storeId, occ);
-//            }
-//        });
 
 
 
@@ -287,17 +269,16 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
                 Vector3 world = new Vector3(screenX, screenY, 0);
                 camera.unproject(world);
 
-                if (infoDialog != null) {
-                    infoDialog.remove();
-                    infoDialog = null;
+                if (infoPopup != null) {
+                    infoPopup.remove();
+                    infoPopup = null;
                 }
 
                 popupPos.set(world.x + 20, world.y + 20);
                 popupAlpha = 0f;
 
 
-                //selectedStore = null;
-                //selectedUser = null;
+
 
                 float clickRadius = 45f * camera.zoom;
 
@@ -393,11 +374,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         );
 
 
-//        camera.position.set(
-//            Constants.MAP_WIDTH / 2f,
-//            Constants.MAP_HEIGHT / 2f,
-//            0
-//        );
+
 
         camera.zoom = 1f;
 
@@ -468,12 +445,12 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
         popupAlpha = Math.min(1f, popupAlpha + Gdx.graphics.getDeltaTime() * 6f);
-        //updateTileZoomIfNeeded();
+
         if (!simulationMode) {
             occupancyTimer += Gdx.graphics.getDeltaTime();
 
-            if (occupancyTimer > 20f) {
-                generateFakeOccupancy();
+            if (occupancyTimer > 300f) {
+                loadLiveOccupancy();
                 occupancyTimer = 0f;
             }
         }
@@ -513,27 +490,11 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         float scale = MathUtils.clamp(1f / camera.zoom, 0.01f, 1.4f);
         float iconSize = baseIconSize / scale;
 
-        Vector2 marker = MapRasterTiles.getPixelPosition(
-            MARKER_GEOLOCATION.lat,
-            MARKER_GEOLOCATION.lng,
-            beginTile.x,
-            beginTile.y
-        );
-
-
-        batch.draw(
-            currentLocationIcon,
-            marker.x - iconSize / 2,
-            marker.y - iconSize / 2,
-            iconSize,
-            iconSize
-        );
-
 
         // STORES
         for (LocationDTO loc : storeLocations) {
             if (loc.coordinates == null || loc.coordinates.coordinates == null) {
-                System.out.println("❌ STORE WITHOUT COORDINATES: " + loc._id);
+                System.out.println("STORE WITHOUT COORDINATES: " + loc._id);
                 continue;
             }
             float lon = loc.coordinates.coordinates[0];
@@ -583,7 +544,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         int segments = 60;
 
         float startAngle = -90f;
-        //float sweepAngle = 360f * fill;
+
 
         shapeRenderer.setColor(new Color(0.7f, 0.7f, 0.7f, 0.4f));
 
@@ -670,49 +631,92 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
 
     private void showInfoPopup() {
-        if (infoDialog != null) {
-            infoDialog.remove();
+        // Remove old popup
+        if (infoPopup != null) {
+            infoPopup.remove();
+            infoPopup = null;
         }
 
-        infoDialog = new VisDialog("Location info");
-        infoDialog.setModal(false);
-        infoDialog.setMovable(true);
-        infoDialog.setResizable(false);
+        Table content = ui.panel();
+        content.defaults().left().padBottom(4);
 
-        Table content = infoDialog.getContentTable();
-        content.defaults().pad(6).left();
 
+        content.add(ui.subtitle(
+            selectedStore != null ? "Store info" : "User info"
+        )).row();
+        content.add(createDivider()).growX().height(1).pad(6, 0, 8, 0).row();
+
+        // Store info
         if (selectedStore != null) {
-            content.add(new VisLabel("Store:")).row();
-            content.add(new VisLabel(selectedStore.clothingStoreId.name)).row();
+            content.add(ui.mutedLabel("Name")).row();
+            content.add(ui.label(selectedStore.clothingStoreId.name)).row();
 
-            content.add(new VisLabel("Website:")).row();
-            content.add(new VisLabel(selectedStore.clothingStoreId.website)).row();
+            content.add(ui.mutedLabel("Website")).padTop(4).row();
+            content.add(ui.label(selectedStore.clothingStoreId.website)).row();
 
-            content.add(new VisLabel("Address:")).row();
-            content.add(new VisLabel(selectedStore.address)).row();
-        }
+            content.add(ui.mutedLabel("Address")).padTop(4).row();
+            content.add(ui.label(selectedStore.address)).row();
 
-        if (selectedUser != null) {
-            content.add(new VisLabel("User:")).row();
-            content.add(new VisLabel(selectedUser.username)).row();
+            Integer people = getOccupancyForStore(selectedStore);
 
-            content.add(new VisLabel("Email:")).row();
-            content.add(new VisLabel(selectedUser.email)).row();
+            content.add(ui.mutedLabel(
+                simulationMode ? "Simulated occupancy" : "Current occupancy"
+            )).padTop(6).row();
 
-            if (selectedUser.location != null) {
-                content.add(new VisLabel("Address:")).row();
-                content.add(new VisLabel(selectedUser.location.address)).row();
+            if (people != null) {
+                content.add(
+                    ui.label(people + " people")
+                ).row();
+            } else {
+                content.add(
+                    ui.mutedLabel("No data")
+                ).row();
             }
         }
 
-        infoDialog.button("Close");
-        infoDialog.pack();
-        infoDialog.show(uiStage);
 
 
-        infoDialog.setPosition(20, 20);
+        // User info
+        if (selectedUser != null) {
+            content.add(ui.mutedLabel("Username")).row();
+            content.add(ui.label(selectedUser.username)).row();
+
+            content.add(ui.mutedLabel("Email")).padTop(4).row();
+            content.add(ui.label(selectedUser.email)).row();
+
+            if (selectedUser.location != null) {
+                content.add(ui.mutedLabel("Address")).padTop(4).row();
+                content.add(ui.label(selectedUser.location.address)).row();
+            }
+        }
+
+
+        TextButton close = ui.secondaryButton("Close");
+        close.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                infoPopup.addAction(Actions.sequence(
+                    Actions.fadeOut(0.15f),
+                    Actions.removeActor()
+                ));
+                infoPopup = null;
+            }
+        });
+
+        content.add(close).padTop(10).width(150);
+
+
+        infoPopup = new Table();
+        infoPopup.setFillParent(true);
+        infoPopup.bottom().left().pad(20);
+        infoPopup.add(content);
+
+        infoPopup.getColor().a = 0f;
+        infoPopup.addAction(Actions.fadeIn(0.2f));
+
+        uiStage.addActor(infoPopup);
     }
+
 
 
     @Override
@@ -789,16 +793,6 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         camera.viewportWidth = width;
         camera.viewportHeight = height;
         camera.update();
-
-        if (storePanel == null) return;
-
-        Actor content = storePanel.getChildren().first();
-
-        if (storePanelVisible) {
-            content.setPosition(width - content.getWidth(), height - content.getHeight());
-        } else {
-            content.setPosition(width, height - content.getHeight());
-        }
     }
 
 
@@ -843,41 +837,36 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     }
 
     private void createToggleStoreButton() {
-        VisTextButton toggleButton = new VisTextButton("Stores");
-        VisTextButton timeButton = new VisTextButton("Time");
-        VisTextButton nowButton = new VisTextButton("Now");
-        playButton = new VisTextButton("▶ Play");
-        pauseButton = new VisTextButton("⏸ Pause");
+        Table root = ui.panel();
 
+        TextButton stores = ui.secondaryButton("Stores");
+        TextButton time = ui.secondaryButton("Time");
+        TextButton now = ui.secondaryButton("Now");
+        playButton = ui.button("Play");
+        pauseButton = ui.dangerButton("Pause");
         pauseButton.setVisible(false);
 
-        Table root = new Table();
-        root.setFillParent(true);
-        root.top().left().pad(16);
-
-        root.add(toggleButton).width(120).height(40);
-
-        root.row().padTop(8);
-        root.add(timeButton).width(120).height(40);
-
-        root.row().padTop(6);
-        root.add(nowButton).width(120).height(40);
-
-        root.row().padTop(6);
-        root.add(playButton).width(120).height(40);
-
-        root.row().padTop(6);
-        root.add(pauseButton).width(120).height(40);
+        root.add(stores).width(120).row();
+        root.add(time).padTop(8).width(120).row();
+        root.add(now).padTop(8).width(120).row();
+        root.add(playButton).padTop(8).width(120).row();
+        root.add(pauseButton).padTop(8).width(120);
 
 
-        toggleButton.addListener(new ClickListener() {
+        Table wrapper = new Table();
+        wrapper.setFillParent(true);
+        wrapper.top().left().pad(16);
+        wrapper.add(root);
+
+
+        stores.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 toggleStorePanel();
             }
         });
 
-        timeButton.addListener(new ClickListener() {
+        time.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 toggleTimePanel();
@@ -889,7 +878,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
             }
         });
 
-        nowButton.addListener(new ClickListener() {
+        now.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 playMode = false;
@@ -898,7 +887,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
                 pauseButton.setVisible(false);
                 timeSlider.setVisible(false);
 
-                generateFakeOccupancy();
+                loadLiveOccupancy();
                 updateTimeStatusLabel();
 
             }
@@ -930,50 +919,26 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         });
 
 
-        uiStage.addActor(root);
+        uiStage.addActor(wrapper);
     }
 
     private void createStorePanel() {
-        // Root overlay (NE IMA backgrounda!)
-        storePanel = new VisTable();
-        storePanel.setFillParent(true);
-        storePanel.setVisible(false);
-        storePanel.top().right();
+        if (storePanel != null) storePanel.remove();
 
-        float panelWidth = 220;
+        Table content = ui.panel();
 
-        // Pravi panel z backgroundom
-        VisTable content = new VisTable(true);
-        content.setBackground("window");
-        content.top().pad(10);
-        content.setWidth(panelWidth);
-
-        content.setTransform(true);
-        float stageWidth = uiStage.getViewport().getWorldWidth();
-        float stageHeight = uiStage.getViewport().getWorldHeight();
-        float panelHeight = content.getPrefHeight();
-
-        content.pack();
-        content.setPosition(stageWidth, stageHeight - panelHeight);
-
-
-        VisLabel title = new VisLabel("Stores");
-        content.add(title).left().row();
-        content.addSeparator().pad(6).row();
+        content.add(ui.subtitle("Stores")).left().row();
+        content.add(createDivider()).growX().height(1).pad(8, 0, 8, 0).row();
 
         for (LocationDTO loc : storeLocations) {
-            VisTable row = new VisTable();
-            row.left().pad(6);
+            Table row = new Table();
+            row.left();
 
-            VisLabel name = new VisLabel(loc.clothingStoreId.name);
-            name.setFontScale(1.05f);
-
-            VisLabel address = new VisLabel(loc.address);
-            address.setColor(Color.LIGHT_GRAY);
+            row.add(ui.label(loc.clothingStoreId.name)).left().row();
+            Label address = ui.mutedLabel(loc.address);
             address.setWrap(true);
 
-            row.add(name).left().row();
-            row.add(address).width(panelWidth - 40).left().row();
+            row.add(address).width(180).row();
 
             row.addListener(new ClickListener() {
                 @Override
@@ -983,12 +948,12 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
                 }
             });
 
-            content.add(row).growX().padBottom(8).row();
+            content.add(row).growX().padBottom(10).row();
         }
 
-        content.addSeparator().pad(10).row();
+        content.add(createDivider()).growX().height(1).pad(8, 0, 8, 0).row();
 
-        VisTextButton addButton = new VisTextButton("+ Add store");
+        TextButton addButton = ui.successButton("+ Add store");
         addButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -996,63 +961,54 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
             }
         });
 
-        content.add(addButton).growX();
+        content.add(addButton).width(180);
 
-        // content dodamo v root
-        storePanel.add(content).top().right();
+        storePanel = new Table();
+        storePanel.setFillParent(true);
+        storePanel.top().right().pad(16);
+        storePanel.add(content);
+        storePanel.setVisible(false);
 
         uiStage.addActor(storePanel);
     }
 
     private void createTimePanel() {
-        timePanel = new VisTable();
+        Table content = ui.panel();
+
+        content.add(ui.subtitle("Time simulation")).left().row();
+        content.add(createDivider()).growX().height(1).pad(8, 0, 8, 0).row();
+
+
+        TextField dayField = ui.textField(String.valueOf(selectedDay), "1 to 7");
+        TextField hourField = ui.textField(String.valueOf(selectedHour), "0 to 23");
+
+        content.add(ui.mutedLabel("Day (1 to 7)")).left().row();
+        content.add(dayField).width(200).left().row();
+
+        content.add(ui.mutedLabel("Hour (0 to 23)")).left().padTop(6).row();
+        content.add(hourField).width(200).left().row();
+
+        content.add(createDivider()).growX().height(1).pad(10, 0, 10, 0).row();
+
+        TextButton apply = ui.successButton("Apply");
+        TextButton close = ui.secondaryButton("Close");
+
+        Table buttons = new Table();
+        buttons.add(close).width(95);
+        buttons.add(apply).width(95).padLeft(8);
+
+        content.add(buttons);
+
+        timePanel = new Table();
         timePanel.setFillParent(true);
-        timePanel.left().top().pad(16);
+        timePanel.center();
+        timePanel.add(content).center();
         timePanel.setVisible(false);
 
-        float panelWidth = 220;
-
-        VisTable content = new VisTable(true);
-        content.setBackground("window");
-        content.pad(10);
-        content.setWidth(panelWidth);
-
-        VisLabel title = new VisLabel("Time simulation");
-        content.add(title).left().row();
-        content.addSeparator().pad(6).row();
-
-        VisTextField dayField =
-            new VisTextField(String.valueOf(selectedDay));
-
-        VisTextField hourField =
-            new VisTextField(String.valueOf(selectedHour));
-
-        content.add("Day (1–7):").left().row();
-        content.add(dayField).growX().row();
-
-        content.add("Hour (0–23):").left().padTop(6).row();
-        content.add(hourField).growX().row();
-
-        content.addSeparator().pad(10).row();
-
-        VisTextButton applyButton = new VisTextButton("Apply");
-        VisTextButton closeButton = new VisTextButton("Close");
-
-        VisTable buttons = new VisTable();
-        buttons.add(applyButton).growX();
-        buttons.add(closeButton).growX().padLeft(6);
-
-        content.add(buttons).growX();
-
-        // POSITION – LEVO, POD GUMBI
-        content.pack();
-        content.setPosition(0, uiStage.getViewport().getWorldHeight() - content.getHeight() - 160);
-
-        timePanel.addActor(content);
         uiStage.addActor(timePanel);
 
         // APPLY
-        applyButton.addListener(new ClickListener() {
+        apply.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 selectedDay = MathUtils.clamp(
@@ -1071,7 +1027,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         });
 
         // CLOSE
-        closeButton.addListener(new ClickListener() {
+        close.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 hideTimePanel();
@@ -1102,162 +1058,182 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
 
     private void toggleStorePanel() {
-        Actor content = storePanel.getChildren().first();
-
-        float panelWidth = content.getWidth();
-        float panelHeight = content.getHeight();
-
-        float stageWidth = uiStage.getViewport().getWorldWidth();
-        float stageHeight = uiStage.getViewport().getWorldHeight();
-
-        float targetY = stageHeight - panelHeight;
-
-        content.clearActions();
-
-        if (storePanelVisible) {
-            // zapiranje – ven zgoraj desno
-            content.addAction(
-                Actions.moveTo(stageWidth, targetY, 0.25f)
-            );
-        } else {
-            // odpiranje – zgoraj desno
-            storePanel.setVisible(true);
-            content.addAction(
-                Actions.moveTo(stageWidth - panelWidth, targetY, 0.25f)
-            );
-        }
-
         storePanelVisible = !storePanelVisible;
+        storePanel.setVisible(storePanelVisible);
     }
 
     private void showAddStoreDialog() {
+        Table content = ui.panel();
+        content.defaults().pad(4).left();
 
-        VisTextField nameField = new VisTextField();
-        VisTextField websiteField = new VisTextField();
-        VisTextField addressField = new VisTextField();
-        VisTextField cityField = new VisTextField();
-        VisTextField countryField = new VisTextField();
+        content.add(ui.title("Add store")).row();
+        content.add(createDivider()).growX().height(1).pad(8, 0, 10, 0).row();
 
-        VisDialog dialog = new VisDialog("Add store") {
+        TextField name = createInput("");
+        TextField website = createInput("");
+        TextField address = createInput("");
+        TextField city = createInput("");
+        TextField country = createInput("");
 
+        content.add(ui.mutedLabel("Name")).row();
+        content.add(name).width(280).row();
+
+        content.add(ui.mutedLabel("Website")).row();
+        content.add(website).width(280).row();
+
+        content.add(ui.mutedLabel("Address")).row();
+        content.add(address).width(280).row();
+
+        content.add(ui.mutedLabel("City")).row();
+        content.add(city).width(280).row();
+
+        content.add(ui.mutedLabel("Country")).row();
+        content.add(country).width(280).row();
+
+        TextButton cancel = ui.secondaryButton("Cancel");
+        TextButton save = ui.successButton("Save");
+
+        Table buttons = new Table();
+        buttons.add(cancel).width(135);
+        buttons.add(save).width(135).padLeft(8);
+
+        content.add(buttons).padTop(12);
+
+        // Center the dialog using a wrapper
+        Table dialog = new Table();
+        dialog.setFillParent(true);
+        dialog.add(content);
+
+        dialog.getColor().a = 0f;
+        dialog.addAction(Actions.fadeIn(0.2f));
+        uiStage.addActor(dialog);
+
+        cancel.addListener(new ClickListener() {
             @Override
-            protected void result(Object object) {
-                if (Boolean.TRUE.equals(object)) {
-
-                    ApiService.addNewStore(
-                        nameField.getText(),
-                        websiteField.getText(),
-                        addressField.getText(),
-                        cityField.getText(),
-                        countryField.getText(),
-                        () -> {
-                            ApiService.loadStoreLocations(data -> {
-                                storeLocations = data;
-
-                                if (storePanel != null) storePanel.remove();
-                                createStorePanel();
-
-                                refreshMap();
-                            });
-                        }
-                    );
-                }
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.addAction(Actions.sequence(
+                    Actions.fadeOut(0.15f),
+                    Actions.removeActor()
+                ));
             }
-        };
+        });
 
+        save.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ApiService.addNewStore(
+                    name.getText(),
+                    website.getText(),
+                    address.getText(),
+                    city.getText(),
+                    country.getText(),
+                    () -> {
+                        ApiService.loadStoreLocations(data -> {
+                            storeLocations = data;
+                            createStorePanel();
+                        });
+                    }
+                );
 
-
-        Table t = dialog.getContentTable();
-        t.defaults().pad(4).left();
-
-        t.add("Name"); t.add(nameField).growX().row();
-        t.add("Website"); t.add(websiteField).growX().row();
-        t.add("Address"); t.add(addressField).growX().row();
-        t.add("City"); t.add(cityField).growX().row();
-        t.add("Country"); t.add(countryField).growX().row();
-
-        dialog.button("Cancel", false);
-        dialog.button("Save", true);
-
-        dialog.show(uiStage);
+                dialog.addAction(Actions.sequence(
+                    Actions.fadeOut(0.15f),
+                    Actions.removeActor()
+                ));
+            }
+        });
     }
 
     private void refreshMap() {
-        // libGDX renders every frame automatically.
-        // Updating storeLocations is enough.
-        // This method exists for clarity + future extensions.
+
         Gdx.app.postRunnable(() -> {
             // no-op on purpose
         });
     }
 
     private void showEditStoreDialog(LocationDTO loc) {
-        VisTextField nameField =
-            new VisTextField(loc.clothingStoreId.name);
+        Table content = ui.panel();
+        content.defaults().pad(4).left();
 
-        VisTextField websiteField =
-            new VisTextField(loc.clothingStoreId.website);
+        content.add(ui.title("Edit store")).row();
+        content.add(createDivider()).growX().height(1).pad(8, 0, 10, 0).row();
 
-        VisTextField addressField =
-            new VisTextField(loc.address);
+        TextField name = createInput(loc.clothingStoreId.name);
+        TextField website = createInput(loc.clothingStoreId.website);
+        TextField address = createInput(loc.address);
+        TextField city = createInput(loc.city);
+        TextField country = createInput(loc.country);
 
-        VisTextField cityField =
-            new VisTextField(loc.city);
+        content.add(ui.mutedLabel("Name")).row();
+        content.add(name).width(280).row();
 
-        VisTextField countryField =
-            new VisTextField(loc.country);
+        content.add(ui.mutedLabel("Website")).row();
+        content.add(website).width(280).row();
 
-        VisDialog dialog = new VisDialog("Edit store") {
+        content.add(ui.mutedLabel("Address")).row();
+        content.add(address).width(280).row();
 
+        content.add(ui.mutedLabel("City")).row();
+        content.add(city).width(280).row();
+
+        content.add(ui.mutedLabel("Country")).row();
+        content.add(country).width(280).row();
+
+        TextButton cancel = ui.secondaryButton("Cancel");
+        TextButton save = ui.successButton("Save");
+
+        Table buttons = new Table();
+        buttons.add(cancel).width(135);
+        buttons.add(save).width(135).padLeft(8);
+
+        content.add(buttons).padTop(12);
+
+        Table dialog = new Table();
+        dialog.setFillParent(true);
+        dialog.add(content);
+
+        dialog.getColor().a = 0f;
+        dialog.addAction(Actions.fadeIn(0.2f));
+        uiStage.addActor(dialog);
+
+        cancel.addListener(new ClickListener() {
             @Override
-            protected void result(Object object) {
-                if (!Boolean.TRUE.equals(object)) return;
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.addAction(Actions.sequence(
+                    Actions.fadeOut(0.15f),
+                    Actions.removeActor()
+                ));
+            }
+        });
 
-                // update ClothingStore
+        save.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
                 ApiService.updateStore(
                     loc.clothingStoreId._id,
-                    nameField.getText(),
-                    websiteField.getText(),
+                    name.getText(),
+                    website.getText(),
                     () -> {
-
-                        // update Location
                         ApiService.updateLocation(
                             loc._id,
-                            addressField.getText(),
-                            cityField.getText(),
-                            countryField.getText(),
+                            address.getText(),
+                            city.getText(),
+                            country.getText(),
                             () -> {
-
-                                // reload everything
                                 ApiService.loadStoreLocations(data -> {
                                     storeLocations = data;
-
-                                    if (storePanel != null)
-                                        storePanel.remove();
-
                                     createStorePanel();
-                                    storePanelVisible = true;
                                 });
                             }
                         );
                     }
                 );
+
+                dialog.addAction(Actions.sequence(
+                    Actions.fadeOut(0.15f),
+                    Actions.removeActor()
+                ));
             }
-        };
-
-        Table t = dialog.getContentTable();
-        t.defaults().pad(4).left();
-
-        t.add("Name");     t.add(nameField).growX().row();
-        t.add("Website");  t.add(websiteField).growX().row();
-        t.add("Address");  t.add(addressField).growX().row();
-        t.add("City");     t.add(cityField).growX().row();
-        t.add("Country");  t.add(countryField).growX().row();
-
-        dialog.button("Cancel", false);
-        dialog.button("Save", true);
-
-        dialog.show(uiStage);
+        });
     }
 
 
@@ -1289,19 +1265,38 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     }
 
 
-    private void generateFakeOccupancy() {
-        occupancyMap.clear();
+    private void loadLiveOccupancy() {
+        ApiService.loadLatestOccupancy(data -> {
 
-        for (LocationDTO loc : storeLocations) {
-            StoreOccupancyDTO occ = new StoreOccupancyDTO();
-            occ.storeId = loc._id;
+            occupancyMap.clear();
 
-            // realistične fake vrednosti
-            occ.peopleCount = MathUtils.random(5, 80);
+            // DB values
+            for (StoreOccupancyDTO occ : data) {
+                occupancyMap.put(occ.storeId, occ);
 
-            occupancyMap.put(occ.storeId, occ);
-        }
+                if (!animatedOccupancy.containsKey(occ.storeId)) {
+                    animatedOccupancy.put(occ.storeId, (float) occ.peopleCount);
+                }
+            }
+
+            // fallback for missing stores
+            for (LocationDTO loc : storeLocations) {
+                if (!occupancyMap.containsKey(loc._id)) {
+
+                    StoreOccupancyDTO fake = new StoreOccupancyDTO();
+                    fake.storeId = loc._id;
+                    fake.peopleCount = MathUtils.random(5, 80);
+
+                    occupancyMap.put(fake.storeId, fake);
+
+                    if (!animatedOccupancy.containsKey(fake.storeId)) {
+                        animatedOccupancy.put(fake.storeId, (float) fake.peopleCount);
+                    }
+                }
+            }
+        });
     }
+
 
     private void updateOccupancyForSelectedTime() {
         occupancyMap.clear();
@@ -1320,7 +1315,7 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
 
     private void updateOccupancyAnimation(float delta) {
-        float speed = 6f; // več = hitrejša animacija
+        float speed = 6f;
 
         for (ObjectMap.Entry<String, StoreOccupancyDTO> e : occupancyMap.entries()) {
             float current =
@@ -1328,10 +1323,8 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
             float target = e.value.peopleCount;
 
-            // smooth prehod
             current = MathUtils.lerp(current, target, delta * speed);
 
-            // če smo zelo blizu, snap
             if (Math.abs(current - target) < 0.1f) {
                 current = target;
             }
@@ -1430,6 +1423,22 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     }
 
 
+    private Actor createDivider() {
+        return ui.divider();
+    }
+
+    private TextField createInput(String text) {
+        return ui.textField(text, "...");
+    }
+
+    private Integer getOccupancyForStore(LocationDTO store) {
+        if (store == null) return null;
+
+        StoreOccupancyDTO occ = occupancyMap.get(store._id);
+        if (occ == null) return null;
+
+        return occ.peopleCount;
+    }
 
 
 }
