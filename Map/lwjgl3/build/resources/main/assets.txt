@@ -3,6 +3,8 @@ font/banita32.fnt
 font/banita32.png
 font/textFont.fnt
 font/textFont.png
+font/uiText.fnt
+font/uiText.png
 libgdx.png
 store.png
 wardrobe.png

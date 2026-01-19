@@ -132,7 +132,39 @@ const getEvents = async (req, res) => {
   }
 };
 
+// GET /api/events/latest
+const getLatestOccupancy = async (req, res) => {
+  try {
+    const latest = await SensorEvent.aggregate([
+      {
+        $match: {
+          storeId: { $exists: true, $ne: null }
+        }
+      },
+      { $sort: { timestamp: -1 } },
+      {
+        $group: {
+          _id: "$storeId",
+          event: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          storeId: "$event.storeId",
+          peopleCount: "$event.metadata.value"
+        }
+      }
+    ]);
+
+    res.json(latest);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   createEvent,
   getEvents,
+  getLatestOccupancy
 };

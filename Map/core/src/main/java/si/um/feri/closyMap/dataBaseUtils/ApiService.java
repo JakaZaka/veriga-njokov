@@ -206,6 +206,35 @@ public class ApiService {
         });
     }
 
+    public static void loadLatestOccupancy(
+        Consumer<Array<StoreOccupancyDTO>> callback
+    ) {
+        Net.HttpRequest request =
+            new Net.HttpRequest(Net.HttpMethods.GET);
+
+        request.setUrl("http://localhost:5000/api/events/latest");
+
+        Gdx.net.sendHttpRequest(request, new Net.HttpResponseListener() {
+            @Override
+            public void handleHttpResponse(Net.HttpResponse response) {
+                Json json = new Json();
+                json.setIgnoreUnknownFields(true);
+
+                Array<StoreOccupancyDTO> data =
+                    json.fromJson(
+                        Array.class,
+                        StoreOccupancyDTO.class,
+                        response.getResultAsString()
+                    );
+
+                Gdx.app.postRunnable(() -> callback.accept(data));
+            }
+
+            @Override public void failed(Throwable t) { t.printStackTrace(); }
+            @Override public void cancelled() {}
+        });
+    }
+
 
 
 
