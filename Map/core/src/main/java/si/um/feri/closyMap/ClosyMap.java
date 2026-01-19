@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -41,6 +42,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisSlider;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisTextField;
@@ -109,10 +111,39 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     private ObjectMap<String, StoreOccupancyDTO> occupancyMap =
         new ObjectMap<>();
+    private ObjectMap<String, Float> animatedOccupancy =
+        new ObjectMap<>();
+
 
     private float occupancyTimer = 0f;
 
     private static final int MAX_PEOPLE = 70;
+
+    private int selectedDay = 2;   // 1 = ponedeljek
+    private int selectedHour = 12; // 0–23
+
+    private boolean simulationMode = false;
+
+    private VisTable timePanel;
+    private boolean timePanelVisible = false;
+
+    private boolean playMode = false;
+
+    private float playTimer = 0f;
+    private static final float PLAY_STEP_TIME = 0.6f;
+
+    private int playDay = 1;   // 1–7
+    private int playHour = 0;  // 0–23
+    private VisLabel timeStatusLabel;
+
+    private VisSlider timeSlider;
+    private boolean sliderDragging = false;
+
+    private VisTextButton playButton;
+    private VisTextButton pauseButton;
+
+
+
 
 
     @Override
@@ -124,12 +155,73 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         batch = new SpriteBatch();
         font = new BitmapFont(Gdx.files.internal("font/textFont.fnt"));
 
+
         VisUI.load(VisUI.SkinScale.X1);
 
         uiStage = new Stage(
             new ExtendViewport(1280, 720)
         );
         createToggleStoreButton();
+
+
+        timeSlider = new VisSlider(0, 7 * 24 - 1, 1, false);
+        timeSlider.setWidth(320);
+        timeSlider.setVisible(false);
+
+        timeSlider.addListener(event -> {
+            if (!timeSlider.isDragging()) return false;
+
+            sliderDragging = true;
+
+            int value = (int) timeSlider.getValue();
+            selectedDay = value / 24 + 1;
+            selectedHour = value % 24;
+
+            simulationMode = true;
+            //playMode = false;
+
+            playDay = selectedDay;
+            playHour = selectedHour;
+
+
+            updateOccupancyForSelectedTime();
+            updateTimeStatusLabel();
+
+            return true;
+        });
+
+
+
+        VisTable statusChip = new VisTable(true);
+        statusChip.setBackground("window"); // VisUI stil
+        statusChip.pad(10, 16, 10, 16);
+
+        timeStatusLabel = new VisLabel("");
+        timeStatusLabel.setAlignment(Align.center);
+        timeStatusLabel.setFontScale(1.1f);
+        timeStatusLabel.setColor(Color.WHITE);
+
+        statusChip.add(timeStatusLabel).center();
+
+        Table statusWrapper = new Table();
+        statusWrapper.setFillParent(true);
+        statusWrapper.top().padTop(12);
+
+        statusWrapper.add(statusChip).center();
+
+        uiStage.addActor(statusWrapper);
+
+
+        updateTimeStatusLabel();
+
+        Table sliderTable = new Table();
+        sliderTable.setFillParent(true);
+        sliderTable.bottom().pad(16);
+
+        sliderTable.add(timeSlider);
+
+        uiStage.addActor(sliderTable);
+
 
         ApiService.loadStoreLocations(data -> {
             storeLocations = data;
@@ -148,8 +240,6 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 //                occupancyMap.put(occ.storeId, occ);
 //            }
 //        });
-
-
 
 
 
@@ -191,6 +281,9 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
                     return false;
                 }
 
+
+
+
                 Vector3 world = new Vector3(screenX, screenY, 0);
                 camera.unproject(world);
 
@@ -210,6 +303,9 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
                 if (storePanelVisible) {
                     toggleStorePanel();
+                }
+                if (timePanelVisible) {
+                    hideTimePanel();
                 }
                 if(selectedStore != null){
                     selectedStore = null;
@@ -319,27 +415,51 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     }
 
-    private void updateTileZoomIfNeeded() {
-        int desiredZoom = currentTileZoom;
 
-        if (camera.zoom < 0.6f) {
-            desiredZoom = 16;
-        } else if (camera.zoom < 1.2f) {
-            desiredZoom = 15;
+
+    private void updateTimeStatusLabel() {
+        if (playMode) {
+            timeStatusLabel.setText(
+                "▶ Playing • " + getDayName(playDay) + " • " + String.format("%02d:00", playHour)
+            );
+        } else if (simulationMode) {
+            timeStatusLabel.setText(
+                "Selected • " + getDayName(selectedDay) + " • " + String.format("%02d:00", selectedHour)
+            );
         } else {
-            desiredZoom = 14;
-        }
-
-        if (desiredZoom != currentTileZoom) {
-            reloadMapTiles(desiredZoom);
-            currentTileZoom = desiredZoom;
+            timeStatusLabel.setText("NOW • Live occupancy");
         }
     }
+
+    private String getDayName(int day) {
+        switch (day) {
+            case 1: return "Monday";
+            case 2: return "Tuesday";
+            case 3: return "Wednesday";
+            case 4: return "Thursday";
+            case 5: return "Friday";
+            case 6: return "Saturday";
+            case 7: return "Sunday";
+            default: return "";
+        }
+    }
+
+
 
 
     @Override
     public void render() {
         ScreenUtils.clear(0, 0, 0, 1);
+
+        if (playMode && !timeSlider.isDragging()) {
+            playTimer += Gdx.graphics.getDeltaTime();
+
+            if (playTimer >= PLAY_STEP_TIME) {
+                playTimer = 0f;
+                advancePlayTime();
+            }
+        }
+
 
         handleInput();
 
@@ -349,19 +469,22 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
         tiledMapRenderer.render();
         popupAlpha = Math.min(1f, popupAlpha + Gdx.graphics.getDeltaTime() * 6f);
         //updateTileZoomIfNeeded();
+        if (!simulationMode) {
+            occupancyTimer += Gdx.graphics.getDeltaTime();
 
-        occupancyTimer += Gdx.graphics.getDeltaTime();
-
-        if (occupancyTimer > 20f) {
-            generateFakeOccupancy();
-            occupancyTimer = 0f;
+            if (occupancyTimer > 20f) {
+                generateFakeOccupancy();
+                occupancyTimer = 0f;
+            }
         }
 
+        updateOccupancyAnimation(Gdx.graphics.getDeltaTime());
 
         drawMarkers();
         uiStage.act(Gdx.graphics.getDeltaTime());
         uiStage.draw();
     }
+
 
     private void drawMarkers() {
         batch.setProjectionMatrix(camera.combined);
@@ -378,7 +501,10 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
                 beginTile.y
             );
 
-            drawOccupancyRing(pos, occ.peopleCount);
+            float animated =
+                animatedOccupancy.get(loc._id, (float)occ.peopleCount);
+
+            drawOccupancyRing(pos, Math.round(animated));
         }
 
         shapeRenderer.end();
@@ -621,7 +747,15 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
     }
 
     @Override
-    public boolean pan(float x, float y, float deltaX, float deltaY) {
+    public boolean pan(float x, float y, float deltaX, float deltaY) {Actor hit = uiStage.hit(
+        Gdx.input.getX(),
+            uiStage.getViewport().getScreenHeight() - Gdx.input.getY(),
+            true
+        );
+
+        if (hit != null) {
+            return false;
+        }
         camera.translate(-deltaX * camera.zoom, deltaY * camera.zoom);
         return true;
     }
@@ -710,11 +844,31 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
     private void createToggleStoreButton() {
         VisTextButton toggleButton = new VisTextButton("Stores");
+        VisTextButton timeButton = new VisTextButton("Time");
+        VisTextButton nowButton = new VisTextButton("Now");
+        playButton = new VisTextButton("▶ Play");
+        pauseButton = new VisTextButton("⏸ Pause");
+
+        pauseButton.setVisible(false);
+
         Table root = new Table();
         root.setFillParent(true);
         root.top().left().pad(16);
 
         root.add(toggleButton).width(120).height(40);
+
+        root.row().padTop(8);
+        root.add(timeButton).width(120).height(40);
+
+        root.row().padTop(6);
+        root.add(nowButton).width(120).height(40);
+
+        root.row().padTop(6);
+        root.add(playButton).width(120).height(40);
+
+        root.row().padTop(6);
+        root.add(pauseButton).width(120).height(40);
+
 
         toggleButton.addListener(new ClickListener() {
             @Override
@@ -722,6 +876,59 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
                 toggleStorePanel();
             }
         });
+
+        timeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                toggleTimePanel();
+                playMode = false;
+                playTimer = 0f;
+                pauseButton.setVisible(false);
+                timeSlider.setVisible(false);
+
+            }
+        });
+
+        nowButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                playMode = false;
+                simulationMode = false;
+                playTimer = 0f;
+                pauseButton.setVisible(false);
+                timeSlider.setVisible(false);
+
+                generateFakeOccupancy();
+                updateTimeStatusLabel();
+
+            }
+        });
+        playButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!playMode) {
+                    startPlayMode();
+                }
+
+                timeSlider.setVisible(true);
+                timeSlider.setValue((playDay - 1) * 24 + playHour);
+                pauseButton.setVisible(true);
+                pauseButton.setDisabled(false);
+                updateTimeStatusLabel();
+
+            }
+        });
+
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
+                playMode = false;
+                pauseButton.setDisabled(true);
+                updateTimeStatusLabel();
+            }
+        });
+
 
         uiStage.addActor(root);
     }
@@ -796,6 +1003,103 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
 
         uiStage.addActor(storePanel);
     }
+
+    private void createTimePanel() {
+        timePanel = new VisTable();
+        timePanel.setFillParent(true);
+        timePanel.left().top().pad(16);
+        timePanel.setVisible(false);
+
+        float panelWidth = 220;
+
+        VisTable content = new VisTable(true);
+        content.setBackground("window");
+        content.pad(10);
+        content.setWidth(panelWidth);
+
+        VisLabel title = new VisLabel("Time simulation");
+        content.add(title).left().row();
+        content.addSeparator().pad(6).row();
+
+        VisTextField dayField =
+            new VisTextField(String.valueOf(selectedDay));
+
+        VisTextField hourField =
+            new VisTextField(String.valueOf(selectedHour));
+
+        content.add("Day (1–7):").left().row();
+        content.add(dayField).growX().row();
+
+        content.add("Hour (0–23):").left().padTop(6).row();
+        content.add(hourField).growX().row();
+
+        content.addSeparator().pad(10).row();
+
+        VisTextButton applyButton = new VisTextButton("Apply");
+        VisTextButton closeButton = new VisTextButton("Close");
+
+        VisTable buttons = new VisTable();
+        buttons.add(applyButton).growX();
+        buttons.add(closeButton).growX().padLeft(6);
+
+        content.add(buttons).growX();
+
+        // POSITION – LEVO, POD GUMBI
+        content.pack();
+        content.setPosition(0, uiStage.getViewport().getWorldHeight() - content.getHeight() - 160);
+
+        timePanel.addActor(content);
+        uiStage.addActor(timePanel);
+
+        // APPLY
+        applyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                selectedDay = MathUtils.clamp(
+                    Integer.parseInt(dayField.getText()), 1, 7
+                );
+
+                selectedHour = MathUtils.clamp(
+                    Integer.parseInt(hourField.getText()), 0, 23
+                );
+
+                simulationMode = true;
+                updateOccupancyForSelectedTime();
+                updateTimeStatusLabel();
+                hideTimePanel();
+            }
+        });
+
+        // CLOSE
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                hideTimePanel();
+            }
+        });
+    }
+
+    private void toggleTimePanel() {
+        if (timePanelVisible) {
+            hideTimePanel();
+        } else {
+            showTimePanel();
+        }
+    }
+
+    private void showTimePanel() {
+        if (timePanel == null) createTimePanel();
+        timePanel.setVisible(true);
+        timePanelVisible = true;
+    }
+
+    private void hideTimePanel() {
+        timePanel.setVisible(false);
+        timePanelVisible = false;
+    }
+
+
+
 
     private void toggleStorePanel() {
         Actor content = storePanel.getChildren().first();
@@ -998,6 +1302,134 @@ public class ClosyMap extends ApplicationAdapter implements GestureDetector.Gest
             occupancyMap.put(occ.storeId, occ);
         }
     }
-    
+
+    private void updateOccupancyForSelectedTime() {
+        occupancyMap.clear();
+
+        for (LocationDTO loc : storeLocations) {
+            StoreOccupancyDTO occ = new StoreOccupancyDTO();
+            occ.storeId = loc._id;
+            occ.peopleCount = simulateOccupancy(loc, selectedDay, selectedHour);
+            occupancyMap.put(occ.storeId, occ);
+
+            if (!animatedOccupancy.containsKey(loc._id)) {
+                animatedOccupancy.put(loc._id, (float) occ.peopleCount);
+            }
+        }
+    }
+
+
+    private void updateOccupancyAnimation(float delta) {
+        float speed = 6f; // več = hitrejša animacija
+
+        for (ObjectMap.Entry<String, StoreOccupancyDTO> e : occupancyMap.entries()) {
+            float current =
+                animatedOccupancy.get(e.key, (float)e.value.peopleCount);
+
+            float target = e.value.peopleCount;
+
+            // smooth prehod
+            current = MathUtils.lerp(current, target, delta * speed);
+
+            // če smo zelo blizu, snap
+            if (Math.abs(current - target) < 0.1f) {
+                current = target;
+            }
+
+            animatedOccupancy.put(e.key, current);
+        }
+    }
+
+
+
+    private int simulateOccupancy(LocationDTO store, int day, int hour) {
+        // osnovna zasedenost glede na tip dneva
+        float base;
+
+        boolean weekend = (day == 6 || day == 7); // sobota, nedelja
+
+        if (weekend) {
+            base = 0.6f;
+        } else {
+            base = 0.4f;
+        }
+
+        // vpliv ure
+        float hourFactor;
+        if (hour < 9) {
+            hourFactor = 0.2f;
+        } else if (hour < 12) {
+            hourFactor = 0.6f;
+        } else if (hour < 15) {
+            hourFactor = 0.8f;
+        } else if (hour < 18) {
+            hourFactor = 1.0f; // peak
+        } else if (hour < 21) {
+            hourFactor = 0.7f;
+        } else {
+            hourFactor = 0.3f;
+        }
+
+        // unikaten “šum” na trgovino
+        int seed = store._id.hashCode() + day * 31 + hour * 17;
+        MathUtils.random.setSeed(seed);
+        float noise = MathUtils.random(0.8f, 1.2f);
+
+        float result = MAX_PEOPLE * base * hourFactor * noise;
+
+        return MathUtils.clamp(Math.round(result), 0, MAX_PEOPLE);
+    }
+
+    private void startPlayMode() {
+        playMode = true;
+        simulationMode = true;
+
+        if (playDay == 0 && playHour == 0) {
+            playDay = selectedDay;
+            playHour = selectedHour;
+        }
+        playTimer = 0f;
+
+        selectedDay = playDay;
+        selectedHour = playHour;
+
+        updateOccupancyForSelectedTime();
+        updateTimeStatusLabel();
+    }
+
+    private void advancePlayTime() {
+        playHour++;
+
+        if (playHour >= 24) {
+            playHour = 0;
+            playDay++;
+        }
+
+        int sliderValue = (playDay - 1) * 24 + playHour;
+        timeSlider.setValue(sliderValue);
+        updateTimeStatusLabel();
+
+
+        // konec animacije (7 dni)
+        if (playDay > 7) {
+            stopPlayMode();
+            return;
+        }
+
+        selectedDay = playDay;
+        selectedHour = playHour;
+
+        updateOccupancyForSelectedTime();
+        updateTimeStatusLabel();
+    }
+
+    private void stopPlayMode() {
+        playMode = false;
+        updateTimeStatusLabel();
+
+    }
+
+
+
 
 }
