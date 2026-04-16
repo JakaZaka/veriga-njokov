@@ -10,7 +10,6 @@ https://www.zara.com/si/
 
 https://www2.hm.com/en_eur/index.html
 
-Next steps to connect the Android app:
 
 In the Android app, set the server URL to:
 
