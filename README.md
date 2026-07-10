@@ -14,6 +14,10 @@ It brings together:
 
 The repository demonstrates practical integration of mobile, web, data, and ML/distributed components in one system.
 
+## Project Scope
+
+This project is also documented in the wiki as **Closy**: a digital wardrobe and fashion-sharing system. In short, it lets users manage clothes, assemble outfits, get weather-based outfit suggestions, explore nearby stores and other users’ closets on a map, and exchange clothing items.
+
 ## Implemented Features
 
 ### 1) Android data collection app
@@ -38,6 +42,27 @@ The repository demonstrates practical integration of mobile, web, data, and ML/d
 ### 5) Computer vision prototypes
 - People counting on images using YOLOv8n.
 - Initial work on clothing-type recognition.
+
+## Quick Start
+
+The Closy/Veriga Njokov web stack can be started with Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+## More Documentation
+
+- [Use cases](https://github.com/JakaZaka/veriga-njokov/wiki/Primeri-uporabe)
+- [Project specifications](https://github.com/JakaZaka/veriga-njokov/wiki/Projektne-Specifikacije)
+- [Feature documentation](https://github.com/JakaZaka/veriga-njokov/wiki/Dokumentacija-funkcionalnosti)
+- [Installation guide](https://github.com/JakaZaka/veriga-njokov/wiki/Navodila-za-namestitev)
 
 ## Project Snapshots
 
